@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+	<Import Project="$(MSbuildExtensionsPath)\MSBuildCommunityTasks\MSBuild.Community.Tasks.Targets"/>
+	
+	<PropertyGroup Condition=" '$(NuSpecFileName)' == '' ">
+		<NuSpecFileName>$(MSBuildProjectName).nuspec</NuSpecFileName>
+	</PropertyGroup>
+
+	<PropertyGroup Condition=" '$(NuSpecFilePath)' == '' ">
+		<NuSpecFilePath>$(MSBuildProjectDirectory)\$(NuSpecFileName)</NuSpecFilePath>
+	</PropertyGroup>
+	
+	<ItemGroup>
+		<NuSpec Include="$(NuSpecFilePath)"/>
+	</ItemGroup>
+	
+	<ItemGroup Condition=" '@(Content)' == '' ">
+		<Content Include="content/**"/>
+	</ItemGroup>
+	
+	<ItemGroup Condition=" '@(Tools)' == '' ">
+		<Content Include="tools/**"/>
+	</ItemGroup>
+	
+	<PropertyGroup>
+		<NuGetCommand>NuGet.exe</NuGetCommand>
+		<BuildCommand>"$(NuGetCommand)" pack "$(NuSpecFileName)"</BuildCommand>
+	</PropertyGroup>
+	
+	<Target Name="BeforeClean"/>
+	<Target Name="AfterClean"/>
+	<Target Name="ProcessClean">
+		<RemoveDir Directories="$(PackagePath)" ContinueOnError="true"/>
+	</Target>
+	
+	<Target Name="Clean" DependsOnTargets="BeforeClean;ProcessClean;AfterClean"/>
+	
+	<Target Name="BeforeCopy"/>
+	<Target Name="AfterCopy"/>
+	<Target Name="ProcessCopy">
+		<Copy SourceFiles="@(NuSpec)" DestinationFolder="$(PackagePath)"/>
+
+		<Copy SourceFiles="@(Lib)" DestinationFolder="$(PackagePath)\lib"/>
+		
+		<Copy SourceFiles="@(LibNet20)" DestinationFolder="$(PackagePath)\lib\net20"/>
+		<Copy SourceFiles="@(LibNet20Client)" DestinationFolder="$(PackagePath)\lib\net20-client"/>
+		<Copy SourceFiles="@(LibNet20Full)" DestinationFolder="$(PackagePath)\lib\net20-full"/>
+		<Copy SourceFiles="@(LibNet20Compact)" DestinationFolder="$(PackagePath)\lib\net20-cf"/>
+
+		<Copy SourceFiles="@(LibNet40)" DestinationFolder="$(PackagePath)\lib\net40"/>
+		<Copy SourceFiles="@(LibNet40Client)" DestinationFolder="$(PackagePath)\lib\net40-client"/>
+		<Copy SourceFiles="@(LibNet40Full)" DestinationFolder="$(PackagePath)\lib\net40-full"/>
+		<Copy SourceFiles="@(LibNet40Compact)" DestinationFolder="$(PackagePath)\lib\net40-cf"/>
+		
+		<Copy SourceFiles="@(LibSL4)" DestinationFolder="$(PackagePath)\lib\sl4"/>
+		<Copy SourceFiles="@(LibSL5)" DestinationFolder="$(PackagePath)\lib\sl5"/>
+		
+		<Copy SourceFiles="@(LibWP70)" DestinationFolder="$(PackagePath)\lib\sl3-wp"/>
+		<Copy SourceFiles="@(LibWP71)" DestinationFolder="$(PackagePath)\lib\sl4-windowsphone71"/>
+		
+		<Copy SourceFiles="@(Content)" DestinationFolder="$(PackagePath)\content"/>
+		<Copy SourceFiles="@(Tools)" DestinationFolder="$(PackagePath)\tools"/>
+	</Target>
+	
+	<Target Name="Copy" DependsOnTargets="BeforeCopy;ProcessCopy;AfterCopy"/>
+	
+	<Target Name="BeforePrepare"/>
+	<Target Name="AfterPrepare"/>
+	<Target Name="PrepareVersion" Condition=" '$(VersionAssembly)' != '' ">
+		<GetAssemblyIdentity AssemblyFiles="$(VersionAssembly)">
+			<Output TaskParameter="Assemblies" ItemName="AssemblyInfo"/>
+		</GetAssemblyIdentity>
+		
+		<XmlUpdate
+			Namespace="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd"
+			XmlFileName="$(PackagePath)\$(NuSpecFileName)"
+			XPath="/package/metadata/version"
+			Value="%(AssemblyInfo.Version)"/>
+		
+		<PropertyGroup>
+			<OutputPackage>$(PackagePath)\$([System.IO.Path]::GetFileNameWithoutExtension( '$(NuSpecFileName)' )).%(AssemblyInfo.Version).nupkg</OutputPackage>
+		</PropertyGroup>
+		
+		<Message Text="Package version stamped, output package set to $(OutputPackage)."/>
+	</Target>
+	<Target Name="ProcessPrepare" DependsOnTargets="PrepareVersion"/>
+	
+	<Target Name="Prepare" DependsOnTargets="BeforePrepare;ProcessPrepare;AfterPrepare"/>
+	
+	<Target Name="BeforePackage"/>
+	<Target Name="AfterPackage"/>
+	<Target Name="ProcessPackage">
+		<Exec Command="$(BuildCommand)" WorkingDirectory="$(PackagePath)"/>
+	</Target>
+	
+	<Target Name="Package" DependsOnTargets="BeforePackage;ProcessPackage;AfterPackage"/>
+	
+	<Target Name="Build" DependsOnTargets="Clean;Copy;Prepare;Package"/>
+	
+	<Target Name="Push" DependsOnTargets="Build" Condition=" '$(NuGetServer)' != '' and '$(NuGetServerPassword)' != '' ">
+		<PropertyGroup>
+			<PushCommand>"$(NuGetCommand)" push "$(OutputPackage)" -s "$(NuGetServer)" $(NuGetServerPassword)</PushCommand>
+		</PropertyGroup>
+		
+		<Exec Command="$(PushCommand)"/>
+	</Target>
+</Project>

@@ -1,0 +1,97 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="4.0">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>9.0.30729</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{6A0D13DA-0078-46EB-99AC-6B62C4FC136B}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>Digillect</RootNamespace>
+    <AssemblyName>Digillect</AssemblyName>
+    <KeyContainerName>Digillect.Key</KeyContainerName>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <TargetFrameworkProfile>Client</TargetFrameworkProfile>
+    <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\..\Sources\</SolutionDir>
+    <RestorePackages>true</RestorePackages>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>..\..\Build\$(Configuration)\Desktop\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <DocumentationFile>..\..\Build\$(Configuration)\Desktop\Digillect.xml</DocumentationFile>
+    <NoWarn>436,1591</NoWarn>
+    <CodeAnalysisRuleSet>..\DigillectRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>..\..\Build\$(Configuration)\Desktop\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <NoWarn>436,1591</NoWarn>
+    <DocumentationFile>..\..\Build\$(Configuration)\Desktop\Digillect.xml</DocumentationFile>
+    <CodeAnalysisRuleSet>..\DigillectRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Runtime.Serialization" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Runtime\CompilerServices\AutoNotifyPropertyChangesAttribute.cs" />
+    <Compile Include="Runtime\CompilerServices\AutoNotifyPropertyChangesMethodsAttribute.cs" />
+    <Compile Include="Collections\CollectionUpdateOptions.cs" />
+    <Compile Include="Collections\CollectionUpdateResults.cs" />
+    <Compile Include="Collections\IXCollection.cs" />
+    <Compile Include="Collections\IXList.cs" />
+    <Compile Include="Collections\XCollection.cs" />
+    <Compile Include="Collections\XCollectionsUtil.cs" />
+    <Compile Include="Collections\XFilteredCollection.cs" />
+    <Compile Include="Collections\XKeyedCollection.cs" />
+    <Compile Include="Collections\XUniqueCollection.cs" />
+    <Compile Include="ComponentModel\PropertyChangingEventArgs.cs" />
+    <Compile Include="Runtime\CompilerServices\AutoNotifyAdditionalPropertiesAttribute.cs" />
+    <Compile Include="Runtime\CompilerServices\GenerateEqualsAndGetHashCodeAttribute.cs" />
+    <Compile Include="GlobalSuppressions.cs" />
+    <Compile Include="IXIdentifiable.cs" />
+    <Compile Include="IXUpdatable.cs" />
+    <Compile Include="ObservableObject.cs" />
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
+    <Compile Include="Reflection\ReflectionHelpers.cs" />
+    <Compile Include="Runtime\CompilerServices\XIgnoreUpdateAttribute.cs" />
+    <Compile Include="XKey.cs" />
+    <Compile Include="Runtime\CompilerServices\XKeyAttribute.cs" />
+    <Compile Include="XKeyNotAvailableException.cs" />
+    <Compile Include="Runtime\CompilerServices\XNullKeyAttribute.cs" />
+    <Compile Include="XObject.cs" />
+    <Compile Include="XObject`1.cs" />
+    <Compile Include="XSecureIdentifiedObject.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Properties\Resources.resx">
+      <SubType>Designer</SubType>
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup />
+  <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

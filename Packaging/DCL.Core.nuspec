@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+<package >
+	<metadata>
+		<id>DCL.Core</id>
+		<version>4.0.0</version>
+		<authors>Andrew Nefedkin, Gregory Nickonov</authors>
+		<owners>Andrew Nefedkin, Gregory Nickonov</owners>
+		<requireLicenseAcceptance>false</requireLicenseAcceptance>
+		<description>Digillect Common Libraries: Core</description>
+		<releaseNotes>Initial release.</releaseNotes>
+		<copyright>Copyright 2005-2012 Actis Systems. All rights reserved.</copyright>
+		<tags>digillect common core</tags>
+	</metadata>
+</package>
