@@ -25,26 +25,26 @@
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
-    <OutputPath>..\..\Build\$(Configuration)\WP7\</OutputPath>
+    <OutputPath>..\..\Build\bin\$(Configuration)\WP7\</OutputPath>
     <DefineConstants>DEBUG;TRACE;SILVERLIGHT;WINDOWS_PHONE</DefineConstants>
     <NoStdLib>true</NoStdLib>
     <NoConfig>true</NoConfig>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <DocumentationFile>..\..\Build\$(Configuration)\WP7\Digillect.xml</DocumentationFile>
+    <DocumentationFile>..\..\Build\bin\$(Configuration)\WP7\Digillect.xml</DocumentationFile>
     <NoWarn>1591,1607</NoWarn>
     <CodeAnalysisRuleSet>..\DigillectRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
-    <OutputPath>..\..\Build\$(Configuration)\WP7\</OutputPath>
+    <OutputPath>..\..\Build\bin\$(Configuration)\WP7\</OutputPath>
     <DefineConstants>TRACE;SILVERLIGHT;WINDOWS_PHONE</DefineConstants>
     <NoStdLib>true</NoStdLib>
     <NoConfig>true</NoConfig>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <DocumentationFile>..\..\Build\$(Configuration)\WP7\Digillect.xml</DocumentationFile>
+    <DocumentationFile>..\..\Build\bin\$(Configuration)\WP7\Digillect.xml</DocumentationFile>
     <NoWarn>1591,1607</NoWarn>
     <CodeAnalysisRuleSet>..\DigillectRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>

@@ -1,31 +1,22 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
+
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 	<PropertyGroup>
-	    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-	    
-	    <BuildPath>..\Build\$(Configuration)</BuildPath>
-	    <PackagePath>..\Build\$(Configuration)\DCL.Core</PackagePath>
-	</PropertyGroup>
-	
-	<PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
-	    <BuildPath>..\Build\$(Configuration)</BuildPath>
-	    <PackagePath>..\Build\$(Configuration)\DCL.Core</PackagePath>
-	</PropertyGroup>
-	
-	<PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
-	    <BuildPath>..\Build\$(Configuration)</BuildPath>
-	    <PackagePath>..\Build\$(Configuration)\DCL.Core</PackagePath>
+		<Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+
+		<BuildPath>..\Build\bin\$(Configuration)</BuildPath>
+		<PackagePath>..\Build\package\$(Configuration)\DCL.Core</PackagePath>
 	</PropertyGroup>
 
 	<PropertyGroup>
 		<VersionAssembly>$(BuildPath)\Desktop\Digillect.dll</VersionAssembly>
 	</PropertyGroup>
-	
+
 	<ItemGroup>
 		<LibNet40 Include="$(BuildPath)\Desktop\Digillect.*"/>
 		<LibSL4 Include="$(BuildPath)\SL4\Digillect.*"/>
 		<LibWP71 Include="$(BuildPath)\WP7\Digillect.*"/>
 	</ItemGroup>
-	
+
 	<Import Project="NuGet.Project.Targets"/>
 </Project>

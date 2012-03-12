@@ -1,4 +1,5 @@
-<?xml version="1.0"?>
+﻿<?xml version="1.0"?>
+
 <package >
 	<metadata>
 		<id>DCL.Core</id>
@@ -8,7 +9,7 @@
 		<requireLicenseAcceptance>false</requireLicenseAcceptance>
 		<description>Digillect Common Libraries: Core</description>
 		<releaseNotes>Initial release.</releaseNotes>
-		<copyright>Copyright 2005-2012 Actis Systems. All rights reserved.</copyright>
+		<copyright>Copyright © 2002-2012 Actis Systems. All rights reserved.</copyright>
 		<tags>digillect common core</tags>
 	</metadata>
 </package>
