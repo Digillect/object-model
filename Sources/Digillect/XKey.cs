@@ -15,21 +15,22 @@ namespace Digillect
 		/// </summary>
 		public static readonly XKey Null = new NullKey();
 
+		private XKey m_parentKey;
+
 		#region Constructor
 		protected XKey()
 		{
 		}
 
-		protected XKey(XKey parent)
+		protected XKey(XKey parentKey)
 		{
-			this.Parent = parent;
+			m_parentKey = parentKey;
 		}
 		#endregion
 
 		public XKey Parent
 		{
-			get;
-			private set;
+			get { return m_parentKey; }
 		}
 
 		public abstract int CompareTo(XKey other);
@@ -62,7 +63,7 @@ namespace Digillect
 		#endregion
 
 		#region Cast Operators
-		public static XKey From<T>(T key, XKey parentKey = null)
+		public static XKey From<T>(T key, XKey parentKey)
 			where T : IComparable<T>, IEquatable<T>
 		{
 			if ( key == null )
@@ -75,17 +76,17 @@ namespace Digillect
 
 		public static explicit operator XKey(Guid key)
 		{
-			return From(key);
+			return From(key, null);
 		}
 
 		public static explicit operator XKey(int key)
 		{
-			return From(key);
+			return From(key, null);
 		}
 
 		public static explicit operator XKey(string key)
 		{
-			return From(key);
+			return From(key, null);
 		}
 		#endregion
 
@@ -138,20 +139,20 @@ namespace Digillect
 #if !SILVERLIGHT
 		[Serializable]
 #endif
-		private sealed class SimpleKey<T> : XKey
+		private sealed class SimpleKey<T> : XKey, IComparable<SimpleKey<T>>, IEquatable<SimpleKey<T>>
 			where T: IComparable<T>, IEquatable<T>
 		{
-			public T Key { get; private set; }
+			private T m_key;
 
-			public SimpleKey( T key, XKey parent )
-				: base( parent )
+			public SimpleKey(T key, XKey parentKey)
+				: base(parentKey)
 			{
 				if ( key == null )
 				{
 					throw new ArgumentNullException("key");
 				}
 
-				this.Key = key;
+				m_key = key;
 			}
 
 			public override int CompareTo( XKey other )
@@ -163,38 +164,38 @@ namespace Digillect
 
 				SimpleKey<T> otherKey = other as SimpleKey<T>;
 
+				return CompareTo(otherKey);
+			}
+
+			public int CompareTo(SimpleKey<T> other)
+			{
 				if ( other == null )
 				{
-					throw new ArgumentException("Invalid key type.", "other");
+					//throw new ArgumentException("Invalid key type.", "other");
+					return 1;
 				}
 
-				int result = 0;
-
-				if( this.Parent != null || otherKey.Parent != null )
+				if ( m_parentKey == null || other.m_parentKey == null )
 				{
-					if( this.Parent != null && otherKey.Parent == null )
-						result = 1;
-
-					if( this.Parent == null && otherKey.Parent != null )
-						result = -1;
-
-					if( this.Parent != null && otherKey.Parent != null )
-						result = this.Parent.CompareTo( otherKey.Parent );
+					if ( m_parentKey != null && other.m_parentKey == null )
+						return 1;
+					else if ( m_parentKey == null && other.m_parentKey != null )
+						return -1;
 				}
 
-				return result != 0 ? result : this.Key.CompareTo( otherKey.Key );
+				int result = m_parentKey.CompareTo(other.m_parentKey);
+
+				if ( result == 0 )
+				{
+					result = m_key.CompareTo(other.m_key);
+				}
+
+				return result;
 			}
 
 			public override bool Equals( XKey other )
 			{
-				SimpleKey<T> otherKey = other as SimpleKey<T>;
-
-				if ( otherKey == null )
-				{
-					return false;
-				}
-
-				return EqualsEx( otherKey );
+				return Equals(other as SimpleKey<T>);
 			}
 
 			public override bool Equals( object obj )
@@ -204,41 +205,41 @@ namespace Digillect
 					return false;
 				}
 
-				SimpleKey<T> otherKey = obj as SimpleKey<T>;
-
-				return EqualsEx( otherKey );
+				return Equals(obj as SimpleKey<T>);
 			}
 
-			private bool EqualsEx( SimpleKey<T> otherKey )
+			public bool Equals(SimpleKey<T> other)
 			{
-				if( this.Parent != null || otherKey.Parent != null )
+				if ( other == null || !m_key.Equals(other.m_key) )
 				{
-					if( this.Parent != null && otherKey.Parent == null )
-						return false;
-					if( this.Parent == null && otherKey.Parent != null )
-						return false;
-					if( this.Parent != null && otherKey.Parent != null )
-						if( !this.Parent.Equals( otherKey.Parent ) )
-							return false;
+					return false;
 				}
 
-				return this.Key.Equals( otherKey.Key );
+				if ( m_parentKey == null || other.m_parentKey == null )
+				{
+					if ( m_parentKey != null && other.m_parentKey == null )
+						return false;
+					else if ( m_parentKey == null && other.m_parentKey != null )
+						return false;
+				}
+
+				return m_parentKey.Equals(other.m_parentKey);
 			}
 
 			public override int GetHashCode()
 			{
-				if( this.Parent != null )
-					return this.Parent.GetHashCode() ^ this.Key.GetHashCode();
+				if ( m_parentKey != null )
+					return m_parentKey.GetHashCode() ^ m_key.GetHashCode();
 
-				return this.Key.GetHashCode();
+				return m_key.GetHashCode();
 			}
 
 			public override string ToString()
 			{
-				if( this.Parent != null )
-					return this.Parent.ToString() + "+" + this.Key.ToString();
+				if ( m_parentKey != null )
+					return m_parentKey.ToString() + "+" + m_key.ToString();
 
-				return this.Key.ToString();
+				return m_key.ToString();
 			}
 		}
 		#endregion
