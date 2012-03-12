@@ -11,11 +11,12 @@ namespace Digillect
 #if !SILVERLIGHT
 	[Serializable]
 #endif
-	public class ObservableObject :
+	public class ObservableObject
 #if !SILVERLIGHT || WINDOWS_PHONE
-	INotifyPropertyChanging,
+		: INotifyPropertyChanging, INotifyPropertyChanged
+#else
+		: INotifyPropertyChanged
 #endif
-	INotifyPropertyChanged
 	{
 		#region Constructor
 		protected ObservableObject()

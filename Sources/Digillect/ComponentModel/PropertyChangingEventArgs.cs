@@ -2,14 +2,18 @@ using System;
 
 namespace Digillect.ComponentModel
 {
-	/// <summary>
-	/// Provides data for the <see cref="System.ComponentModel.INotifyPropertyChanging.PropertyChanging"/> event.
-	/// </summary>
 #if !SILVERLIGHT
+	/// <summary>
+	/// Provides data for the <see cref="ObservableObject.PropertyChanging"/> event.
+	/// </summary>
 #if false
 	[System.Security.Permissions.HostProtectionAttribute(System.Security.Permissions.SecurityAction.LinkDemand, SharedState = true)]
 #endif
 	[Serializable]
+#else
+	/// <summary>
+	/// Provides data for the <b>PropertyChanging</b> event.
+	/// </summary>
 #endif
 	public class PropertyChangingEventArgs
 #if !SILVERLIGHT || WINDOWS_PHONE
