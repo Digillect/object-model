@@ -34,5 +34,5 @@ internal static class AssemblyInfo
 	public const string Version = Major + "." + Minor + "." + Patch;
 	public const string FileVersion = Major + "." + Minor + "." + Patch + SemVerSuffix;
 	public const string ProductVersion = Major + "." + Minor;
-	public const string SatelliteContractVersion = Major + "." + Minor;
+	public const string SatelliteContractVersion = Major + "." + Minor + ".0.0";
 }
