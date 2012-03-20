@@ -35,17 +35,10 @@ namespace Digillect.Collections
 		bool Remove(XKey key);
 
 		/// <summary>
-		/// Returns a collection of all objects' keys.
+		/// Returns an enumeration of all objects' keys.
 		/// </summary>
 		/// <returns>A collection with objects' keys.</returns>
-		ICollection<XKey> GetKeys();
-
-		/// <summary>
-		/// Creates a copy of this collection.
-		/// </summary>
-		/// <param name="deep"><see langword="true"/> to deep-clone inner collections (including their members), <see langword="false"/> to clone only inner collections but not their members.</param>
-		/// <returns>Cloned copy of the collection.</returns>
-		IXCollection<T> Clone(bool deep);
+		IEnumerable<XKey> GetKeys();
 
 #if false
 		/// <summary>

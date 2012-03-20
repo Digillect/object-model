@@ -5,39 +5,56 @@ using System.Runtime.Serialization;
 
 namespace Digillect
 {
+	/// <summary>
+	/// <see cref="Digillect.XObject"/> that uses <typeparamref name="TId"/> type as the indentifier and key.
+	/// </summary>
+	/// <typeparam name="TId">The type of the identifier.</typeparam>
 	[DataContract]
-	[DebuggerDisplay("Id = {m_id}")]
+	[DebuggerDisplay("Id = {id}")]
 #if !SILVERLIGHT
 	[Serializable]
 #endif
 	public class XObject<TId> : XObject, IXIdentifiable<TId>
 		where TId : IComparable<TId>, IEquatable<TId>
 	{
-		private TId m_id;
+		private TId id;
 
 		#region Constructor
+		/// <summary>
+		/// Initializes a new instance of the <see cref="XObject&lt;TId&gt;"/> class.
+		/// </summary>
 		protected XObject()
 		{
 		}
 
+		/// <summary>
+		/// Initializes a new instance of the <see cref="XObject&lt;TId&gt;"/> class.
+		/// </summary>
+		/// <param name="id">The id.</param>
 		protected XObject( TId id )
 		{
-			m_id = id;
+			this.id = id;
 		}
 		#endregion
 
 		#region Public Properties
+		/// <summary>
+		/// Gets or sets the identifier.
+		/// </summary>
+		/// <value>
+		/// The identifier.
+		/// </value>
 		[DataMember]
 		public TId Id
 		{
 			[DebuggerStepThrough]
-			get { return m_id; }
+			get { return this.id; }
 			set
 			{
-				if ( !EqualityComparer<TId>.Default.Equals(m_id, value) )
+				if ( !EqualityComparer<TId>.Default.Equals(this.id, value) )
 				{
-					OnPropertyChanging( "Id", m_id, value );
-					m_id = value;
+					OnPropertyChanging( "Id", this.id, value );
+					this.id = value;
 					ResetKey();
 					OnPropertyChanged( "Id" );
 				}
@@ -46,18 +63,28 @@ namespace Digillect
 		#endregion
 
 		#region Protected Methods
+		/// <summary>
+		/// Creates the key.
+		/// </summary>
+		/// <returns>
+		/// Created key.
+		/// </returns>
 		protected override XKey CreateKey()
 		{
-			return XKey.From( m_id, base.CreateKey() );
+			return XKey.From( this.id, base.CreateKey() );
 		}
 
-		protected override void ProcessCopy( XObject source, bool clone, bool deep )
+		/// <summary>
+		/// Performs update. Override update properties of your class.
+		/// </summary>
+		/// <param name="source">The source of update.</param>
+		protected override void ProcessUpdate( XObject source )
 		{
-			base.ProcessCopy( source, clone, deep );
+			base.ProcessUpdate( source );
 
 			XObject<TId> obj = (XObject<TId>) source;
 
-			m_id = obj.m_id;
+			this.id = obj.id;
 		}
 		#endregion
 
@@ -77,7 +104,7 @@ namespace Digillect
 
 			XObject<TId> other = (XObject<TId>) obj;
 
-			return EqualityComparer<TId>.Default.Equals(m_id, other.m_id);
+			return EqualityComparer<TId>.Default.Equals(this.id, other.id);
 		}
 
 		/// <summary>
@@ -87,7 +114,7 @@ namespace Digillect
 		/// <remarks>See <see cref="Object.GetHashCode"/>.</remarks>
 		public override int GetHashCode()
 		{
-			return m_id == null ? 0 : m_id.GetHashCode();
+			return this.id == null ? 0 : this.id.GetHashCode();
 		}
 		#endregion
 	}

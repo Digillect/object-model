@@ -16,11 +16,5 @@ namespace Digillect.Collections
 		/// <param name="key">The key of an item to locate in the <b>collection</b>.</param>
 		/// <returns>The index of item if found in the list; otherwise, -1.</returns>
 		int IndexOf(XKey key);
-
-		/// <summary>
-		/// Returns a collection of all objects' keys.
-		/// </summary>
-		/// <returns>A collection with objects' keys.</returns>
-		new IList<XKey> GetKeys();
 	}
 }

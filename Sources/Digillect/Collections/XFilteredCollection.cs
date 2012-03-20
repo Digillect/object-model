@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
+using System.Diagnostics.Contracts;
 using System.Linq;
 
 using Digillect.Properties;
@@ -12,28 +13,22 @@ namespace Digillect.Collections
 #if !SILVERLIGHT
 	[Serializable]
 #endif
+	[ContractClass( typeof( XFilteredCollectionContract<> ) )]
 	public abstract class XFilteredCollection<T> : IXList<T>, IDisposable
-#if !SILVERLIGHT
-		, ICloneable
-#endif
 		where T : XObject
 	{
-		private IXList<T> m_originalCollection;
+		private readonly IXList<T> originalCollection;
 
-		private int m_count = -1;
-		private int m_version;
+		private int count = -1;
+		private int version;
 
 		#region Constructor/Disposer
 		protected XFilteredCollection(IXList<T> originalCollection)
 		{
-			if ( originalCollection == null )
-			{
-				throw new ArgumentNullException("originalCollection");
-			}
+			Contract.Requires( originalCollection != null );
 
-			m_originalCollection = originalCollection;
-
-			m_originalCollection.CollectionChanged += OriginalCollection_CollectionChanged;
+			this.originalCollection = originalCollection;
+			this.originalCollection.CollectionChanged += OriginalCollection_CollectionChanged;
 		}
 
 		public void Dispose()
@@ -46,32 +41,31 @@ namespace Digillect.Collections
 		{
 			if ( disposing )
 			{
-				m_originalCollection.CollectionChanged -= OriginalCollection_CollectionChanged;
+				this.originalCollection.CollectionChanged -= OriginalCollection_CollectionChanged;
 			}
 		}
 		#endregion
 
+		#region ObjectInvariant
+		[ContractInvariantMethod]
+		[System.Diagnostics.CodeAnalysis.SuppressMessage( "Microsoft.Performance", "CA1822:MarkMembersAsStatic", Justification = "Required for code contracts." )]
+		private void ObjectInvariant()
+		{
+			Contract.Invariant( this.originalCollection != null );
+		}
+		#endregion
+
+		#region OriginalCollection
 		public IXList<T> OriginalCollection
 		{
-			get { return m_originalCollection; }
+			get { return this.originalCollection; }
 		}
+		#endregion
 
 		#region IXList`1 Members
 		public int IndexOf(XKey key)
 		{
-			return CalcFilteredIndex(m_originalCollection.IndexOf(key));
-		}
-
-		public IList<XKey> GetKeys()
-		{
-			List<XKey> identifiers = new List<XKey>();
-
-			foreach ( T obj in this )
-			{
-				identifiers.Add(obj.GetKey());
-			}
-
-			return new ReadOnlyCollection<XKey>(identifiers);
+			return CalcFilteredIndex(this.originalCollection.IndexOf(key));
 		}
 		#endregion
 
@@ -85,40 +79,28 @@ namespace Digillect.Collections
 
 		public T Find(XKey key)
 		{
-			T obj = m_originalCollection.Find(key);
-			int idx = m_originalCollection.IndexOf( obj );
+			T obj = this.originalCollection.Find(key);
+			int idx = this.originalCollection.IndexOf( obj );
 
 			return Equals(obj, default(T)) || Filter(obj, idx) ? obj : default(T);
 		}
 
-		ICollection<XKey> IXCollection<T>.GetKeys()
+		IEnumerable<XKey> IXCollection<T>.GetKeys()
 		{
-			return GetKeys();
+			return ((IEnumerable<T>) this).Select( obj => obj == null ? null : obj.GetKey() );
 		}
 
 		bool IXCollection<T>.Remove(XKey key)
 		{
 			throw new NotSupportedException(Resources.XCollectionReadOnlyException);
 		}
-
-		IXCollection<T> IXCollection<T>.Clone(bool deep)
-		{
-			return Clone(deep);
-		}
-
-		public virtual XFilteredCollection<T> Clone(bool deep)
-		{
-			IXList<T> collection = deep ? (IXList<T>) m_originalCollection.Clone(true) : m_originalCollection;
-
-			return CreateInstanceOfSameType(collection);
-		}
 		#endregion
 
 		#region IXUpdatable`1 Members
 		event EventHandler IXUpdatable<IXCollection<T>>.Updated
 		{
-			add { m_originalCollection.Updated += value; }
-			remove { m_originalCollection.Updated -= value; }
+			add { this.originalCollection.Updated += value; }
+			remove { this.originalCollection.Updated -= value; }
 		}
 
 		void IXUpdatable<IXCollection<T>>.BeginUpdate()
@@ -131,7 +113,7 @@ namespace Digillect.Collections
 			throw new NotSupportedException(Resources.XCollectionReadOnlyException);
 		}
 
-		bool IXUpdatable<IXCollection<T>>.UpdateRequired(IXCollection<T> source)
+		bool IXUpdatable<IXCollection<T>>.IsUpdateRequired(IXCollection<T> source)
 		{
 			return false;
 		}
@@ -145,7 +127,12 @@ namespace Digillect.Collections
 		#region IList`1 Members
 		public T this[int index]
 		{
-			get { return m_originalCollection[CalcOriginalIndex(index)]; }
+			get
+			{
+				var originalIndex = CalcOriginalIndex( index );
+
+				return originalIndex >= 0 ? this.originalCollection[originalIndex] : default( T );
+			}
 		}
 
 		T IList<T>.this[int index]
@@ -156,7 +143,11 @@ namespace Digillect.Collections
 
 		public int IndexOf(T item)
 		{
-			return CalcFilteredIndex(m_originalCollection.IndexOf(item));
+			Contract.Ensures( Contract.Result<int>() >= -1 );
+
+			var filteredIndex = CalcFilteredIndex( this.originalCollection.IndexOf( item ) );
+
+			return filteredIndex;
 		}
 
 		void IList<T>.Insert(int index, T item)
@@ -175,28 +166,31 @@ namespace Digillect.Collections
 		{
 			get
 			{
-				if ( m_count == -1 )
+				Contract.Ensures( Contract.Result<int>() == this.count );
+				Contract.Ensures( Contract.Result<int>() >= 0 );
+
+				if ( this.count < 0 )
 				{
-					lock ( m_originalCollection )
+					lock ( this.originalCollection )
 					{
-						if ( m_count == -1 )
+						if ( this.count == -1 )
 						{
 							int count = 0;
 
-							for ( int i = 0; i < m_originalCollection.Count; i++ )
+							for ( int i = 0; i < this.originalCollection.Count; i++ )
 							{
-								if ( Filter(m_originalCollection[i], i) )
+								if ( Filter(this.originalCollection[i], i) )
 								{
 									count++;
 								}
 							}
 
-							m_count = count;
+							this.count = count;
 						}
 					}
 				}
 
-				return m_count;
+				return this.count;
 			}
 		}
 
@@ -217,11 +211,15 @@ namespace Digillect.Collections
 
 		public bool Contains(T item)
 		{
-			return m_originalCollection.Contains(item) && Filter(item, m_originalCollection.IndexOf(item));
+			return originalCollection.Contains(item) && Filter(item, this.originalCollection.IndexOf(item));
 		}
 
 		public void CopyTo(T[] array, int arrayIndex)
 		{
+			Contract.Requires( array != null );
+			Contract.Requires( arrayIndex >= 0 );
+			Contract.Requires( arrayIndex + this.Count < array.Length );
+
 			if ( array == null )
 			{
 				throw new ArgumentNullException("array");
@@ -242,16 +240,16 @@ namespace Digillect.Collections
 		#region IEnumerable`1 Members
 		public IEnumerator<T> GetEnumerator()
 		{
-			int version = m_version;
+			int version = this.version;
 
-			for ( int i = 0; i < m_originalCollection.Count; i++ )
+			for ( int i = 0; i < originalCollection.Count; i++ )
 			{
-				if ( version != m_version )
+				if ( this.version != version )
 				{
 					throw new InvalidOperationException(Resources.XCollectionEnumFailedVersionException);
 				}
 
-				T obj = m_originalCollection[i];
+				T obj = originalCollection[i];
 
 				if ( Filter(obj, i) )
 				{
@@ -308,15 +306,6 @@ namespace Digillect.Collections
 		}
 		#endregion
 
-#if !SILVERLIGHT
-		#region ICloneable Members
-		object ICloneable.Clone()
-		{
-			return Clone(true);
-		}
-		#endregion
-#endif
-
 		#region Protected Methods
 		protected abstract XFilteredCollection<T> CreateInstanceOfSameType(IXList<T> collection);
 
@@ -339,7 +328,7 @@ namespace Digillect.Collections
 
 			for ( int i = 0; i <= originalIndex; i++ )
 			{
-				if ( Filter(m_originalCollection[i], i) )
+				if ( Filter(originalCollection[i], i) )
 				{
 					filteredIndex++;
 				}
@@ -358,9 +347,9 @@ namespace Digillect.Collections
 			int originalIndex = -1;
 			int count = 0;
 
-			for ( int i = 0; i < m_originalCollection.Count && count <= filteredIndex; i++ )
+			for ( int i = 0; i < originalCollection.Count && count <= filteredIndex; i++ )
 			{
-				if ( Filter(m_originalCollection[i],i) )
+				if ( Filter(originalCollection[i],i) )
 				{
 					originalIndex = i;
 					count++;
@@ -374,11 +363,11 @@ namespace Digillect.Collections
 		#region Event Handlers
 		private void OriginalCollection_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
 		{
-			m_version++;
+			version++;
 
 			if ( e.Action == NotifyCollectionChangedAction.Add || e.Action == NotifyCollectionChangedAction.Remove || e.Action == NotifyCollectionChangedAction.Reset )
 			{
-				m_count = -1;
+				count = -1;
 			}
 
 			if ( CollectionChanged != null )
@@ -412,39 +401,52 @@ namespace Digillect.Collections
 						break;
 #else
 					case NotifyCollectionChangedAction.Add:
-						IList newItems = e.NewItems.Cast<T>().Where(Filter).ToArray();
-						if ( newItems.Count == 0 )
-						{
+						Contract.Assume( e.NewItems != null );
+
+						var newItems = e.NewItems.Cast<T>().Where( Filter ).ToArray();
+
+						if( newItems.Length == 0 )
 							return;
-						}
-						args = new NotifyCollectionChangedEventArgs(e.Action, newItems, CalcFilteredIndex(e.NewStartingIndex));
+
+						args = new NotifyCollectionChangedEventArgs( e.Action, newItems, CalcFilteredIndex( e.NewStartingIndex ) );
+
 						break;
+
 					case NotifyCollectionChangedAction.Remove:
-						IList oldItems = e.OldItems.Cast<T>().Where(Filter).ToArray();
-						if ( oldItems.Count == 0 )
-						{
+						Contract.Assume( e.OldItems != null );
+
+						var oldItems = e.OldItems.Cast<T>().Where( Filter ).ToArray();
+
+						if( oldItems.Length == 0 )
 							return;
-						}
-						args = new NotifyCollectionChangedEventArgs(e.Action, oldItems, CalcFilteredIndex(e.OldStartingIndex));
+
+						args = new NotifyCollectionChangedEventArgs( e.Action, oldItems, CalcFilteredIndex( e.OldStartingIndex ) );
 						break;
+
 					case NotifyCollectionChangedAction.Move:
 						// e.NewItems and e.OldItems have the same content
-						IList changedItems = e.NewItems.Cast<T>().Where(Filter).ToArray();
-						if ( changedItems.Count == 0 )
-						{
+						Contract.Assume( e.NewItems != null );
+
+						newItems = e.NewItems.Cast<T>().Where( Filter ).ToArray();
+
+						if( newItems.Length == 0 )
 							return;
-						}
-						args = new NotifyCollectionChangedEventArgs(e.Action, changedItems, CalcFilteredIndex(e.NewStartingIndex), CalcFilteredIndex(e.OldStartingIndex));
+
+						args = new NotifyCollectionChangedEventArgs( e.Action, newItems, CalcFilteredIndex( e.NewStartingIndex ), CalcFilteredIndex( e.OldStartingIndex ) );
 						break;
+
 					case NotifyCollectionChangedAction.Replace:
 						// e.NewStartingIndex == e.OldStartingIndex
-						newItems = e.NewItems.Cast<T>().Where(Filter).ToArray();
-						oldItems = e.OldItems.Cast<T>().Where(Filter).ToArray();
-						if ( newItems.Count == 0 && oldItems.Count == 0 )
-						{
+						Contract.Assume( e.NewItems != null );
+						Contract.Assume( e.OldItems != null );
+
+						newItems = e.NewItems.Cast<T>().Where( Filter ).ToArray();
+						oldItems = e.OldItems.Cast<T>().Where( Filter ).ToArray();
+
+						if( newItems.Length == 0 && oldItems.Length == 0 )
 							return;
-						}
-						args = new NotifyCollectionChangedEventArgs(e.Action, newItems, oldItems, CalcFilteredIndex(e.NewStartingIndex));
+
+						args = new NotifyCollectionChangedEventArgs( e.Action, newItems, oldItems, CalcFilteredIndex( e.NewStartingIndex ) );
 						break;
 #endif
 					case NotifyCollectionChangedAction.Reset:
@@ -458,5 +460,23 @@ namespace Digillect.Collections
 			}
 		}
 		#endregion
+	}
+
+	[ContractClassFor( typeof( XFilteredCollection<> ) )]
+	abstract class XFilteredCollectionContract<T> : XFilteredCollection<T>
+		where T : XObject
+	{
+		protected XFilteredCollectionContract( IXList<T> originalCollection )
+			: base( originalCollection )
+		{
+		}
+
+		protected override XFilteredCollection<T> CreateInstanceOfSameType( IXList<T> collection )
+		{
+			Contract.Requires( collection != null );
+			Contract.Ensures( Contract.Result<XFilteredCollection<T>>() != null );
+
+			return this;
+		}
 	}
 }

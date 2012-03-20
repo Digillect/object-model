@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Diagnostics.Contracts;
 using System.Runtime.Serialization;
 
 using Digillect.Properties;
@@ -29,6 +30,7 @@ namespace Digillect.Collections
 		/// </summary>
 		public XKeyedCollection()
 		{
+			Contract.Assume( this.Items != null );
 		}
 
 		/// <summary>
@@ -38,7 +40,20 @@ namespace Digillect.Collections
 		public XKeyedCollection(IEnumerable<TObject> collection)
 			: base(collection)
 		{
+			Contract.Requires( collection != null );
+
 			OnDeserialization();
+
+			Contract.Assume( this.Items != null );
+		}
+		#endregion
+
+		#region ObjectInvariant
+		[ContractInvariantMethod]
+		[System.Diagnostics.CodeAnalysis.SuppressMessage( "Microsoft.Performance", "CA1822:MarkMembersAsStatic", Justification = "Required for code contracts." )]
+		private void ObjectInvariant()
+		{
+			Contract.Invariant( this.Items != null );
 		}
 		#endregion
 
@@ -114,17 +129,6 @@ namespace Digillect.Collections
 		}
 		#endregion
 
-		#region Clone Methods
-		protected override void ProcessClone(XCollection<TObject> clone, bool deep)
-		{
-			base.ProcessClone(clone, deep);
-
-			foreach ( var item in Items )
-			{
-				m_dictionary.Add(item.Id, item);
-			}
-		}
-		#endregion
 		#region Update Methods
 		/// <summary>
 		/// Обновляет текущую коллекцию на основе другой коллекции.
@@ -139,12 +143,7 @@ namespace Digillect.Collections
 				throw new NotSupportedException(Resources.XCollectionReadOnlyException);
 			}
 
-			if ( source == null )
-			{
-				throw new ArgumentNullException("source");
-			}
-
-			if ( options == CollectionUpdateOptions.None || !UpdateRequired(source, options) )
+			if ( options == CollectionUpdateOptions.None || !IsUpdateRequired(source, options) )
 			{
 				return CollectionUpdateResults.Empty;
 			}

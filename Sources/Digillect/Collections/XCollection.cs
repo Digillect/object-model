@@ -5,6 +5,7 @@ using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Diagnostics;
+using System.Diagnostics.Contracts;
 using System.Linq;
 
 using Digillect.Properties;
@@ -19,15 +20,12 @@ namespace Digillect.Collections
 	[Serializable]
 #endif
 	public class XCollection<T> : Collection<T>, IXList<T>, INotifyPropertyChanged
-#if !SILVERLIGHT
-		, ICloneable
-#endif
 		where T : XObject
 	{
 #if !SILVERLIGHT
 		[NonSerialized]
 #endif
-		private short m_updateCount;
+		private short updateCount;
 
 		#region Constructor
 		/// <summary>
@@ -44,6 +42,7 @@ namespace Digillect.Collections
 		public XCollection(IEnumerable<T> collection)
 			: base(new List<T>(collection))
 		{
+			Contract.Requires( collection != null );
 		}
 
 #if false
@@ -58,10 +57,20 @@ namespace Digillect.Collections
 #endif
 		#endregion
 
-		#region Protected Properties
-		protected bool InUpdate
+		#region ObjectInvariant
+		[ContractInvariantMethod]
+		[System.Diagnostics.CodeAnalysis.SuppressMessage( "Microsoft.Performance", "CA1822:MarkMembersAsStatic", Justification = "Required for code contracts." )]
+		private void ObjectInvariant()
 		{
-			get { return m_updateCount > 0; }
+			Contract.Invariant( this.Items != null );
+			Contract.Invariant( this.Items.Count >= 0 );
+		}
+		#endregion
+
+		#region Protected Properties
+		protected bool IsInUpdate
+		{
+			get { return this.updateCount > 0; }
 		}
 		#endregion
 
@@ -72,23 +81,31 @@ namespace Digillect.Collections
 
 		protected virtual void OnUpdated(EventArgs e)
 		{
-			if ( m_updateCount == 0 && Updated != null )
+			if ( this.updateCount == 0 )
 			{
-				Updated(this, e);
+				var handler = Updated;
+
+				if( handler != null )
+					handler(this, e);
 			}
 		}
 
 		protected virtual void OnCollectionChanged(NotifyCollectionChangedEventArgs e)
 		{
-			if ( m_updateCount == 0 && CollectionChanged != null )
+			if ( this.updateCount == 0 )
 			{
-				CollectionChanged(this, e);
+				var handler = CollectionChanged;
+
+				if( handler != null )
+					handler(this, e);
 			}
 		}
 
 		protected void OnPropertyChanged(string propertyName)
 		{
-			if ( m_updateCount == 0 )
+			Contract.Requires( propertyName != null );
+
+			if ( this.updateCount == 0 )
 			{
 				OnPropertyChanged(new PropertyChangedEventArgs(propertyName));
 			}
@@ -96,9 +113,12 @@ namespace Digillect.Collections
 
 		protected virtual void OnPropertyChanged(PropertyChangedEventArgs e)
 		{
-			if ( m_updateCount == 0 && PropertyChanged != null )
+			if ( this.updateCount == 0 )
 			{
-				PropertyChanged(this, e);
+				var handler = PropertyChanged;
+
+				if( handler != null )
+					handler(this, e);
 			}
 		}
 		#endregion
@@ -106,6 +126,8 @@ namespace Digillect.Collections
 		#region Public Methods
 		public void AddRange(IEnumerable<T> collection)
 		{
+			Contract.Requires( collection != null );
+
 			InsertRange(this.Count, collection);
 		}
 
@@ -121,10 +143,8 @@ namespace Digillect.Collections
 
 		public XCollection<T> Derive(Predicate<T> filter)
 		{
-			if ( filter == null )
-			{
-				throw new ArgumentNullException("filter");
-			}
+			Contract.Requires( filter != null );
+			Contract.Ensures( Contract.Result<XCollection<T>>() != null );
 
 			var derived = (XCollection<T>) CreateInstanceOfSameType();
 
@@ -148,41 +168,27 @@ namespace Digillect.Collections
 		{
 			int index = IndexOf(key);
 
-			return index == -1 ? null : this.Items[index];
+			return index < 0 ? null : this.Items[index];
 		}
 
 		public void ForEach(Action<T> action)
 		{
-			if ( action == null )
-			{
-				throw new ArgumentNullException("action");
-			}
+			Contract.Requires( action != null );
 
-			for ( int i = 0; i < this.Items.Count; i++ )
+			if( this.Items.Count > 0 )
 			{
-				action(this.Items[i]);
+				for ( int i = 0; i < this.Items.Count; i++ )
+				{
+					action(this.Items[i]);
+				}
 			}
 		}
 
-		ICollection<XKey> IXCollection<T>.GetKeys()
+		IEnumerable<XKey> IXCollection<T>.GetKeys()
 		{
-			return GetKeys();
-		}
+			Contract.Ensures( Contract.Result<IEnumerable<XKey>>() != null );
 
-		/// <summary>
-		/// Returns a collection of all objects' keys.
-		/// </summary>
-		/// <returns>A collection with objects' keys.</returns>
-		public IList<XKey> GetKeys()
-		{
-			XKey[] identifiers = new XKey[this.Items.Count];
-
-			for ( int i = 0; i < this.Items.Count; i++ )
-			{
-				identifiers[i] = this.Items[i].GetKey();
-			}
-
-			return new ReadOnlyCollection<XKey>(identifiers);
+			return this.Items.Select( obj => obj == null ? null : obj.GetKey() );
 		}
 
 		/// <summary>
@@ -192,6 +198,8 @@ namespace Digillect.Collections
 		/// <returns>The index of item if found in the list; otherwise, -1.</returns>
 		public int IndexOf(XKey key)
 		{
+			Contract.Ensures( Contract.Result<int>() >= -1 );
+
 			for ( int i = 0; i < this.Items.Count; i++ )
 			{
 				var item = this.Items[i];
@@ -207,21 +215,16 @@ namespace Digillect.Collections
 
 		public void InsertRange(int index, IEnumerable<T> collection)
 		{
-			if ( collection == null )
-			{
-				throw new ArgumentNullException("collection");
-			}
+			Contract.Requires( collection != null );
+			Contract.Requires( 0 <= index && index <= this.Count );
 
-			if ( index > this.Count )
-			{
-				throw new ArgumentOutOfRangeException("index");
-			}
-
+			/*
 			List<T> is2 = this.Items as List<T>;
 
 			if ( is2 != null )
 			{
-				is2.InsertRange(index, collection);
+				Contract.Assert( index < is2.Count );
+				is2.InsertRange( index, collection );
 			}
 			else
 			{
@@ -229,8 +232,22 @@ namespace Digillect.Collections
 				{
 					while ( enumerator.MoveNext() )
 					{
+						Contract.Assert( index <= this.Count );
 						Insert(index++, enumerator.Current);
 					}
+				}
+			}
+			*/
+			using( IEnumerator<T> enumerator = collection.GetEnumerator() )
+			{
+				while( enumerator.MoveNext() )
+				{
+					//Contract.Assert( index <= this.Count );
+					Insert( index, enumerator.Current );
+					
+					index++;
+
+					Contract.Assert( index <= this.Count );
 				}
 			}
 		}
@@ -259,6 +276,8 @@ namespace Digillect.Collections
 
 		public T[] ToArray()
 		{
+			Contract.Ensures( Contract.Result<T[]>() != null );
+
 			T[] array = new T[this.Items.Count];
 
 			this.Items.CopyTo(array, 0);
@@ -267,59 +286,16 @@ namespace Digillect.Collections
 		}
 		#endregion
 
-#if !SILVERLIGHT
-		#region ICloneable Members
-		object ICloneable.Clone()
-		{
-			return Clone(true);
-		}
-		#endregion
-#endif
-
-		#region Clone Methods
-		IXCollection<T> IXCollection<T>.Clone(bool deep)
-		{
-			return Clone(deep);
-		}
-
-		/// <summary>
-		/// Creates a copy of this collection.
-		/// </summary>
-		/// <param name="deep"><see langword="true"/> to deep-clone inner collections (including their members), <see langword="false"/> to clone only inner collections but not their members.</param>
-		/// <returns>Cloned copy of the collection.</returns>
-		public virtual XCollection<T> Clone(bool deep)
-		{
-			var clone = CreateInstanceOfSameType();
-
-			ProcessClone(clone, deep);
-
-			return clone;
-		}
-
-		protected virtual void ProcessClone(XCollection<T> clone, bool deep)
-		{
-			if ( clone == null )
-			{
-				throw new ArgumentNullException("clone");
-			}
-
-			foreach ( var item in this.Items )
-			{
-				T itemClone = (T) item.Clone(deep);
-
-				clone.Items.Add(itemClone);
-			}
-		}
-
 		[EditorBrowsable(EditorBrowsableState.Advanced)]
 #if false // !SILVERLIGHT
 		[System.Security.Permissions.ReflectionPermission(System.Security.Permissions.SecurityAction.Demand, RestrictedMemberAccess = true)]
 #endif
 		protected virtual XCollection<T> CreateInstanceOfSameType()
 		{
+			Contract.Ensures( Contract.Result<XCollection<T>>() != null );
+
 			return (XCollection<T>) Activator.CreateInstance(GetType());
 		}
-		#endregion
 		#region Update Methods
 		/// <summary>
 		/// Начинает операцию глобального изменения содержимого коллекции.
@@ -335,7 +311,7 @@ namespace Digillect.Collections
 				throw new NotSupportedException(Resources.XCollectionReadOnlyException);
 			}
 
-			++m_updateCount;
+			++this.updateCount;
 		}
 
 		/// <summary>
@@ -352,10 +328,10 @@ namespace Digillect.Collections
 				throw new NotSupportedException(Resources.XCollectionReadOnlyException);
 			}
 
-			if ( m_updateCount == 0 )
+			if ( this.updateCount == 0 )
 				return;
 
-			if ( --m_updateCount == 0 )
+			if ( --this.updateCount == 0 )
 			{
 				OnUpdated(EventArgs.Empty);
 				OnPropertyChanged("Count");
@@ -364,9 +340,9 @@ namespace Digillect.Collections
 			}
 		}
 
-		bool IXUpdatable<IXCollection<T>>.UpdateRequired(IXCollection<T> source)
+		bool IXUpdatable<IXCollection<T>>.IsUpdateRequired(IXCollection<T> source)
 		{
-			return UpdateRequired(source, CollectionUpdateOptions.All);
+			return IsUpdateRequired(source, CollectionUpdateOptions.All);
 		}
 
 		/// <summary>
@@ -375,7 +351,7 @@ namespace Digillect.Collections
 		/// <param name="source">Source <b>collection</b> to compare with.</param>
 		/// <param name="options">Update options.</param>
 		/// <returns><see langword="false"/> if two collections are the same (equal by reference), otherwise, <see langword="true"/>.</returns>
-		public virtual bool UpdateRequired(IEnumerable<T> source, CollectionUpdateOptions options)
+		public virtual bool IsUpdateRequired(IEnumerable<T> source, CollectionUpdateOptions options)
 		{
 			return !ReferenceEquals(this, source);
 		}
@@ -395,6 +371,8 @@ namespace Digillect.Collections
 		/// </remarks>
 		public CollectionUpdateResults Update(IEnumerable<T> source)
 		{
+			Contract.Requires( source != null );
+
 			return Update(source, CollectionUpdateOptions.All);
 		}
 
@@ -404,19 +382,18 @@ namespace Digillect.Collections
 		/// <param name="source">Источник изменений.</param>
 		/// <param name="options">Операции, которые надо произвести с объектами, находящимися в данной коллекции.</param>
 		/// <returns>The <see cref="CollectionUpdateResults">results</see> of the operation.</returns>
+		[ContractVerification( false )]
 		public virtual CollectionUpdateResults Update(IEnumerable<T> source, CollectionUpdateOptions options)
 		{
+			Contract.Requires( source != null );
+			Contract.Ensures( Contract.Result<CollectionUpdateResults>() != null );
+
 			if ( this.Items.IsReadOnly )
 			{
 				throw new NotSupportedException(Resources.XCollectionReadOnlyException);
 			}
 
-			if ( source == null )
-			{
-				throw new ArgumentNullException("source");
-			}
-
-			if ( options == CollectionUpdateOptions.None || !UpdateRequired(source, options) )
+			if ( options == CollectionUpdateOptions.None || !IsUpdateRequired(source, options) )
 			{
 				return CollectionUpdateResults.Empty;
 			}
@@ -445,10 +422,15 @@ namespace Digillect.Collections
 			for ( int i = 0; i < this.Items.Count; i++ )
 			{
 				T item = this.Items[i];
+
+				Contract.Assume( item != null ); // Since we'd removed all nulls in the previous step.
+
 				XKey key = item.GetKey();
 				List<XUpdateItem> items;
 
-				if ( !updateCandidates.TryGetValue(key, out items) )
+				if( updateCandidates.ContainsKey( key ) )
+					items = updateCandidates[key];
+				else
 				{
 					items = new List<XUpdateItem>();
 					updateCandidates.Add(key, items);
@@ -466,6 +448,8 @@ namespace Digillect.Collections
 				if ( item != null && updateCandidates.ContainsKey(key = item.GetKey()) )
 				{
 					var existing = updateCandidates[key];
+
+					Contract.Assume( existing != null );
 
 					if ( (options & CollectionUpdateOptions.UpdateExisting) != CollectionUpdateOptions.None )
 					{

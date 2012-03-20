@@ -1,11 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Diagnostics.Contracts;
 using System.Text;
 
 namespace Digillect
 {
 #if !SILVERLIGHT
+	/// <summary>
+	/// Key that is used for unique object identification.
+	/// </summary>
 	[Serializable]
 #endif
 	public abstract class XKey : IComparable<XKey>, IEquatable<XKey>
@@ -15,35 +19,85 @@ namespace Digillect
 		/// </summary>
 		public static readonly XKey Null = new NullKey();
 
-		private XKey m_parentKey;
+		private readonly XKey parentKey;
 
 		#region Constructor
+		/// <summary>
+		/// Initializes a new instance of the <see cref="XKey"/> class.
+		/// </summary>
 		protected XKey()
 		{
+			Contract.Ensures( this.parentKey == null );
 		}
 
+		/// <summary>
+		/// Initializes a new instance of the <see cref="XKey"/> class.
+		/// </summary>
+		/// <param name="parentKey">The parent key.</param>
 		protected XKey(XKey parentKey)
 		{
-			m_parentKey = parentKey;
+			Contract.Ensures( this.parentKey == parentKey );
+
+			this.parentKey = parentKey;
 		}
 		#endregion
 
+		/// <summary>
+		/// Gets the parent key.
+		/// </summary>
 		public XKey Parent
 		{
-			get { return m_parentKey; }
+			get { return parentKey; }
 		}
 
+		/// <summary>
+		/// Compares key to other key.
+		/// </summary>
+		/// <param name="other">The other key.</param>
+		/// <returns>Negative value if this key is less then other key, positive value if other key is less then this one or zero if keys are equal.</returns>
 		public abstract int CompareTo(XKey other);
+		/// <summary>
+		/// Checks that keys are equal.
+		/// </summary>
+		/// <param name="other">The other key.</param>
+		/// <returns><c>true</c> if keys are equal, otherwise <c>false</c>.</returns>
 		public abstract bool Equals(XKey other);
-		public abstract override bool Equals(object obj);
+		/// <summary>
+		/// Checks that objects are equal.
+		/// </summary>
+		/// <param name="obj">The other object.</param>
+		/// <returns><c>true</c> if <paramref name="obj"/> is key and keys are equal, otherwise <c>false</c>.</returns>
+		public abstract override bool Equals( object obj );
+		/// <summary>
+		/// Returns a hash code for this instance.
+		/// </summary>
+		/// <returns>
+		/// A hash code for this instance, suitable for use in hashing algorithms and data structures like a hash table. 
+		/// </returns>
 		public abstract override int GetHashCode();
 
 		#region Compare Operators
+		/// <summary>
+		/// Implements the operator &lt;.
+		/// </summary>
+		/// <param name="key1">The key1.</param>
+		/// <param name="key2">The key2.</param>
+		/// <returns>
+		/// The result of the operator.
+		/// </returns>
 		public static bool operator <(XKey key1, XKey key2)
 		{
 			return Comparer<XKey>.Default.Compare(key1, key2) < 0;
 		}
 
+		/// <summary>
+		/// Implements the operator &gt;.
+		/// </summary>
+		/// <param name="key1">The key1.</param>
+		/// <param name="key2">The key2.</param>
+		/// <returns>
+		/// The result of the operator.
+		/// </returns>
 		public static bool operator >(XKey key1, XKey key2)
 		{
 			return Comparer<XKey>.Default.Compare(key1, key2) > 0;
@@ -51,11 +105,27 @@ namespace Digillect
 		#endregion
 
 		#region Equality Operators
+		/// <summary>
+		/// Implements the operator ==.
+		/// </summary>
+		/// <param name="key1">The key1.</param>
+		/// <param name="key2">The key2.</param>
+		/// <returns>
+		/// The result of the operator.
+		/// </returns>
 		public static bool operator ==(XKey key1, XKey key2)
 		{
 			return EqualityComparer<XKey>.Default.Equals(key1, key2);
 		}
 
+		/// <summary>
+		/// Implements the operator !=.
+		/// </summary>
+		/// <param name="key1">The key1.</param>
+		/// <param name="key2">The key2.</param>
+		/// <returns>
+		/// The result of the operator.
+		/// </returns>
 		public static bool operator !=(XKey key1, XKey key2)
 		{
 			return !EqualityComparer<XKey>.Default.Equals(key1, key2);
@@ -63,6 +133,13 @@ namespace Digillect
 		#endregion
 
 		#region Cast Operators
+		/// <summary>
+		/// Creates key froms the specified type and parent key.
+		/// </summary>
+		/// <typeparam name="T">Type of key value.</typeparam>
+		/// <param name="key">The value.</param>
+		/// <param name="parentKey">The parent key.</param>
+		/// <returns>Created key.</returns>
 		public static XKey From<T>(T key, XKey parentKey)
 			where T : IComparable<T>, IEquatable<T>
 		{
@@ -74,16 +151,37 @@ namespace Digillect
 			return new SimpleKey<T>(key, parentKey);
 		}
 
+		/// <summary>
+		/// Performs an explicit conversion from <see cref="System.Guid"/> to <see cref="Digillect.XKey"/>.
+		/// </summary>
+		/// <param name="key">The key.</param>
+		/// <returns>
+		/// The result of the conversion.
+		/// </returns>
 		public static explicit operator XKey(Guid key)
 		{
 			return From(key, null);
 		}
 
+		/// <summary>
+		/// Performs an explicit conversion from <see cref="System.Int32"/> to <see cref="Digillect.XKey"/>.
+		/// </summary>
+		/// <param name="key">The key.</param>
+		/// <returns>
+		/// The result of the conversion.
+		/// </returns>
 		public static explicit operator XKey(int key)
 		{
 			return From(key, null);
 		}
 
+		/// <summary>
+		/// Performs an explicit conversion from <see cref="System.String"/> to <see cref="Digillect.XKey"/>.
+		/// </summary>
+		/// <param name="key">The key.</param>
+		/// <returns>
+		/// The result of the conversion.
+		/// </returns>
 		public static explicit operator XKey(string key)
 		{
 			return From(key, null);
@@ -175,15 +273,15 @@ namespace Digillect
 					return 1;
 				}
 
-				if ( m_parentKey == null || other.m_parentKey == null )
+				if ( parentKey == null || other.parentKey == null )
 				{
-					if ( m_parentKey != null && other.m_parentKey == null )
+					if ( parentKey != null && other.parentKey == null )
 						return 1;
-					else if ( m_parentKey == null && other.m_parentKey != null )
+					else if ( parentKey == null && other.parentKey != null )
 						return -1;
 				}
 
-				int result = m_parentKey.CompareTo(other.m_parentKey);
+				int result = parentKey.CompareTo(other.parentKey);
 
 				if ( result == 0 )
 				{
@@ -215,29 +313,29 @@ namespace Digillect
 					return false;
 				}
 
-				if ( m_parentKey == null || other.m_parentKey == null )
+				if ( parentKey == null || other.parentKey == null )
 				{
-					if ( m_parentKey != null && other.m_parentKey == null )
+					if ( parentKey != null && other.parentKey == null )
 						return false;
-					else if ( m_parentKey == null && other.m_parentKey != null )
+					else if ( parentKey == null && other.parentKey != null )
 						return false;
 				}
 
-				return m_parentKey.Equals(other.m_parentKey);
+				return parentKey.Equals(other.parentKey);
 			}
 
 			public override int GetHashCode()
 			{
-				if ( m_parentKey != null )
-					return m_parentKey.GetHashCode() ^ m_key.GetHashCode();
+				if ( parentKey != null )
+					return parentKey.GetHashCode() ^ m_key.GetHashCode();
 
 				return m_key.GetHashCode();
 			}
 
 			public override string ToString()
 			{
-				if ( m_parentKey != null )
-					return m_parentKey.ToString() + "+" + m_key.ToString();
+				if ( parentKey != null )
+					return parentKey.ToString() + "+" + m_key.ToString();
 
 				return m_key.ToString();
 			}

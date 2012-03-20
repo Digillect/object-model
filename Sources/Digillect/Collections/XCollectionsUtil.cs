@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
+using System.Diagnostics.Contracts;
 
 using Digillect.Properties;
 
@@ -175,12 +176,16 @@ namespace Digillect.Collections
 		#region Unmodifiable Wrappers
 		public static IXCollection<T> UnmodifiableCollection<T>(IXCollection<T> collection)
 		{
+			Contract.Requires( collection != null );
+
 			return new ReadOnlyXCollection<T>(collection);
 		}
 
 		public static IXList<T> UnmodifiableList<T>(IXList<T> collection)
 		{
-			return new ReadOnlyXList<T>(collection);
+			Contract.Requires( collection != null );
+
+			return new ReadOnlyXList<T>( collection );
 		}
 
 #if false
@@ -200,18 +205,26 @@ namespace Digillect.Collections
 		public static XFilteredCollection<T> FilteredList<T>(IXList<T> collection, Predicate<T> filter)
 			where T : XObject
 		{
-			return new PredicateXFilteredCollection<T>(collection, filter);
+			Contract.Requires( collection != null );
+			Contract.Requires( filter != null );
+
+			return new PredicateXFilteredCollection<T>( collection, filter );
 		}
 
 		public static XFilteredCollection<T> FilteredList<T>(IXList<T> collection, Func<T, bool> filter)
 			where T : XObject
 		{
-			return new FuncXFilteredCollection<T>(collection, filter);
+			Contract.Requires( collection != null );
+			Contract.Requires( filter != null );
+
+			return new FuncXFilteredCollection<T>( collection, filter );
 		}
 
 		public static XFilteredCollection<T> FilteredList<T>( IXList<T> collection, int start, int count )
 			where T : XObject
 		{
+			Contract.Requires( collection != null );
+
 			return new RangeFilteredCollection<T>( collection, start, count );
 		}
 		#endregion
@@ -221,33 +234,36 @@ namespace Digillect.Collections
 		[Serializable]
 #endif
 		private class ReadOnlyXCollection<T> : IXCollection<T>
-#if !SILVERLIGHT
-			, ICloneable
-#endif
 		{
-			private readonly IXCollection<T> m_collection;
+			private readonly IXCollection<T> collection;
 
 			#region Constructor
 			public ReadOnlyXCollection(IXCollection<T> collection)
 			{
-				if ( collection == null )
-				{
-					throw new ArgumentNullException("collection");
-				}
+				Contract.Requires( collection != null );
 
-				m_collection = collection;
+				this.collection = collection;
+			}
+			#endregion
+
+			#region ObjectInvariant
+			[ContractInvariantMethod]
+			[System.Diagnostics.CodeAnalysis.SuppressMessage( "Microsoft.Performance", "CA1822:MarkMembersAsStatic", Justification = "Required for code contracts." )]
+			private void ObjectInvariant()
+			{
+				Contract.Invariant( this.collection != null );
 			}
 			#endregion
 
 			#region IXCollection`1 Members
 			bool IXCollection<T>.Contains(XKey key)
 			{
-				return m_collection.Contains(key);
+				return this.collection.Contains(key);
 			}
 
 			T IXCollection<T>.Find(XKey key)
 			{
-				return m_collection.Find(key);
+				return this.collection.Find( key );
 			}
 
 			bool IXCollection<T>.Remove(XKey key)
@@ -255,22 +271,17 @@ namespace Digillect.Collections
 				throw new NotSupportedException(Resources.XCollectionReadOnlyException);
 			}
 
-			ICollection<XKey> IXCollection<T>.GetKeys()
+			IEnumerable<XKey> IXCollection<T>.GetKeys()
 			{
-				return m_collection.GetKeys();
-			}
-
-			IXCollection<T> IXCollection<T>.Clone(bool deep)
-			{
-				return m_collection.Clone(deep);
+				return this.collection.GetKeys();
 			}
 			#endregion
 
 			#region IXUpdatable`1 Members
 			event EventHandler IXUpdatable<IXCollection<T>>.Updated
 			{
-				add { m_collection.Updated += value; }
-				remove { m_collection.Updated -= value; }
+				add { this.collection.Updated += value; }
+				remove { this.collection.Updated -= value; }
 			}
 
 			void IXUpdatable<IXCollection<T>>.BeginUpdate()
@@ -283,9 +294,9 @@ namespace Digillect.Collections
 				throw new NotSupportedException(Resources.XCollectionReadOnlyException);
 			}
 
-			bool IXUpdatable<IXCollection<T>>.UpdateRequired(IXCollection<T> source)
+			bool IXUpdatable<IXCollection<T>>.IsUpdateRequired(IXCollection<T> source)
 			{
-				return m_collection.UpdateRequired(source);
+				return this.collection.IsUpdateRequired( source );
 			}
 
 			void IXUpdatable<IXCollection<T>>.Update(IXCollection<T> source )
@@ -307,17 +318,22 @@ namespace Digillect.Collections
 
 			bool ICollection<T>.Contains(T item)
 			{
-				return m_collection.Contains(item);
+				return this.collection.Contains( item );
 			}
 
 			void ICollection<T>.CopyTo(T[] array, int arrayIndex)
 			{
-				m_collection.CopyTo(array, arrayIndex);
+				this.collection.CopyTo( array, arrayIndex );
 			}
 
 			int ICollection<T>.Count
 			{
-				get { return m_collection.Count; }
+				get
+				{
+					Contract.Ensures( Contract.Result<int>() == this.collection.Count );
+
+					return this.collection.Count;
+				}
 			}
 
 			bool ICollection<T>.IsReadOnly
@@ -334,55 +350,46 @@ namespace Digillect.Collections
 			#region IEnumerable`1 Members
 			IEnumerator<T> IEnumerable<T>.GetEnumerator()
 			{
-				return m_collection.GetEnumerator();
+				return this.collection.GetEnumerator();
 			}
 			#endregion
 
 			#region IEnumerable Members
 			System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
 			{
-				return m_collection.GetEnumerator();
+				return this.collection.GetEnumerator();
 			}
 			#endregion
 
 			#region IEquatable`1 Members
 			bool IEquatable<IXCollection<T>>.Equals(IXCollection<T> other)
 			{
-				return m_collection.Equals(other);
+				return this.collection.Equals( other );
 			}
 			#endregion
 
 			#region INotifyCollectionChanged Members
 			event NotifyCollectionChangedEventHandler INotifyCollectionChanged.CollectionChanged
 			{
-				add { m_collection.CollectionChanged += value; }
-				remove { m_collection.CollectionChanged -= value; }
+				add { this.collection.CollectionChanged += value; }
+				remove { this.collection.CollectionChanged -= value; }
 			}
 			#endregion
-
-#if !SILVERLIGHT
-			#region ICloneable Members
-			object ICloneable.Clone()
-			{
-				return m_collection.Clone(true);
-			}
-			#endregion
-#endif
 
 			#region Object Overrides
 			public override bool Equals(object obj)
 			{
-				return m_collection.Equals(obj);
+				return this.collection.Equals( obj );
 			}
 
 			public override int GetHashCode()
 			{
-				return m_collection.GetHashCode();
+				return this.collection.GetHashCode();
 			}
 
 			public override string ToString()
 			{
-				return m_collection.ToString();
+				return this.collection.ToString();
 			}
 			#endregion
 		}
@@ -394,32 +401,38 @@ namespace Digillect.Collections
 #endif
 		private class ReadOnlyXList<T> : ReadOnlyXCollection<T>, IXList<T>
 		{
-			private readonly IXList<T> m_collection;
+			private readonly IXList<T> collection;
 
 			#region Constructor
 			public ReadOnlyXList(IXList<T> collection)
 				: base(collection)
 			{
-				m_collection = collection;
+				Contract.Requires( collection != null );
+					 
+				this.collection = collection;
+			}
+			#endregion
+
+			#region ObjectInvariant
+			[ContractInvariantMethod]
+			[System.Diagnostics.CodeAnalysis.SuppressMessage( "Microsoft.Performance", "CA1822:MarkMembersAsStatic", Justification = "Required for code contracts." )]
+			private void ObjectInvariant()
+			{
+				Contract.Invariant( this.collection != null );
 			}
 			#endregion
 
 			#region IXList`1 Members
 			int IXList<T>.IndexOf(XKey key)
 			{
-				return m_collection.IndexOf(key);
-			}
-
-			IList<XKey> IXList<T>.GetKeys()
-			{
-				return m_collection.GetKeys();
+				return this.collection.IndexOf(key);
 			}
 			#endregion
 
 			#region IList`1 Members
 			int IList<T>.IndexOf(T item)
 			{
-				return m_collection.IndexOf(item);
+				return this.collection.IndexOf(item);
 			}
 
 			void IList<T>.Insert(int index, T item)
@@ -434,7 +447,7 @@ namespace Digillect.Collections
 
 			T IList<T>.this[int index]
 			{
-				get { return m_collection[index]; }
+				get { return this.collection[index]; }
 				set { throw new NotSupportedException(Resources.XCollectionReadOnlyException); }
 			}
 			#endregion
@@ -442,7 +455,7 @@ namespace Digillect.Collections
 			#region IEquatable`1 Members
 			bool IEquatable<IXList<T>>.Equals(IXList<T> other)
 			{
-				return m_collection.Equals(other);
+				return this.collection.Equals(other);
 			}
 			#endregion
 		}
@@ -452,33 +465,33 @@ namespace Digillect.Collections
 		private class PredicateXFilteredCollection<T> : XFilteredCollection<T>
 			where T : XObject
 		{
-			private Predicate<T> m_filter;
+			private readonly Predicate<T> filter;
 
 			public PredicateXFilteredCollection(IXList<T> collection, Predicate<T> filter)
 				: base(collection)
 			{
-				if ( filter == null )
-				{
-					throw new ArgumentNullException("filter");
-				}
+				Contract.Requires( collection != null );
+				Contract.Requires( filter != null );
 
-				m_filter = filter;
+				this.filter = filter;
 			}
 
 			protected override XFilteredCollection<T> CreateInstanceOfSameType(IXList<T> collection)
 			{
+				Contract.Ensures( Contract.Result<XFilteredCollection<T>>() != null );
+
 #if !SILVERLIGHT
-				Predicate<T> filter = (Predicate<T>) m_filter.Clone();
+				Predicate<T> filter = (Predicate<T>) this.filter.Clone();
 #else
-				Predicate<T> filter = m_filter;
+				Predicate<T> filter = this.filter;
 #endif
 
-				return new PredicateXFilteredCollection<T>(collection, filter);
+				return new PredicateXFilteredCollection<T>(collection, this.filter);
 			}
 
 			protected override bool Filter(T obj, int index)
 			{
-				return m_filter(obj);
+				return this.filter(obj);
 			}
 		}
 		#endregion
@@ -487,25 +500,23 @@ namespace Digillect.Collections
 		private class FuncXFilteredCollection<T> : XFilteredCollection<T>
 			where T : XObject
 		{
-			private Func<T, bool> m_filter;
+			private Func<T, bool> filter;
 
 			public FuncXFilteredCollection(IXList<T> collection, Func<T, bool> filter)
 				: base(collection)
 			{
-				if ( filter == null )
-				{
-					throw new ArgumentNullException("filter");
-				}
+				Contract.Requires( collection != null );
+				Contract.Requires( filter != null );
 
-				m_filter = filter;
+				this.filter = filter;
 			}
 
 			protected override XFilteredCollection<T> CreateInstanceOfSameType(IXList<T> collection)
 			{
 #if !SILVERLIGHT
-				Func<T, bool> filter = (Func<T, bool>) m_filter.Clone();
+				Func<T, bool> filter = (Func<T, bool>) this.filter.Clone();
 #else
-				Func<T, bool> filter = m_filter;
+				Func<T, bool> filter = this.filter;
 #endif
 
 				return new FuncXFilteredCollection<T>(collection, filter);
@@ -513,7 +524,7 @@ namespace Digillect.Collections
 
 			protected override bool Filter(T obj, int index)
 			{
-				return m_filter(obj);
+				return this.filter(obj);
 			}
 		} 
 		#endregion
@@ -521,30 +532,32 @@ namespace Digillect.Collections
 		private class RangeFilteredCollection<T> : XFilteredCollection<T>
 			where T : XObject
 		{
-			private int m_start;
-			private int m_count;
+			private readonly int start;
+			private readonly int count;
 
 			public RangeFilteredCollection( IXList<T> collection, int start, int count )
 				: base( collection )
 			{
-				m_start = start;
-				m_count = count;
+				Contract.Requires( collection != null );
+
+				this.start = start;
+				this.count = count;
 			}
 
 			protected override XFilteredCollection<T> CreateInstanceOfSameType( IXList<T> collection )
 			{
-				return new RangeFilteredCollection<T>( collection, m_start, m_count );
+				return new RangeFilteredCollection<T>( collection, this.start, this.count );
 			}
 
 			protected override bool Filter( T obj, int index )
 			{
-				if( index < m_start )
+				if( index < start )
 					return false;
 
-				if( m_count == 0 )
+				if( count == 0 )
 					return true;
 
-				return index < m_start + m_count;
+				return index < start + count;
 			}
 		}
 		#endregion

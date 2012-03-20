@@ -1,7 +1,13 @@
 ﻿using System;
+using System.Diagnostics.Contracts;
 
 namespace Digillect
 {
+	/// <summary>
+	/// Specifies that class supports update operations.
+	/// </summary>
+	/// <typeparam name="T"></typeparam>
+	[ContractClass( typeof( IXUpdatableContract<> ) )]
 	public interface IXUpdatable<T>
 		where T : IXUpdatable<T>
 	{
@@ -29,16 +35,16 @@ namespace Digillect
 		/// Determines whether the update operation is needed.
 		/// </summary>
 		/// <param name="source">Source <b>object</b> to compare with.</param>
-		/// <returns><see langword="false"/> if the <see cref="Update">update operation</see> is not required (i.e, the two objects are equal by reference), otherwise, <see langword="true"/>.</returns>
-		bool UpdateRequired(T source);
+		/// <returns><c>false</c> if the <see cref="Update">update operation</see> is not required (i.e, the two objects are equal by reference), otherwise, <c>true</c>.</returns>
+		bool IsUpdateRequired(T source);
 
 		/// <summary>
-		/// Обновляет текущий объект на основе другого объекта.
+		/// Updates instance using <paramref name="source"/> as reference.
 		/// </summary>
-		/// <param name="source">Источник изменений.</param>
+		/// <param name="source">Source object.</param>
 		/// <remarks>
-		/// В конце операции возбуждается событие <see cref="Updated"/>, если это не заблокировано вызовом <see cref="BeginUpdate"/>;
-		/// в этом случае событие <b>Updated</b> будет возбуждено в результате вызова последнего соответствующего метода <see cref="EndUpdate"/>.
+		/// At the end of update <see cref="Updated"/> event is raised if not blocked by call to <see cref="BeginUpdate"/>. In the
+		/// later scenario <see cref="Updated"/> event will be raised upon the call to <see cref="EndUpdate"/>.
 		/// </remarks>
 		void Update(T source);
 	}

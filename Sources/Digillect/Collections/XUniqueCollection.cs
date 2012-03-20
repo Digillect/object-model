@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Diagnostics.Contracts;
 
 using Digillect.Properties;
 
@@ -22,6 +23,7 @@ namespace Digillect.Collections
 		/// </summary>
 		public XUniqueCollection()
 		{
+			Contract.Assume( this.Items != null );
 		}
 
 		/// <summary>
@@ -31,6 +33,8 @@ namespace Digillect.Collections
 		public XUniqueCollection(IEnumerable<T> source)
 			: base(source)
 		{
+			Contract.Requires( source != null );
+			Contract.Assume( this.Items != null );
 		}
 		#endregion
 
