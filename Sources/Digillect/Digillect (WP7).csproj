@@ -146,6 +146,7 @@
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
     <Compile Include="Reflection\ReflectionHelpers.cs" />
+    <Compile Include="Runtime\CompilerServices\AssemblyProcessedAttribute.cs" />
     <Compile Include="Runtime\CompilerServices\AutoNotifyAdditionalPropertiesAttribute.cs" />
     <Compile Include="Runtime\CompilerServices\AutoNotifyPropertyChangesAttribute.cs" />
     <Compile Include="Runtime\CompilerServices\AutoNotifyPropertyChangesMethodsAttribute.cs" />
@@ -154,7 +155,6 @@
     <Compile Include="Runtime\CompilerServices\XKeyAttribute.cs" />
     <Compile Include="Runtime\CompilerServices\XNullKeyAttribute.cs" />
     <Compile Include="XKey.cs" />
-    <Compile Include="XKeyNotAvailableException.cs" />
     <Compile Include="XObject.cs" />
     <Compile Include="XObject`1.cs" />
     <Compile Include="XSecureIdentifiedObject.cs" />

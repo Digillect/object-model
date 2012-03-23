@@ -9,7 +9,7 @@ using Digillect.Properties;
 namespace Digillect
 {
 	/// <summary>
-	/// Abstract base class that supports cloning and updating. Exposes <see cref="Digillect.XKey"/> as identifier.
+	/// Abstract base class that supports updating. Exposes <see cref="XKey"/> as an identifier.
 	/// </summary>
 	[DataContract]
 #if !SILVERLIGHT
@@ -20,7 +20,12 @@ namespace Digillect
 #if !SILVERLIGHT
 		[NonSerialized]
 #endif
-		private short updateCount;
+		private ushort updateCount;
+
+#if !SILVERLIGHT
+		[NonSerialized]
+#endif
+		private bool isKeyCreated;
 #if !SILVERLIGHT
 		[NonSerialized]
 #endif
@@ -40,7 +45,7 @@ namespace Digillect
 		/// Gets a value indicating whether this instance is in update.
 		/// </summary>
 		/// <value>
-		/// 	<c>true</c> if this instance is in update; otherwise, <c>false</c>.
+		/// <c>true</c> if this instance is in update; otherwise, <c>false</c>.
 		/// </value>
 		protected bool IsInUpdate
 		{
@@ -96,18 +101,13 @@ namespace Digillect
 		/// through the call to <see cref="CreateKey"/>.
 		/// </summary>
 		/// <returns>Key, identifying this object.</returns>
-		/// <exception cref="XKeyNotAvailableException">If key was not created properly.</exception>
 		[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1024:UsePropertiesWhereAppropriate")]
 		public XKey GetKey()
 		{
-			Contract.Ensures( Contract.Result<XKey>() != null );
-
-			if( this.key == null )
+			if ( !this.isKeyCreated )
 			{
+				this.isKeyCreated = true;
 				this.key = CreateKey();
-
-				if( this.key == null )
-					throw new XKeyNotAvailableException();
 			}
 
 			return this.key;
@@ -118,6 +118,7 @@ namespace Digillect
 		/// </summary>
 		protected void ResetKey()
 		{
+			this.isKeyCreated = false;
 			this.key = null;
 		}
 
@@ -127,9 +128,7 @@ namespace Digillect
 		/// <returns>Created key.</returns>
 		protected virtual XKey CreateKey()
 		{
-			Contract.Ensures( Contract.Result<XKey>() != null );
-
-			throw new XKeyNotAvailableException();
+			return null;
 		}
 		#endregion
 

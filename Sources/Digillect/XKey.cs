@@ -13,12 +13,6 @@ namespace Digillect
 #endif
 	public abstract class XKey : IComparable<XKey>, IEquatable<XKey>
 	{
-		/// <summary>
-		/// The default "null" key which isn't equal to any other key but itself.
-		/// </summary>
-		[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA2104:DoNotDeclareReadOnlyMutableReferenceTypes")]
-		public static readonly XKey Null = new NullKey();
-
 		private readonly XKey parentKey;
 
 		#region Constructor
@@ -53,18 +47,21 @@ namespace Digillect
 		/// <param name="other">The other key.</param>
 		/// <returns>Negative value if this key is less then other key, positive value if other key is less then this one or zero if keys are equal.</returns>
 		public abstract int CompareTo(XKey other);
+
 		/// <summary>
 		/// Checks that keys are equal.
 		/// </summary>
 		/// <param name="other">The other key.</param>
 		/// <returns><c>true</c> if keys are equal, otherwise <c>false</c>.</returns>
 		public abstract bool Equals(XKey other);
+
 		/// <summary>
 		/// Checks that objects are equal.
 		/// </summary>
 		/// <param name="obj">The other object.</param>
 		/// <returns><c>true</c> if <paramref name="obj"/> is key and keys are equal, otherwise <c>false</c>.</returns>
 		public abstract override bool Equals( object obj );
+
 		/// <summary>
 		/// Returns a hash code for this instance.
 		/// </summary>
@@ -142,7 +139,7 @@ namespace Digillect
 		{
 			if ( key == null )
 			{
-				return Null;
+				return null;
 			}
 
 			return new SimpleKey<T>(key, parentKey);
@@ -185,50 +182,6 @@ namespace Digillect
 		}
 		#endregion
 
-		#region class NullKey
-#if !SILVERLIGHT
-		[Serializable]
-#endif
-		private sealed class NullKey : XKey
-		{
-			public override int CompareTo(XKey other)
-			{
-				if ( other == null )
-				{
-					return 1;
-				}
-				else if ( other is NullKey )
-				{
-					return 0;
-				}
-				else
-				{
-					return -1;
-				}
-			}
-
-			public override bool Equals(XKey other)
-			{
-				return other is NullKey;
-			}
-
-			public override bool Equals(object obj)
-			{
-				return obj is NullKey;
-			}
-
-			public override int GetHashCode()
-			{
-				return -1;
-			}
-
-			public override string ToString()
-			{
-				return "Null";
-			}
-		}
-		#endregion
-
 		#region class SimpleKey`1
 		[DebuggerDisplay("Key = {Key}")]
 #if !SILVERLIGHT
@@ -252,7 +205,7 @@ namespace Digillect
 
 			public override int CompareTo( XKey other )
 			{
-				if ( other == null || other is NullKey )
+				if ( other == null )
 				{
 					return 1;
 				}
@@ -266,7 +219,6 @@ namespace Digillect
 			{
 				if ( other == null )
 				{
-					//throw new ArgumentException("Invalid key type.", "other");
 					return 1;
 				}
 

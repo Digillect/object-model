@@ -56,16 +56,6 @@ namespace Digillect.Collections
 				throw new ArgumentException(Resources.XCollectionItemDuplicateException, "newItem");
 			}
 		}
-
-		protected override void ValidateItem(T item)
-		{
-			base.ValidateItem(item);
-
-			if ( item == null )
-			{
-				throw new ArgumentNullException("item");
-			}
-		}
 		#endregion
 	}
 }

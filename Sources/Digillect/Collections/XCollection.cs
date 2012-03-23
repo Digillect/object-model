@@ -714,6 +714,10 @@ namespace Digillect.Collections
 		/// <exclude/>
 		protected virtual void ValidateItem(T item)
 		{
+			if ( item == null )
+			{
+				throw new ArgumentNullException("item");
+			}
 		}
 		#endregion
 
