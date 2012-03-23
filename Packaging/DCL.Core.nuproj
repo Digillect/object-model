@@ -8,12 +8,13 @@
 		<PackagePath>..\Build\package\$(Configuration)\DCL.Core</PackagePath>
 	</PropertyGroup>
 
-	<PropertyGroup>
+	<!--PropertyGroup>
 		<VersionAssembly>$(BuildPath)\Desktop\Digillect.dll</VersionAssembly>
-	</PropertyGroup>
+	</PropertyGroup-->
 
 	<ItemGroup>
 		<LibNet40 Include="$(BuildPath)\Desktop\Digillect.*"/>
+		<WinRT45 Include="$(BuildPath)\WinRT\Digillect.*"/>
 		<LibSL4 Include="$(BuildPath)\SL4\Digillect.*"/>
 		<LibWP71 Include="$(BuildPath)\WP7\Digillect.*"/>
 	</ItemGroup>

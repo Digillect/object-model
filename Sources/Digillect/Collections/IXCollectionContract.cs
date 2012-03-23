@@ -35,6 +35,13 @@ namespace Digillect.Collections
 			return false;
 		}
 
+		public IXCollection<T> Clone( bool deep )
+		{
+			Contract.Ensures( Contract.Result<IXCollection<T>>() != null );
+
+			return null;
+		}
+
 		public IEnumerable<XKey> GetKeys()
 		{
 			Contract.Ensures(Contract.Result<IEnumerable<XKey>>() != null);

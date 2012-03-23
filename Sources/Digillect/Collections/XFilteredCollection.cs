@@ -14,6 +14,9 @@ namespace Digillect.Collections
 	[Serializable]
 #endif
 	public abstract class XFilteredCollection<T> : IXList<T>, IDisposable
+#if !SILVERLIGHT
+		, ICloneable
+#endif
 		where T : XObject
 	{
 		private readonly IXList<T> originalCollection;
@@ -88,6 +91,18 @@ namespace Digillect.Collections
 		bool IXCollection<T>.Remove(XKey key)
 		{
 			throw new NotSupportedException(Resources.XCollectionReadOnlyException);
+		}
+
+		IXCollection<T> IXCollection<T>.Clone( bool deep )
+		{
+			return Clone( deep );
+		}
+
+		public virtual XFilteredCollection<T> Clone( bool deep )
+		{
+			IXList<T> collection = deep ? (IXList<T>) this.originalCollection.Clone( true ) : this.originalCollection;
+
+			return CreateInstanceOfSameType( collection );
 		}
 		#endregion
 
@@ -292,7 +307,18 @@ namespace Digillect.Collections
 		}
 		#endregion
 
+#if !SILVERLIGHT
+		#region ICloneable Members
+		object ICloneable.Clone()
+		{
+			return Clone( true );
+		}
+		#endregion
+#endif
+
 		#region Protected Methods
+		protected abstract XFilteredCollection<T> CreateInstanceOfSameType( IXList<T> collection );
+
 		/// <summary>
 		/// Determines whether an item satisfies a filtering criteria.
 		/// </summary>

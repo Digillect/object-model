@@ -78,9 +78,11 @@ namespace Digillect
 		/// Performs update. Override update properties of your class.
 		/// </summary>
 		/// <param name="source">The source of update.</param>
-		protected override void ProcessUpdate( XObject source )
+		/// <param name="cloning"><c>true</c> if cloning source, otherwise, <c>false</c>.</param>
+		/// <param name="deepCloning"><c>true</c> if performing deep cloning, otherwise, <c>false</c>.</param>
+		protected override void ProcessCopy( XObject source, bool cloning, bool deepCloning )
 		{
-			base.ProcessUpdate( source );
+			base.ProcessCopy( source, cloning, deepCloning );
 
 			XObject<TId> obj = (XObject<TId>) source;
 

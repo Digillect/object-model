@@ -20,6 +20,9 @@ namespace Digillect.Collections
 	[Serializable]
 #endif
 	public class XCollection<T> : Collection<T>, IXList<T>, INotifyPropertyChanged
+#if !SILVERLIGHT
+		, ICloneable
+#endif
 		where T : XObject
 	{
 #if !SILVERLIGHT
@@ -282,7 +285,53 @@ namespace Digillect.Collections
 		}
 		#endregion
 
-		[EditorBrowsable(EditorBrowsableState.Advanced)]
+
+#if !SILVERLIGHT
+		#region ICloneable Members
+		object ICloneable.Clone()
+		{
+			return Clone( true );
+		}
+		#endregion
+#endif
+
+		#region Clone Methods
+		IXCollection<T> IXCollection<T>.Clone( bool deep )
+		{
+			return Clone( deep );
+		}
+
+		/// <summary>
+		/// Creates a copy of this collection.
+		/// </summary>
+		/// <param name="deep"><see langword="true"/> to deep-clone inner collections (including their members), <see langword="false"/> to clone only inner collections but not their members.</param>
+		/// <returns>Cloned copy of the collection.</returns>
+		public virtual XCollection<T> Clone( bool deep )
+		{
+			var clone = CreateInstanceOfSameType();
+
+			ProcessClone( clone, deep );
+
+			return clone;
+		}
+
+		protected virtual void ProcessClone( XCollection<T> clone, bool deep )
+		{
+			if( clone == null )
+			{
+				throw new ArgumentNullException( "clone" );
+			}
+
+			foreach( var item in this.Items )
+			{
+				T itemClone = (T) item.Clone( deep );
+
+				clone.Items.Add( itemClone );
+			}
+		}
+		#endregion
+
+		[EditorBrowsable( EditorBrowsableState.Advanced )]
 #if false // !SILVERLIGHT
 		[System.Security.Permissions.ReflectionPermission(System.Security.Permissions.SecurityAction.Demand, RestrictedMemberAccess = true)]
 #endif

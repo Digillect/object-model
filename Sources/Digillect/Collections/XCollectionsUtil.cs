@@ -237,6 +237,9 @@ namespace Digillect.Collections
 		[Serializable]
 #endif
 		private class ReadOnlyXCollection<T> : IXCollection<T>
+#if !SILVERLIGHT
+			, ICloneable
+#endif
 		{
 			private readonly IXCollection<T> collection;
 
@@ -282,6 +285,11 @@ namespace Digillect.Collections
 			IEnumerable<XKey> IXCollection<T>.GetKeys()
 			{
 				return this.collection.GetKeys();
+			}
+
+			IXCollection<T> IXCollection<T>.Clone( bool deep )
+			{
+				return this.collection.Clone( deep );
 			}
 			#endregion
 
@@ -378,6 +386,15 @@ namespace Digillect.Collections
 				remove { this.collection.CollectionChanged -= value; }
 			}
 			#endregion
+
+#if !SILVERLIGHT
+			#region ICloneable Members
+			object ICloneable.Clone()
+			{
+				return this.collection.Clone( true );
+			}
+			#endregion
+#endif
 
 			#region Object Overrides
 			public override bool Equals(object obj)
@@ -479,6 +496,17 @@ namespace Digillect.Collections
 				this.filter = filter;
 			}
 
+			protected override XFilteredCollection<T> CreateInstanceOfSameType( IXList<T> collection )
+			{
+#if !SILVERLIGHT
+				Predicate<T> filter = (Predicate<T>) this.filter.Clone();
+#else
+				Predicate<T> filter = this.filter;
+#endif
+
+				return new PredicateFilteredCollection<T>( collection, filter );
+			}
+
 			protected override bool Filter(T obj)
 			{
 				return this.filter(obj);
@@ -499,6 +527,17 @@ namespace Digillect.Collections
 				Contract.Requires( filter != null );
 
 				this.filter = filter;
+			}
+
+			protected override XFilteredCollection<T> CreateInstanceOfSameType( IXList<T> collection )
+			{
+#if !SILVERLIGHT
+				Func<T, bool> filter = (Func<T, bool>) this.filter.Clone();
+#else
+				Func<T, bool> filter = this.filter;
+#endif
+
+				return new FuncFilteredCollection<T>( collection, filter );
 			}
 
 			protected override bool Filter(T obj)

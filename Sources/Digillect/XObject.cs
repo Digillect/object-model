@@ -16,6 +16,9 @@ namespace Digillect
 	[Serializable]
 #endif
 	public class XObject : ObservableObject, IXUpdatable<XObject>
+#if !SILVERLIGHT
+		, ICloneable
+#endif
 	{
 #if !SILVERLIGHT
 		[NonSerialized]
@@ -132,7 +135,25 @@ namespace Digillect
 		}
 		#endregion
 
-		#region Update
+
+#if !SILVERLIGHT
+		#region ICloneable Members
+		object ICloneable.Clone()
+		{
+			return Clone( true );
+		}
+		#endregion
+#endif
+
+		#region Clone/Update
+		public XObject Clone( bool deep )
+		{
+			XObject clone = CreateInstanceOfSameType();
+
+			clone.ProcessCopy( this, true, deep );
+
+			return clone;
+		}
 		/// <summary>
 		/// Determines whether update operation is needed.
 		/// </summary>
@@ -158,7 +179,7 @@ namespace Digillect
 
 			if( IsUpdateRequired( source ) )
 			{
-				ProcessUpdate( source );
+				ProcessCopy( source, false, false );
 
 				OnUpdated( EventArgs.Empty );
 			}
@@ -168,7 +189,9 @@ namespace Digillect
 		/// Performs update. Override update properties of your class.
 		/// </summary>
 		/// <param name="source">The source of update.</param>
-		protected virtual void ProcessUpdate( XObject source )
+		/// <param name="cloning"><c>true</c> if cloning source, otherwise, <c>false</c>.</param>
+		/// <param name="deepCloning"><c>true</c> if performing deep cloning, otherwise, <c>false</c>.</param>
+		protected virtual void ProcessCopy( XObject source, bool cloning, bool deepCloning )
 		{
 			Contract.Requires(source != null, "source");
 
@@ -189,6 +212,17 @@ namespace Digillect
 		public virtual bool IsObjectCompatible( XObject obj )
 		{
 			return obj != null && obj.GetType() == GetType();
+		}
+
+		[EditorBrowsable( EditorBrowsableState.Advanced )]
+#if false // !SILVERLIGHT
+		[System.Security.Permissions.ReflectionPermission(System.Security.Permissions.SecurityAction.Demand, RestrictedMemberAccess = true)]
+#endif
+		protected virtual XObject CreateInstanceOfSameType()
+		{
+			Contract.Ensures( Contract.Result<XObject>() != null );
+
+			return (XObject) Activator.CreateInstance( GetType() );
 		}
 		#endregion
 

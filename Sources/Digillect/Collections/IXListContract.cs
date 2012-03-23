@@ -41,6 +41,13 @@ namespace Digillect.Collections
 		{
 			return null;
 		}
+
+		public IXCollection<T> Clone( bool deep )
+		{
+			Contract.Ensures( Contract.Result<IXCollection<T>>() != null );
+
+			return null;
+		}
 		#endregion
 
 		#region IList<T> Members

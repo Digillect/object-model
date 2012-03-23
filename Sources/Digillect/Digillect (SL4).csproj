@@ -159,7 +159,6 @@
     <Compile Include="Runtime\CompilerServices\GenerateEqualsAndGetHashCodeAttribute.cs" />
     <Compile Include="Runtime\CompilerServices\XIgnoreUpdateAttribute.cs" />
     <Compile Include="Runtime\CompilerServices\XKeyAttribute.cs" />
-    <Compile Include="Runtime\CompilerServices\XNullKeyAttribute.cs" />
     <Compile Include="XKey.cs" />
     <Compile Include="XObject.cs" />
     <Compile Include="XObject`1.cs" />

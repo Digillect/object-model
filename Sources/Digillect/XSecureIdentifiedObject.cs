@@ -70,12 +70,12 @@ namespace Digillect
 		/// Creates a copy of this object setting the identifier to the specified one.
 		/// </summary>
 		/// <param name="newId">Identifier for the new object.</param>
+		/// <param name="deepCloning"><c>true</c> if performing deep cloning, otherwise, <c>false</c>.</param>
 		/// <returns></returns>
-		public virtual XSecureIdentifiedObject<TId> ChangeId(TId newId)
+		public virtual XSecureIdentifiedObject<TId> ChangeId(TId newId, bool deepCloning = false )
 		{
-			XSecureIdentifiedObject<TId> copy = CreateInstanceOfSameType();
+			XSecureIdentifiedObject<TId> copy = (XSecureIdentifiedObject<TId>) Clone( deepCloning );
 
-			copy.ProcessUpdate(this);
 			copy.id = Equals(newId, default(TId)) ? CreateDefaultId() : newId;
 
 			return copy;
@@ -104,20 +104,14 @@ namespace Digillect
 		}
 
 		/// <summary>
-		/// Creates the instance of the same type.
-		/// </summary>
-		/// <returns></returns>
-		protected virtual XSecureIdentifiedObject<TId> CreateInstanceOfSameType()
-		{
-			return (XSecureIdentifiedObject<TId>) Activator.CreateInstance( GetType() );
-		}
-		/// <summary>
 		/// Performs update/clone operation. Override to clone or update properties of your class.
 		/// </summary>
 		/// <param name="source">The source.</param>
-		protected override void ProcessUpdate( XObject source )
+		/// <param name="cloning"><c>true</c> if cloning source, otherwise, <c>false</c>.</param>
+		/// <param name="deepCloning"><c>true</c> if performing deep cloning, otherwise, <c>false</c>.</param>
+		protected override void ProcessCopy( XObject source, bool cloning, bool deepCloning )
 		{
-			base.ProcessUpdate( source );
+			base.ProcessCopy( source, cloning, deepCloning );
 
 			/*
 			 * GN: IMHO not needed, since IsObjectCompatible ensures that source object has the same id.

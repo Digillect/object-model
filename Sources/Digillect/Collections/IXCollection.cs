@@ -45,5 +45,12 @@ namespace Digillect.Collections
 		[Pure]
 		[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1024:UsePropertiesWhereAppropriate")]
 		IEnumerable<XKey> GetKeys();
+
+		/// <summary>
+		/// Creates a copy of this collection.
+		/// </summary>
+		/// <param name="deep"><see langword="true"/> to deep-clone inner collections (including their members), <see langword="false"/> to clone only inner collections but not their members.</param>
+		/// <returns>Cloned copy of the collection.</returns>
+		IXCollection<T> Clone( bool deep );
 	}
 }
