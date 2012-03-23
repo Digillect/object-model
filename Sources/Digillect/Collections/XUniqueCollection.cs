@@ -23,18 +23,16 @@ namespace Digillect.Collections
 		/// </summary>
 		public XUniqueCollection()
 		{
-			Contract.Assume( this.Items != null );
 		}
 
 		/// <summary>
 		/// Initializes new instance of the <see cref="XUniqueCollection&lt;T&gt;"/> class using elements of the provided enumeration as the source for this list.
 		/// </summary>
-		/// <param name="source">The enumeration which elements are used to construct a new list to use as the parameter for the <see cref="Collection&lt;T&gt;(IList&lt;T&gt;)"/> constructor.</param>
-		public XUniqueCollection(IEnumerable<T> source)
-			: base(source)
+		/// <param name="collection">The enumeration which elements are used to construct a new list to use as the parameter for the <see cref="Collection&lt;T&gt;(IList&lt;T&gt;)"/> constructor.</param>
+		public XUniqueCollection(IEnumerable<T> collection)
+			: base(collection)
 		{
-			Contract.Requires( source != null );
-			Contract.Assume( this.Items != null );
+			Contract.Requires(collection != null);
 		}
 		#endregion
 

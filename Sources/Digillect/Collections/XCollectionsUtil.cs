@@ -24,6 +24,8 @@ namespace Digillect.Collections
 		#region RemoveAll`2 Extension
 		public static bool RemoveAll<T>(this ICollection<T> source, IEnumerable<T> collection)
 		{
+			Contract.Requires(source != null, "source");
+
 			if ( source == null )
 			{
 				throw new ArgumentNullException("source");
@@ -48,6 +50,8 @@ namespace Digillect.Collections
 		public static bool RemoveAll<T>(this IXCollection<T> source, IEnumerable<XKey> collection)
 			where T : XObject
 		{
+			Contract.Requires(source != null, "source");
+
 			if ( source == null )
 			{
 				throw new ArgumentNullException("source");
@@ -71,8 +75,11 @@ namespace Digillect.Collections
 		#endregion
 
 		#region RetainAll`2 Extension
+#if false // Not fully implemented yet
 		public static bool RetainAll<T>(this ICollection<T> source, IEnumerable<T> collection)
 		{
+			Contract.Requires(source != null, "source");
+
 			if ( source == null )
 			{
 				throw new ArgumentNullException("source");
@@ -99,6 +106,7 @@ namespace Digillect.Collections
 
 			//return modified;
 		}
+#endif
 		#endregion
 
 		#region Difference`2 Extension
@@ -128,6 +136,9 @@ namespace Digillect.Collections
 		public static XCollectionDifference<T> Difference<T>(this IXCollection<T> source, IEnumerable<T> target)
 			where T : XObject
 		{
+			Contract.Requires(source != null, "source");
+			Contract.Requires(target != null, "target");
+
 			if ( source == null )
 			{
 				throw new ArgumentNullException("source");
@@ -183,9 +194,9 @@ namespace Digillect.Collections
 
 		public static IXList<T> UnmodifiableList<T>(IXList<T> collection)
 		{
-			Contract.Requires( collection != null );
+			Contract.Requires(collection != null);
 
-			return new ReadOnlyXList<T>( collection );
+			return new ReadOnlyXList<T>(collection);
 		}
 
 #if false
@@ -208,7 +219,7 @@ namespace Digillect.Collections
 			Contract.Requires( collection != null );
 			Contract.Requires( filter != null );
 
-			return new PredicateXFilteredCollection<T>( collection, filter );
+			return new PredicateFilteredCollection<T>( collection, filter );
 		}
 
 		public static XFilteredCollection<T> FilteredList<T>(IXList<T> collection, Func<T, bool> filter)
@@ -217,15 +228,7 @@ namespace Digillect.Collections
 			Contract.Requires( collection != null );
 			Contract.Requires( filter != null );
 
-			return new FuncXFilteredCollection<T>( collection, filter );
-		}
-
-		public static XFilteredCollection<T> FilteredList<T>( IXList<T> collection, int start, int count )
-			where T : XObject
-		{
-			Contract.Requires( collection != null );
-
-			return new RangeFilteredCollection<T>( collection, start, count );
+			return new FuncFilteredCollection<T>( collection, filter );
 		}
 		#endregion
 
@@ -240,7 +243,12 @@ namespace Digillect.Collections
 			#region Constructor
 			public ReadOnlyXCollection(IXCollection<T> collection)
 			{
-				Contract.Requires( collection != null );
+				Contract.Requires(collection != null, "collection");
+
+				if ( collection == null )
+				{
+					throw new ArgumentNullException("collection");
+				}
 
 				this.collection = collection;
 			}
@@ -251,7 +259,7 @@ namespace Digillect.Collections
 			[System.Diagnostics.CodeAnalysis.SuppressMessage( "Microsoft.Performance", "CA1822:MarkMembersAsStatic", Justification = "Required for code contracts." )]
 			private void ObjectInvariant()
 			{
-				Contract.Invariant( this.collection != null );
+				Contract.Invariant(this.Count == this.collection.Count);
 			}
 			#endregion
 
@@ -326,14 +334,9 @@ namespace Digillect.Collections
 				this.collection.CopyTo( array, arrayIndex );
 			}
 
-			int ICollection<T>.Count
+			public int Count
 			{
-				get
-				{
-					Contract.Ensures( Contract.Result<int>() == this.collection.Count );
-
-					return this.collection.Count;
-				}
+				get { return this.collection.Count; }
 			}
 
 			bool ICollection<T>.IsReadOnly
@@ -407,18 +410,18 @@ namespace Digillect.Collections
 			public ReadOnlyXList(IXList<T> collection)
 				: base(collection)
 			{
-				Contract.Requires( collection != null );
-					 
+				Contract.Requires(collection != null, "collection");
+
 				this.collection = collection;
 			}
 			#endregion
 
 			#region ObjectInvariant
 			[ContractInvariantMethod]
-			[System.Diagnostics.CodeAnalysis.SuppressMessage( "Microsoft.Performance", "CA1822:MarkMembersAsStatic", Justification = "Required for code contracts." )]
+			[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1822:MarkMembersAsStatic", Justification = "Required for code contracts.")]
 			private void ObjectInvariant()
 			{
-				Contract.Invariant( this.collection != null );
+				Contract.Invariant(this.Count == this.collection.Count);
 			}
 			#endregion
 
@@ -461,13 +464,13 @@ namespace Digillect.Collections
 		}
 		#endregion
 
-		#region class PredicateXFilteredCollection`1
-		private class PredicateXFilteredCollection<T> : XFilteredCollection<T>
+		#region class PredicateFilteredCollection`1
+		private class PredicateFilteredCollection<T> : XFilteredCollection<T>
 			where T : XObject
 		{
 			private readonly Predicate<T> filter;
 
-			public PredicateXFilteredCollection(IXList<T> collection, Predicate<T> filter)
+			public PredicateFilteredCollection(IXList<T> collection, Predicate<T> filter)
 				: base(collection)
 			{
 				Contract.Requires( collection != null );
@@ -476,33 +479,20 @@ namespace Digillect.Collections
 				this.filter = filter;
 			}
 
-			protected override XFilteredCollection<T> CreateInstanceOfSameType(IXList<T> collection)
-			{
-				Contract.Ensures( Contract.Result<XFilteredCollection<T>>() != null );
-
-#if !SILVERLIGHT
-				Predicate<T> filter = (Predicate<T>) this.filter.Clone();
-#else
-				Predicate<T> filter = this.filter;
-#endif
-
-				return new PredicateXFilteredCollection<T>(collection, this.filter);
-			}
-
-			protected override bool Filter(T obj, int index)
+			protected override bool Filter(T obj)
 			{
 				return this.filter(obj);
 			}
 		}
 		#endregion
 
-		#region class FuncXFilteredCollection`1
-		private class FuncXFilteredCollection<T> : XFilteredCollection<T>
+		#region class FuncFilteredCollection`1
+		private class FuncFilteredCollection<T> : XFilteredCollection<T>
 			where T : XObject
 		{
 			private Func<T, bool> filter;
 
-			public FuncXFilteredCollection(IXList<T> collection, Func<T, bool> filter)
+			public FuncFilteredCollection(IXList<T> collection, Func<T, bool> filter)
 				: base(collection)
 			{
 				Contract.Requires( collection != null );
@@ -511,55 +501,11 @@ namespace Digillect.Collections
 				this.filter = filter;
 			}
 
-			protected override XFilteredCollection<T> CreateInstanceOfSameType(IXList<T> collection)
-			{
-#if !SILVERLIGHT
-				Func<T, bool> filter = (Func<T, bool>) this.filter.Clone();
-#else
-				Func<T, bool> filter = this.filter;
-#endif
-
-				return new FuncXFilteredCollection<T>(collection, filter);
-			}
-
-			protected override bool Filter(T obj, int index)
+			protected override bool Filter(T obj)
 			{
 				return this.filter(obj);
 			}
 		} 
-		#endregion
-		#region class RangeFilteredCollection`1
-		private class RangeFilteredCollection<T> : XFilteredCollection<T>
-			where T : XObject
-		{
-			private readonly int start;
-			private readonly int count;
-
-			public RangeFilteredCollection( IXList<T> collection, int start, int count )
-				: base( collection )
-			{
-				Contract.Requires( collection != null );
-
-				this.start = start;
-				this.count = count;
-			}
-
-			protected override XFilteredCollection<T> CreateInstanceOfSameType( IXList<T> collection )
-			{
-				return new RangeFilteredCollection<T>( collection, this.start, this.count );
-			}
-
-			protected override bool Filter( T obj, int index )
-			{
-				if( index < start )
-					return false;
-
-				if( count == 0 )
-					return true;
-
-				return index < start + count;
-			}
-		}
 		#endregion
 	}
 

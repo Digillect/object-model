@@ -1,37 +1,31 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Diagnostics.Contracts;
 
 namespace Digillect
 {
-	[ContractClassFor( typeof( IXUpdatable<> ) )]
-	abstract class IXUpdatableContract<T> : IXUpdatable<T>
+	[ContractClassFor(typeof(IXUpdatable<>))]
+	internal abstract class IXUpdatableContract<T> : IXUpdatable<T>
 		where T : IXUpdatable<T>
 	{
 		protected IXUpdatableContract()
 		{
 		}
 
-		public event EventHandler Updated;
+		public abstract event EventHandler Updated;
 
-		public void BeginUpdate()
-		{
-		}
+		public abstract void BeginUpdate();
+		public abstract void EndUpdate();
 
-		public void EndUpdate()
+		public bool IsUpdateRequired(T source)
 		{
-			Updated( this, EventArgs.Empty ); // To keep compiler happy.
-		}
+			Contract.Requires(source != null, "source");
 
-		public bool IsUpdateRequired( T source )
-		{
 			return false;
 		}
 
-		public void Update( T source )
+		public void Update(T source)
 		{
-			Contract.Requires( source != null );
+			Contract.Requires(source != null, "source");
 		}
 	}
 }

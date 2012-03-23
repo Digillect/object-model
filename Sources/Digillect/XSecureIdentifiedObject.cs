@@ -23,6 +23,7 @@ namespace Digillect
 		/// <summary>
 		/// Initializes a new instance of the <see cref="XSecureIdentifiedObject&lt;TId&gt;"/> class.
 		/// </summary>
+		[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2214:DoNotCallOverridableMethodsInConstructors")]
 		protected XSecureIdentifiedObject()
 		{
 			this.id = CreateDefaultId();
@@ -32,6 +33,7 @@ namespace Digillect
 		/// Initializes a new instance of the <see cref="XSecureIdentifiedObject&lt;TId&gt;"/> class.
 		/// </summary>
 		/// <param name="id">The id.</param>
+		[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2214:DoNotCallOverridableMethodsInConstructors")]
 		protected XSecureIdentifiedObject(TId id)
 		{
 			this.id = EqualityComparer<TId>.Default.Equals(id, default(TId)) ? CreateDefaultId() : id;
@@ -67,14 +69,14 @@ namespace Digillect
 		/// <summary>
 		/// Creates a copy of this object setting the identifier to the specified one.
 		/// </summary>
-		/// <param name="id">Identifier for the new object.</param>
+		/// <param name="newId">Identifier for the new object.</param>
 		/// <returns></returns>
-		public virtual XSecureIdentifiedObject<TId> ChangeId(TId id)
+		public virtual XSecureIdentifiedObject<TId> ChangeId(TId newId)
 		{
 			XSecureIdentifiedObject<TId> copy = CreateInstanceOfSameType();
 
 			copy.ProcessUpdate(this);
-			copy.id = Equals(id, default(TId)) ? CreateDefaultId() : id;
+			copy.id = Equals(newId, default(TId)) ? CreateDefaultId() : newId;
 
 			return copy;
 		}

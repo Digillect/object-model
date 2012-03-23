@@ -15,6 +15,7 @@ namespace Digillect.Runtime.CompilerServices
 	}
 
 	[AttributeUsage( AttributeTargets.Class | AttributeTargets.Property )]
+	[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1019:DefineAccessorsForAttributeArguments")]
 	public sealed class AutoNotifyPropertyChangesAttribute : Attribute
 	{
 		public AutoNotifyPropertyChangesModes Mode { get; private set; }

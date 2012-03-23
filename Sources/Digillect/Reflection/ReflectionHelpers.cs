@@ -1,8 +1,5 @@
-/* $Id: ReflectionHelpers.cs,v 1.2 2006/06/01 14:32:00 Andrew Nefedkin Exp $ */
-
 using System;
 using System.Diagnostics.Contracts;
-//using System.Reflection;
 
 namespace Digillect.Reflection
 {
@@ -11,8 +8,13 @@ namespace Digillect.Reflection
 		#region IsAssignableFrom
 		public static bool IsAssignableFrom( Type targetType, Type sourceType, params Type[] sourceTypeArguments )
 		{
-			Contract.Requires( sourceType != null );
-			Contract.Requires( targetType != null );
+			Contract.Requires(sourceType != null, "sourceType");
+			Contract.Requires(targetType != null, "targetType");
+
+			if ( sourceType == null || targetType == null )
+			{
+				throw new ArgumentNullException(sourceType == null ? "sourceType" : "targetType");
+			}
 
 			bool assignable = false;
 

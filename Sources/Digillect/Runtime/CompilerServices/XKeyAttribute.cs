@@ -6,6 +6,7 @@ using System.Text;
 namespace Digillect.Runtime.CompilerServices
 {
 	[AttributeUsage( AttributeTargets.Class )]
+	[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1019:DefineAccessorsForAttributeArguments")]
 	public sealed class XKeyAttribute : Attribute
 	{
 		public ICollection<string> KeyProperties { get; private set; }

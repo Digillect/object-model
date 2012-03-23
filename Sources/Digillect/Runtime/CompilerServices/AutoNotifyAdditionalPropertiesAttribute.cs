@@ -5,6 +5,7 @@ using System.Linq;
 namespace Digillect.Runtime.CompilerServices
 {
 	[AttributeUsage( AttributeTargets.Property )]
+	[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1019:DefineAccessorsForAttributeArguments")]
 	public sealed class AutoNotifyAdditionalPropertiesAttribute : Attribute
 	{
 		public ICollection<string> AdditionalProperties { get; private set; }

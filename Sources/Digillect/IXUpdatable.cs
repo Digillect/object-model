@@ -36,6 +36,7 @@ namespace Digillect
 		/// </summary>
 		/// <param name="source">Source <b>object</b> to compare with.</param>
 		/// <returns><c>false</c> if the <see cref="Update">update operation</see> is not required (i.e, the two objects are equal by reference), otherwise, <c>true</c>.</returns>
+		[Pure]
 		bool IsUpdateRequired(T source);
 
 		/// <summary>

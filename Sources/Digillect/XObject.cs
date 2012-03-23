@@ -97,6 +97,7 @@ namespace Digillect
 		/// </summary>
 		/// <returns>Key, identifying this object.</returns>
 		/// <exception cref="XKeyNotAvailableException">If key was not created properly.</exception>
+		[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1024:UsePropertiesWhereAppropriate")]
 		public XKey GetKey()
 		{
 			Contract.Ensures( Contract.Result<XKey>() != null );
@@ -170,9 +171,14 @@ namespace Digillect
 		/// <param name="source">The source of update.</param>
 		protected virtual void ProcessUpdate( XObject source )
 		{
-			Contract.Requires( source != null );
+			Contract.Requires(source != null, "source");
 
-			key = source.key;
+			if ( source == null )
+			{
+				throw new ArgumentNullException("source");
+			}
+
+			this.key = source.key;
 		}
 
 		/// <summary>

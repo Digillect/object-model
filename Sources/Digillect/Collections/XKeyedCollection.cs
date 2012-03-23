@@ -30,7 +30,6 @@ namespace Digillect.Collections
 		/// </summary>
 		public XKeyedCollection()
 		{
-			Contract.Assume( this.Items != null );
 		}
 
 		/// <summary>
@@ -43,17 +42,6 @@ namespace Digillect.Collections
 			Contract.Requires( collection != null );
 
 			OnDeserialization();
-
-			Contract.Assume( this.Items != null );
-		}
-		#endregion
-
-		#region ObjectInvariant
-		[ContractInvariantMethod]
-		[System.Diagnostics.CodeAnalysis.SuppressMessage( "Microsoft.Performance", "CA1822:MarkMembersAsStatic", Justification = "Required for code contracts." )]
-		private void ObjectInvariant()
-		{
-			Contract.Invariant( this.Items != null );
 		}
 		#endregion
 
@@ -116,6 +104,7 @@ namespace Digillect.Collections
 			return false;
 		}
 
+		[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1024:UsePropertiesWhereAppropriate")]
 		public IList<TId> GetIdentifiers()
 		{
 			TId[] identifiers = new TId[this.Items.Count];
@@ -138,6 +127,11 @@ namespace Digillect.Collections
 		/// <returns>The <see cref="CollectionUpdateResults">results</see> of the operation.</returns>
 		public override CollectionUpdateResults Update(IEnumerable<TObject> source, CollectionUpdateOptions options)
 		{
+			if ( source == null )
+			{
+				throw new ArgumentNullException("source");
+			}
+
 			if ( this.Items.IsReadOnly )
 			{
 				throw new NotSupportedException(Resources.XCollectionReadOnlyException);

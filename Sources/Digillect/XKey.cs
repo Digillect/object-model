@@ -1,15 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Diagnostics.Contracts;
 using System.Text;
 
 namespace Digillect
 {
-#if !SILVERLIGHT
 	/// <summary>
 	/// Key that is used for unique object identification.
 	/// </summary>
+#if !SILVERLIGHT
 	[Serializable]
 #endif
 	public abstract class XKey : IComparable<XKey>, IEquatable<XKey>
@@ -17,6 +16,7 @@ namespace Digillect
 		/// <summary>
 		/// The default "null" key which isn't equal to any other key but itself.
 		/// </summary>
+		[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA2104:DoNotDeclareReadOnlyMutableReferenceTypes")]
 		public static readonly XKey Null = new NullKey();
 
 		private readonly XKey parentKey;
@@ -27,7 +27,6 @@ namespace Digillect
 		/// </summary>
 		protected XKey()
 		{
-			Contract.Ensures( this.parentKey == null );
 		}
 
 		/// <summary>
@@ -36,8 +35,6 @@ namespace Digillect
 		/// <param name="parentKey">The parent key.</param>
 		protected XKey(XKey parentKey)
 		{
-			Contract.Ensures( this.parentKey == parentKey );
-
 			this.parentKey = parentKey;
 		}
 		#endregion

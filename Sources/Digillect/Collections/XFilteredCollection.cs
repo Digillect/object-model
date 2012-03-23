@@ -13,7 +13,6 @@ namespace Digillect.Collections
 #if !SILVERLIGHT
 	[Serializable]
 #endif
-	[ContractClass( typeof( XFilteredCollectionContract<> ) )]
 	public abstract class XFilteredCollection<T> : IXList<T>, IDisposable
 		where T : XObject
 	{
@@ -25,9 +24,15 @@ namespace Digillect.Collections
 		#region Constructor/Disposer
 		protected XFilteredCollection(IXList<T> originalCollection)
 		{
-			Contract.Requires( originalCollection != null );
+			Contract.Requires(originalCollection != null, "originalCollection");
+
+			if ( originalCollection == null )
+			{
+				throw new ArgumentNullException("originalCollection");
+			}
 
 			this.originalCollection = originalCollection;
+
 			this.originalCollection.CollectionChanged += OriginalCollection_CollectionChanged;
 		}
 
@@ -43,15 +48,6 @@ namespace Digillect.Collections
 			{
 				this.originalCollection.CollectionChanged -= OriginalCollection_CollectionChanged;
 			}
-		}
-		#endregion
-
-		#region ObjectInvariant
-		[ContractInvariantMethod]
-		[System.Diagnostics.CodeAnalysis.SuppressMessage( "Microsoft.Performance", "CA1822:MarkMembersAsStatic", Justification = "Required for code contracts." )]
-		private void ObjectInvariant()
-		{
-			Contract.Invariant( this.originalCollection != null );
 		}
 		#endregion
 
@@ -80,14 +76,13 @@ namespace Digillect.Collections
 		public T Find(XKey key)
 		{
 			T obj = this.originalCollection.Find(key);
-			int idx = this.originalCollection.IndexOf( obj );
 
-			return Equals(obj, default(T)) || Filter(obj, idx) ? obj : default(T);
+			return obj == null || Filter(obj) ? obj : null;
 		}
 
-		IEnumerable<XKey> IXCollection<T>.GetKeys()
+		public IEnumerable<XKey> GetKeys()
 		{
-			return ((IEnumerable<T>) this).Select( obj => obj == null ? null : obj.GetKey() );
+			return this.Select(obj => obj == null ? null : obj.GetKey());
 		}
 
 		bool IXCollection<T>.Remove(XKey key)
@@ -145,9 +140,7 @@ namespace Digillect.Collections
 		{
 			Contract.Ensures( Contract.Result<int>() >= -1 );
 
-			var filteredIndex = CalcFilteredIndex( this.originalCollection.IndexOf( item ) );
-
-			return filteredIndex;
+			return CalcFilteredIndex( this.originalCollection.IndexOf( item ) );
 		}
 
 		void IList<T>.Insert(int index, T item)
@@ -166,29 +159,18 @@ namespace Digillect.Collections
 		{
 			get
 			{
-				Contract.Ensures( Contract.Result<int>() == this.count );
-				Contract.Ensures( Contract.Result<int>() >= 0 );
-
-				if ( this.count < 0 )
+				if ( this.count == -1 )
 				{
 					lock ( this.originalCollection )
 					{
 						if ( this.count == -1 )
 						{
-							int count = 0;
-
-							for ( int i = 0; i < this.originalCollection.Count; i++ )
-							{
-								if ( Filter(this.originalCollection[i], i) )
-								{
-									count++;
-								}
-							}
-
-							this.count = count;
+							this.count = this.originalCollection.Count(Filter);
 						}
 					}
 				}
+
+				Contract.Assume(this.count >= 0);
 
 				return this.count;
 			}
@@ -211,15 +193,19 @@ namespace Digillect.Collections
 
 		public bool Contains(T item)
 		{
-			return originalCollection.Contains(item) && Filter(item, this.originalCollection.IndexOf(item));
+			bool contains = this.originalCollection.Contains(item) && Filter(item);
+
+			if ( contains )
+			{
+				Contract.Assume(this.Count > 0);
+			}
+
+			return contains;
+			//return this.originalCollection.Contains(item) && Filter(item, this.originalCollection.IndexOf(item));
 		}
 
-		public void CopyTo(T[] array, int arrayIndex)
+		void ICollection<T>.CopyTo(T[] array, int arrayIndex)
 		{
-			Contract.Requires( array != null );
-			Contract.Requires( arrayIndex >= 0 );
-			Contract.Requires( arrayIndex + this.Count < array.Length );
-
 			if ( array == null )
 			{
 				throw new ArgumentNullException("array");
@@ -251,7 +237,7 @@ namespace Digillect.Collections
 
 				T obj = originalCollection[i];
 
-				if ( Filter(obj, i) )
+				if ( Filter(obj) )
 				{
 					yield return obj;
 				}
@@ -307,18 +293,17 @@ namespace Digillect.Collections
 		#endregion
 
 		#region Protected Methods
-		protected abstract XFilteredCollection<T> CreateInstanceOfSameType(IXList<T> collection);
-
 		/// <summary>
 		/// Determines whether an item satisfies a filtering criteria.
 		/// </summary>
 		/// <param name="obj">An item to check.</param>
-		/// <param name="index"></param>
 		/// <returns><see langword="true"/> if the item passes the filter; otherwise, <see langword="false"/>.</returns>
-		protected abstract bool Filter(T obj, int index);
+		protected abstract bool Filter(T obj);
 
 		protected int CalcFilteredIndex(int originalIndex)
 		{
+			Contract.Ensures(Contract.Result<int>() >= -1);
+
 			if ( originalIndex < 0 )
 			{
 				return -1;
@@ -328,7 +313,7 @@ namespace Digillect.Collections
 
 			for ( int i = 0; i <= originalIndex; i++ )
 			{
-				if ( Filter(originalCollection[i], i) )
+				if ( Filter(originalCollection[i]) )
 				{
 					filteredIndex++;
 				}
@@ -345,14 +330,13 @@ namespace Digillect.Collections
 			}
 
 			int originalIndex = -1;
-			int count = 0;
 
-			for ( int i = 0; i < originalCollection.Count && count <= filteredIndex; i++ )
+			for ( int i = 0, counter = 0; i < originalCollection.Count && counter <= filteredIndex; i++ )
 			{
-				if ( Filter(originalCollection[i],i) )
+				if ( Filter(originalCollection[i]) )
 				{
 					originalIndex = i;
-					count++;
+					counter++;
 				}
 			}
 
@@ -378,14 +362,16 @@ namespace Digillect.Collections
 				{
 #if SILVERLIGHT
 					case NotifyCollectionChangedAction.Add:
-						if ( !Filter((T) e.NewItems[0], e.NewStartingIndex) )
+						Contract.Assume(e.NewItems.Count > 0);
+						if ( !Filter((T) e.NewItems[0]) )
 						{
 							return;
 						}
 						args = new NotifyCollectionChangedEventArgs(e.Action, e.NewItems[0], CalcFilteredIndex(e.NewStartingIndex));
 						break;
 					case NotifyCollectionChangedAction.Remove:
-						if ( !Filter((T) e.OldItems[0],e.OldStartingIndex) )
+						Contract.Assume(e.OldItems.Count > 0);
+						if ( !Filter((T) e.OldItems[0]) )
 						{
 							return;
 						}
@@ -393,7 +379,9 @@ namespace Digillect.Collections
 						break;
 					case NotifyCollectionChangedAction.Replace:
 						// e.NewStartingIndex == e.OldStartingIndex
-						if ( !Filter((T) e.NewItems[0], e.NewStartingIndex) && !Filter((T) e.OldItems[0],e.OldStartingIndex) )
+						Contract.Assume(e.NewItems.Count > 0);
+						Contract.Assume(e.OldItems.Count > 0);
+						if ( !Filter((T) e.NewItems[0]) && !Filter((T) e.OldItems[0]) )
 						{
 							return;
 						}
@@ -460,23 +448,5 @@ namespace Digillect.Collections
 			}
 		}
 		#endregion
-	}
-
-	[ContractClassFor( typeof( XFilteredCollection<> ) )]
-	abstract class XFilteredCollectionContract<T> : XFilteredCollection<T>
-		where T : XObject
-	{
-		protected XFilteredCollectionContract( IXList<T> originalCollection )
-			: base( originalCollection )
-		{
-		}
-
-		protected override XFilteredCollection<T> CreateInstanceOfSameType( IXList<T> collection )
-		{
-			Contract.Requires( collection != null );
-			Contract.Ensures( Contract.Result<XFilteredCollection<T>>() != null );
-
-			return this;
-		}
 	}
 }

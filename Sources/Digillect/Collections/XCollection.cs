@@ -42,7 +42,6 @@ namespace Digillect.Collections
 		public XCollection(IEnumerable<T> collection)
 			: base(new List<T>(collection))
 		{
-			Contract.Requires( collection != null );
 		}
 
 #if false
@@ -55,16 +54,6 @@ namespace Digillect.Collections
 		{
 		}
 #endif
-		#endregion
-
-		#region ObjectInvariant
-		[ContractInvariantMethod]
-		[System.Diagnostics.CodeAnalysis.SuppressMessage( "Microsoft.Performance", "CA1822:MarkMembersAsStatic", Justification = "Required for code contracts." )]
-		private void ObjectInvariant()
-		{
-			Contract.Invariant( this.Items != null );
-			Contract.Invariant( this.Items.Count >= 0 );
-		}
 		#endregion
 
 		#region Protected Properties
@@ -103,8 +92,6 @@ namespace Digillect.Collections
 
 		protected void OnPropertyChanged(string propertyName)
 		{
-			Contract.Requires( propertyName != null );
-
 			if ( this.updateCount == 0 )
 			{
 				OnPropertyChanged(new PropertyChangedEventArgs(propertyName));
@@ -143,8 +130,13 @@ namespace Digillect.Collections
 
 		public XCollection<T> Derive(Predicate<T> filter)
 		{
-			Contract.Requires( filter != null );
+			Contract.Requires(filter != null, "filter");
 			Contract.Ensures( Contract.Result<XCollection<T>>() != null );
+
+			if ( filter == null )
+			{
+				throw new ArgumentNullException("filter");
+			}
 
 			var derived = (XCollection<T>) CreateInstanceOfSameType();
 
@@ -168,12 +160,19 @@ namespace Digillect.Collections
 		{
 			int index = IndexOf(key);
 
-			return index < 0 ? null : this.Items[index];
+			Contract.Assume(index < this.Items.Count);
+
+			return index == -1 ? null : this.Items[index];
 		}
 
 		public void ForEach(Action<T> action)
 		{
-			Contract.Requires( action != null );
+			Contract.Requires(action != null, "action");
+
+			if ( action == null )
+			{
+				throw new ArgumentNullException("action");
+			}
 
 			if( this.Items.Count > 0 )
 			{
@@ -184,9 +183,9 @@ namespace Digillect.Collections
 			}
 		}
 
-		IEnumerable<XKey> IXCollection<T>.GetKeys()
+		public IEnumerable<XKey> GetKeys()
 		{
-			Contract.Ensures( Contract.Result<IEnumerable<XKey>>() != null );
+			Contract.Assume(this.Items != null);
 
 			return this.Items.Select( obj => obj == null ? null : obj.GetKey() );
 		}
@@ -198,14 +197,14 @@ namespace Digillect.Collections
 		/// <returns>The index of item if found in the list; otherwise, -1.</returns>
 		public int IndexOf(XKey key)
 		{
-			Contract.Ensures( Contract.Result<int>() >= -1 );
-
 			for ( int i = 0; i < this.Items.Count; i++ )
 			{
 				var item = this.Items[i];
 
 				if ( item != null && Equals(item.GetKey(), key) )
 				{
+					Contract.Assume(i < this.Count);
+
 					return i;
 				}
 			}
@@ -215,16 +214,26 @@ namespace Digillect.Collections
 
 		public void InsertRange(int index, IEnumerable<T> collection)
 		{
-			Contract.Requires( collection != null );
-			Contract.Requires( 0 <= index && index <= this.Count );
+			Contract.Requires(0 <= index && index <= this.Count, "index");
+			Contract.Requires(collection != null, "collection");
 
-			/*
+			if ( 0 < index || index > this.Count )
+			{
+				throw new ArgumentOutOfRangeException("index");
+			}
+
+			if ( collection == null )
+			{
+				throw new ArgumentNullException("collection");
+			}
+
 			List<T> is2 = this.Items as List<T>;
 
 			if ( is2 != null )
 			{
-				Contract.Assert( index < is2.Count );
-				is2.InsertRange( index, collection );
+				Contract.Assume(index <= is2.Count);
+				is2.InsertRange(index, collection);
+				OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Add, collection.ToArray(), index));
 			}
 			else
 			{
@@ -232,22 +241,9 @@ namespace Digillect.Collections
 				{
 					while ( enumerator.MoveNext() )
 					{
-						Contract.Assert( index <= this.Count );
+						Contract.Assume(index <= this.Count);
 						Insert(index++, enumerator.Current);
 					}
-				}
-			}
-			*/
-			using( IEnumerator<T> enumerator = collection.GetEnumerator() )
-			{
-				while( enumerator.MoveNext() )
-				{
-					//Contract.Assert( index <= this.Count );
-					Insert( index, enumerator.Current );
-					
-					index++;
-
-					Contract.Assert( index <= this.Count );
 				}
 			}
 		}
@@ -264,7 +260,7 @@ namespace Digillect.Collections
 		{
 			int index = IndexOf(key);
 
-			if ( index < 0 )
+			if ( index == -1 )
 			{
 				return false;
 			}
@@ -296,6 +292,7 @@ namespace Digillect.Collections
 
 			return (XCollection<T>) Activator.CreateInstance(GetType());
 		}
+
 		#region Update Methods
 		/// <summary>
 		/// Начинает операцию глобального изменения содержимого коллекции.
@@ -371,7 +368,8 @@ namespace Digillect.Collections
 		/// </remarks>
 		public CollectionUpdateResults Update(IEnumerable<T> source)
 		{
-			Contract.Requires( source != null );
+			Contract.Requires(source != null, "source");
+			Contract.Ensures(Contract.Result<CollectionUpdateResults>() != null);
 
 			return Update(source, CollectionUpdateOptions.All);
 		}
@@ -382,11 +380,16 @@ namespace Digillect.Collections
 		/// <param name="source">Источник изменений.</param>
 		/// <param name="options">Операции, которые надо произвести с объектами, находящимися в данной коллекции.</param>
 		/// <returns>The <see cref="CollectionUpdateResults">results</see> of the operation.</returns>
-		[ContractVerification( false )]
+		[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Maintainability", "CA1502:AvoidExcessiveComplexity")]
 		public virtual CollectionUpdateResults Update(IEnumerable<T> source, CollectionUpdateOptions options)
 		{
-			Contract.Requires( source != null );
-			Contract.Ensures( Contract.Result<CollectionUpdateResults>() != null );
+			Contract.Requires(source != null, "source");
+			Contract.Ensures(Contract.Result<CollectionUpdateResults>() != null);
+
+			if ( source == null )
+			{
+				throw new ArgumentNullException("source");
+			}
 
 			if ( this.Items.IsReadOnly )
 			{
@@ -423,13 +426,15 @@ namespace Digillect.Collections
 			{
 				T item = this.Items[i];
 
-				Contract.Assume( item != null ); // Since we'd removed all nulls in the previous step.
+				Contract.Assume(item != null); // Since we've removed all nulls in the previous step.
 
 				XKey key = item.GetKey();
 				List<XUpdateItem> items;
 
-				if( updateCandidates.ContainsKey( key ) )
+				if ( updateCandidates.ContainsKey(key) )
+				{
 					items = updateCandidates[key];
+				}
 				else
 				{
 					items = new List<XUpdateItem>();
@@ -450,22 +455,29 @@ namespace Digillect.Collections
 					var existing = updateCandidates[key];
 
 					Contract.Assume( existing != null );
+					Contract.Assume(existing.Count > 0);
 
-					if ( (options & CollectionUpdateOptions.UpdateExisting) != CollectionUpdateOptions.None )
+					if ( (options & CollectionUpdateOptions.UpdateExisting) == CollectionUpdateOptions.UpdateExisting )
 					{
+						// Take first item to update
 						var existing0 = existing[0];
 
 						existing0.Item.Update(item);
 						updated++;
 
-						Debug.Assert(index <= existing0.Index);
+						Contract.Assert(index <= existing0.Index);
+						Contract.Assume(existing0.Index < this.Items.Count);
 
-						// Move
+						// Move the updated item to the current (source) position
+						// HACK: instead of remove-then-insert we will change indexes of all affected items
+
+						// Move range [index..existing0.Index) one element up
 						for ( int i = existing0.Index; i > index; i-- )
 						{
 							this.Items[i] = this.Items[i - 1];
 						}
 
+						// Set updated item at the corect (source) position
 						this.Items[index] = existing0.Item;
 
 						// Recalculate original indexes upon moving
@@ -480,14 +492,16 @@ namespace Digillect.Collections
 						}
 					}
 
+					// Remove updated item form candidates
 					existing.RemoveAt(0);
 
 					if ( existing.Count == 0 )
 					{
+						// No more candidates exist for the given key
 						updateCandidates.Remove(key);
 					}
 				}
-				else if ( (options & CollectionUpdateOptions.AddNew) != CollectionUpdateOptions.None )
+				else if ( (options & CollectionUpdateOptions.AddNew) == CollectionUpdateOptions.AddNew )
 				{
 					this.Items.Insert(index, item);
 					added++;
@@ -507,29 +521,22 @@ namespace Digillect.Collections
 				index++;
 			}
 
-			if ( (options & CollectionUpdateOptions.RemoveOld) != CollectionUpdateOptions.None )
+			if ( (options & CollectionUpdateOptions.RemoveOld) == CollectionUpdateOptions.RemoveOld )
 			{
-				foreach (var items in updateCandidates.Values )
+				foreach ( var items in updateCandidates.Values )
 				{
-					// Тут нужна сортировка по индексу в порядке убывания, чтобы не вылететь за границы
-					// коллекции, как это делал Андрей Николаевич.
+					// Тут нужна сортировка по индексу в порядке убывания, чтобы не вылететь за границы коллекции
+					// Т.к. items в дальнейшем нам больше не нужен, можем смело его "испортить"
+					// Изначально гарантировано, что его элементы идут в правильном порядке, т.е. по возрастанию индексов оригинальной коллекции
+					items.Reverse();
 
-					foreach( var item in items.OrderByDescending( i => i.Index ) )
-					{
-						// И еще один safeguard, для порядку
-						if( item.Index < this.Items.Count )
-						{
-							this.Items.RemoveAt( item.Index );
-							++removed;
-						}
-					}
-
-					/*
 					items.ForEach(x => {
+						// И еще один safeguard, для порядку
+						//Contract.Assert(x.Index < this.Items.Count);
+						Contract.Assume(x.Index >= 0);
 						this.Items.RemoveAt(x.Index);
 						removed++;
 					});
-					*/
 				}
 			}
 
@@ -743,7 +750,7 @@ namespace Digillect.Collections
 		#endregion
 
 		#region class XUpdateItem
-		private class XUpdateItem
+		private sealed class XUpdateItem
 		{
 			public T Item;
 			public int Index;

@@ -10,6 +10,7 @@ namespace Digillect.Collections
 #endif
 	public sealed class CollectionUpdateResults
 	{
+		[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA2104:DoNotDeclareReadOnlyMutableReferenceTypes")]
 		public static readonly CollectionUpdateResults Empty = new CollectionUpdateResults();
 
 		/// <summary>
