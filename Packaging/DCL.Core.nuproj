@@ -14,7 +14,7 @@
 
 	<ItemGroup>
 		<LibNet40 Include="$(BuildPath)\Desktop\Digillect.*"/>
-		<WinRT45 Include="$(BuildPath)\WinRT\Digillect.*"/>
+		<LibNet45 Include="$(BuildPath)\NET45\Digillect.*"/>
 		<LibSL4 Include="$(BuildPath)\SL4\Digillect.*"/>
 		<LibWP71 Include="$(BuildPath)\WP7\Digillect.*"/>
 	</ItemGroup>

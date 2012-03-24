@@ -51,8 +51,12 @@
 		<Copy SourceFiles="@(LibNet40Client)" DestinationFolder="$(PackagePath)\lib\net40-client"/>
 		<Copy SourceFiles="@(LibNet40Full)" DestinationFolder="$(PackagePath)\lib\net40-full"/>
 		<Copy SourceFiles="@(LibNet40Compact)" DestinationFolder="$(PackagePath)\lib\net40-cf"/>
-		
-		<Copy SourceFiles="@(WinRT45)" DestinationFolder="$(PackagePath)\lib\winrt45"/>
+
+		<Copy SourceFiles="@(LibNet45)" DestinationFolder="$(PackagePath)\lib\net45"/>
+		<Copy SourceFiles="@(LibNet45Client)" DestinationFolder="$(PackagePath)\lib\net45-client"/>
+		<Copy SourceFiles="@(LibNet45Full)" DestinationFolder="$(PackagePath)\lib\net45-full"/>
+
+		<Copy SourceFiles="@(LibWinRT)" DestinationFolder="$(PackagePath)\lib\winrt"/>
 
 		<Copy SourceFiles="@(LibSL4)" DestinationFolder="$(PackagePath)\lib\sl4"/>
 		<Copy SourceFiles="@(LibSL5)" DestinationFolder="$(PackagePath)\lib\sl5"/>
