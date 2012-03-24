@@ -3,15 +3,13 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics.Contracts;
 
-using Digillect.Properties;
-
 namespace Digillect.Collections
 {
 	/// <summary>
 	/// A collection of unique non-null objects.
 	/// </summary>
 	/// <typeparam name="T">Type of the collection's members.</typeparam>
-#if !SILVERLIGHT
+#if !(SILVERLIGHT || NETFX_CORE)
 	[Serializable]
 #endif
 	public class XUniqueCollection<T> : XCollection<T>
@@ -43,7 +41,7 @@ namespace Digillect.Collections
 
 			if ( Contains(item.GetKey()) )
 			{
-				throw new ArgumentException(Resources.XCollectionItemDuplicateException, "item");
+				throw new ArgumentException("This object is already a member of the collection.", "item");
 			}
 		}
 
@@ -53,7 +51,7 @@ namespace Digillect.Collections
 
 			if ( !Equals(newItem.GetKey(), oldItem.GetKey()) && Contains(newItem.GetKey()) )
 			{
-				throw new ArgumentException(Resources.XCollectionItemDuplicateException, "newItem");
+				throw new ArgumentException("This object is already a member of the collection.", "newItem");
 			}
 		}
 		#endregion

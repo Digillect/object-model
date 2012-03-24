@@ -2,7 +2,7 @@ using System;
 
 namespace Digillect.Collections
 {
-#if !SILVERLIGHT
+#if !(SILVERLIGHT || NETFX_CORE)
 	/// <summary>
 	/// Contains results of the collection update operation
 	/// </summary>

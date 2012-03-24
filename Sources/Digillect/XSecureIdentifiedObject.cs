@@ -11,7 +11,7 @@ namespace Digillect
 	/// <typeparam name="TId">The type of the id.</typeparam>
 	[DataContract]
 	[DebuggerDisplay("Id = {id}")]
-#if !SILVERLIGHT
+#if !(SILVERLIGHT || NETFX_CORE)
 	[Serializable]
 #endif
 	public class XSecureIdentifiedObject<TId> : XObject, IXIdentifiable<TId>

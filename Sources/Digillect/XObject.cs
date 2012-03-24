@@ -4,32 +4,30 @@ using System.ComponentModel;
 using System.Diagnostics.Contracts;
 using System.Runtime.Serialization;
 
-using Digillect.Properties;
-
 namespace Digillect
 {
 	/// <summary>
 	/// Abstract base class that supports updating. Exposes <see cref="XKey"/> as an identifier.
 	/// </summary>
 	[DataContract]
-#if !SILVERLIGHT
+#if !(SILVERLIGHT || NETFX_CORE)
 	[Serializable]
 #endif
 	public class XObject : ObservableObject, IXUpdatable<XObject>
-#if !SILVERLIGHT
+#if !(SILVERLIGHT || NETFX_CORE)
 		, ICloneable
 #endif
 	{
-#if !SILVERLIGHT
+#if !(SILVERLIGHT || NETFX_CORE)
 		[NonSerialized]
 #endif
 		private ushort updateCount;
 
-#if !SILVERLIGHT
+#if !(SILVERLIGHT || NETFX_CORE)
 		[NonSerialized]
 #endif
 		private bool isKeyCreated;
-#if !SILVERLIGHT
+#if !(SILVERLIGHT || NETFX_CORE)
 		[NonSerialized]
 #endif
 		private XKey key;
@@ -136,7 +134,7 @@ namespace Digillect
 		#endregion
 
 
-#if !SILVERLIGHT
+#if !(SILVERLIGHT || NETFX_CORE)
 		#region ICloneable Members
 		object ICloneable.Clone()
 		{
@@ -175,7 +173,7 @@ namespace Digillect
 		public void Update( XObject source )
 		{
 			if( !IsObjectCompatible( source ) )
-				throw new ArgumentException( Resources.XObjectSourceNotCompatibleException, "source" );
+				throw new ArgumentException( "Source object is not compatible with the current one.", "source" );
 
 			if( IsUpdateRequired( source ) )
 			{
@@ -215,7 +213,7 @@ namespace Digillect
 		}
 
 		[EditorBrowsable( EditorBrowsableState.Advanced )]
-#if false // !SILVERLIGHT
+#if false // !(SILVERLIGHT || NETFX_CORE)
 		[System.Security.Permissions.ReflectionPermission(System.Security.Permissions.SecurityAction.Demand, RestrictedMemberAccess = true)]
 #endif
 		protected virtual XObject CreateInstanceOfSameType()

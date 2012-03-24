@@ -3,8 +3,6 @@ using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Diagnostics.Contracts;
 
-using Digillect.Properties;
-
 namespace Digillect.Collections
 {
 	public static class XCollectionsUtil
@@ -233,11 +231,11 @@ namespace Digillect.Collections
 		#endregion
 
 		#region class ReadOnlyXCollection`1
-#if !SILVERLIGHT
+#if !(SILVERLIGHT || NETFX_CORE)
 		[Serializable]
 #endif
 		private class ReadOnlyXCollection<T> : IXCollection<T>
-#if !SILVERLIGHT
+#if !(SILVERLIGHT || NETFX_CORE)
 			, ICloneable
 #endif
 		{
@@ -279,7 +277,7 @@ namespace Digillect.Collections
 
 			bool IXCollection<T>.Remove(XKey key)
 			{
-				throw new NotSupportedException(Resources.XCollectionReadOnlyException);
+				throw new NotSupportedException( "The target collection is read-only." );
 			}
 
 			IEnumerable<XKey> IXCollection<T>.GetKeys()
@@ -302,12 +300,12 @@ namespace Digillect.Collections
 
 			void IXUpdatable<IXCollection<T>>.BeginUpdate()
 			{
-				throw new NotSupportedException(Resources.XCollectionReadOnlyException);
+				throw new NotSupportedException( "The target collection is read-only." );
 			}
 
 			void IXUpdatable<IXCollection<T>>.EndUpdate()
 			{
-				throw new NotSupportedException(Resources.XCollectionReadOnlyException);
+				throw new NotSupportedException( "The target collection is read-only." );
 			}
 
 			bool IXUpdatable<IXCollection<T>>.IsUpdateRequired(IXCollection<T> source)
@@ -317,19 +315,19 @@ namespace Digillect.Collections
 
 			void IXUpdatable<IXCollection<T>>.Update(IXCollection<T> source )
 			{
-				throw new NotSupportedException(Resources.XCollectionReadOnlyException);
+				throw new NotSupportedException( "The target collection is read-only." );
 			}
 			#endregion
 
 			#region ICollection`1 Members
 			void ICollection<T>.Add(T item)
 			{
-				throw new NotSupportedException(Resources.XCollectionReadOnlyException);
+				throw new NotSupportedException( "The target collection is read-only." );
 			}
 
 			void ICollection<T>.Clear()
 			{
-				throw new NotSupportedException(Resources.XCollectionReadOnlyException);
+				throw new NotSupportedException( "The target collection is read-only." );
 			}
 
 			bool ICollection<T>.Contains(T item)
@@ -354,7 +352,7 @@ namespace Digillect.Collections
 
 			bool ICollection<T>.Remove(T item)
 			{
-				throw new NotSupportedException(Resources.XCollectionReadOnlyException);
+				throw new NotSupportedException( "The target collection is read-only." );
 			}
 			#endregion
 
@@ -387,7 +385,7 @@ namespace Digillect.Collections
 			}
 			#endregion
 
-#if !SILVERLIGHT
+#if !(SILVERLIGHT || NETFX_CORE)
 			#region ICloneable Members
 			object ICloneable.Clone()
 			{
@@ -416,7 +414,7 @@ namespace Digillect.Collections
 		#endregion
 
 		#region class ReadOnlyXList`1
-#if !SILVERLIGHT
+#if !(SILVERLIGHT || NETFX_CORE)
 		[Serializable]
 #endif
 		private class ReadOnlyXList<T> : ReadOnlyXCollection<T>, IXList<T>
@@ -457,18 +455,18 @@ namespace Digillect.Collections
 
 			void IList<T>.Insert(int index, T item)
 			{
-				throw new NotSupportedException(Resources.XCollectionReadOnlyException);
+				throw new NotSupportedException( "The target collection is read-only." );
 			}
 
 			void IList<T>.RemoveAt(int index)
 			{
-				throw new NotSupportedException(Resources.XCollectionReadOnlyException);
+				throw new NotSupportedException( "The target collection is read-only." );
 			}
 
 			T IList<T>.this[int index]
 			{
 				get { return this.collection[index]; }
-				set { throw new NotSupportedException(Resources.XCollectionReadOnlyException); }
+				set { throw new NotSupportedException( "The target collection is read-only." ); }
 			}
 			#endregion
 
@@ -498,7 +496,7 @@ namespace Digillect.Collections
 
 			protected override XFilteredCollection<T> CreateInstanceOfSameType( IXList<T> collection )
 			{
-#if !SILVERLIGHT
+#if !(SILVERLIGHT || NETFX_CORE)
 				Predicate<T> filter = (Predicate<T>) this.filter.Clone();
 #else
 				Predicate<T> filter = this.filter;
@@ -531,7 +529,7 @@ namespace Digillect.Collections
 
 			protected override XFilteredCollection<T> CreateInstanceOfSameType( IXList<T> collection )
 			{
-#if !SILVERLIGHT
+#if !(SILVERLIGHT || NETFX_CORE)
 				Func<T, bool> filter = (Func<T, bool>) this.filter.Clone();
 #else
 				Func<T, bool> filter = this.filter;

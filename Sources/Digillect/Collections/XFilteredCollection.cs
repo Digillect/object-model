@@ -6,15 +6,13 @@ using System.Collections.Specialized;
 using System.Diagnostics.Contracts;
 using System.Linq;
 
-using Digillect.Properties;
-
 namespace Digillect.Collections
 {
-#if !SILVERLIGHT
+#if !(SILVERLIGHT || NETFX_CORE)
 	[Serializable]
 #endif
 	public abstract class XFilteredCollection<T> : IXList<T>, IDisposable
-#if !SILVERLIGHT
+#if !(SILVERLIGHT || NETFX_CORE)
 		, ICloneable
 #endif
 		where T : XObject
@@ -90,7 +88,7 @@ namespace Digillect.Collections
 
 		bool IXCollection<T>.Remove(XKey key)
 		{
-			throw new NotSupportedException(Resources.XCollectionReadOnlyException);
+			throw new NotSupportedException( "The target collection is read-only." );
 		}
 
 		IXCollection<T> IXCollection<T>.Clone( bool deep )
@@ -115,12 +113,12 @@ namespace Digillect.Collections
 
 		void IXUpdatable<IXCollection<T>>.BeginUpdate()
 		{
-			throw new NotSupportedException(Resources.XCollectionReadOnlyException);
+			throw new NotSupportedException("The target collection is read-only.");
 		}
 
 		void IXUpdatable<IXCollection<T>>.EndUpdate()
 		{
-			throw new NotSupportedException(Resources.XCollectionReadOnlyException);
+			throw new NotSupportedException("The target collection is read-only.");
 		}
 
 		bool IXUpdatable<IXCollection<T>>.IsUpdateRequired(IXCollection<T> source)
@@ -130,7 +128,7 @@ namespace Digillect.Collections
 
 		void IXUpdatable<IXCollection<T>>.Update( IXCollection<T> source )
 		{
-			throw new NotSupportedException(Resources.XCollectionReadOnlyException);
+			throw new NotSupportedException("The target collection is read-only.");
 		}
 		#endregion
 
@@ -148,7 +146,7 @@ namespace Digillect.Collections
 		T IList<T>.this[int index]
 		{
 			get { return this[index]; }
-			set { throw new NotSupportedException(Resources.XCollectionReadOnlyException); }
+			set { throw new NotSupportedException("The target collection is read-only."); }
 		}
 
 		public int IndexOf(T item)
@@ -160,12 +158,12 @@ namespace Digillect.Collections
 
 		void IList<T>.Insert(int index, T item)
 		{
-			throw new NotSupportedException(Resources.XCollectionReadOnlyException);
+			throw new NotSupportedException("The target collection is read-only.");
 		}
 
 		void IList<T>.RemoveAt(int index)
 		{
-			throw new NotSupportedException(Resources.XCollectionReadOnlyException);
+			throw new NotSupportedException("The target collection is read-only.");
 		}
 		#endregion
 
@@ -198,12 +196,12 @@ namespace Digillect.Collections
 
 		void ICollection<T>.Add(T item)
 		{
-			throw new NotSupportedException(Resources.XCollectionReadOnlyException);
+			throw new NotSupportedException("The target collection is read-only.");
 		}
 
 		void ICollection<T>.Clear()
 		{
-			throw new NotSupportedException(Resources.XCollectionReadOnlyException);
+			throw new NotSupportedException("The target collection is read-only.");
 		}
 
 		public bool Contains(T item)
@@ -234,7 +232,7 @@ namespace Digillect.Collections
 
 		bool ICollection<T>.Remove(T item)
 		{
-			throw new NotSupportedException(Resources.XCollectionReadOnlyException);
+			throw new NotSupportedException("The target collection is read-only.");
 		}
 		#endregion
 
@@ -247,7 +245,7 @@ namespace Digillect.Collections
 			{
 				if ( this.version != version )
 				{
-					throw new InvalidOperationException(Resources.XCollectionEnumFailedVersionException);
+					throw new InvalidOperationException("Collection was modified; enumeration operation may not execute.");
 				}
 
 				T obj = originalCollection[i];
@@ -307,7 +305,7 @@ namespace Digillect.Collections
 		}
 		#endregion
 
-#if !SILVERLIGHT
+#if !(SILVERLIGHT || NETFX_CORE)
 		#region ICloneable Members
 		object ICloneable.Clone()
 		{

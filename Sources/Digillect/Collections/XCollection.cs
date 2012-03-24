@@ -8,24 +8,22 @@ using System.Diagnostics;
 using System.Diagnostics.Contracts;
 using System.Linq;
 
-using Digillect.Properties;
-
 namespace Digillect.Collections
 {
 	/// <summary>
 	/// A collection of "X"-objects with support for cloning, updating and event notification.
 	/// </summary>
 	/// <typeparam name="T">Type of the collection's members.</typeparam>
-#if !SILVERLIGHT
+#if !(SILVERLIGHT || NETFX_CORE)
 	[Serializable]
 #endif
 	public class XCollection<T> : Collection<T>, IXList<T>, INotifyPropertyChanged
-#if !SILVERLIGHT
+#if !(SILVERLIGHT || NETFX_CORE)
 		, ICloneable
 #endif
 		where T : XObject
 	{
-#if !SILVERLIGHT
+#if !(SILVERLIGHT || NETFX_CORE)
 		[NonSerialized]
 #endif
 		private short updateCount;
@@ -286,7 +284,7 @@ namespace Digillect.Collections
 		#endregion
 
 
-#if !SILVERLIGHT
+#if !(SILVERLIGHT || NETFX_CORE)
 		#region ICloneable Members
 		object ICloneable.Clone()
 		{
@@ -332,7 +330,7 @@ namespace Digillect.Collections
 		#endregion
 
 		[EditorBrowsable( EditorBrowsableState.Advanced )]
-#if false // !SILVERLIGHT
+#if false // !(SILVERLIGHT || NETFX_CORE)
 		[System.Security.Permissions.ReflectionPermission(System.Security.Permissions.SecurityAction.Demand, RestrictedMemberAccess = true)]
 #endif
 		protected virtual XCollection<T> CreateInstanceOfSameType()
@@ -354,7 +352,7 @@ namespace Digillect.Collections
 		{
 			if ( this.Items.IsReadOnly )
 			{
-				throw new NotSupportedException(Resources.XCollectionReadOnlyException);
+				throw new NotSupportedException("The target collection is read-only.");
 			}
 
 			++this.updateCount;
@@ -371,7 +369,7 @@ namespace Digillect.Collections
 		{
 			if ( this.Items.IsReadOnly )
 			{
-				throw new NotSupportedException(Resources.XCollectionReadOnlyException);
+				throw new NotSupportedException( "The target collection is read-only." );
 			}
 
 			if ( this.updateCount == 0 )
@@ -442,7 +440,7 @@ namespace Digillect.Collections
 
 			if ( this.Items.IsReadOnly )
 			{
-				throw new NotSupportedException(Resources.XCollectionReadOnlyException);
+				throw new NotSupportedException( "The target collection is read-only." );
 			}
 
 			if ( options == CollectionUpdateOptions.None || !IsUpdateRequired(source, options) )
@@ -532,12 +530,17 @@ namespace Digillect.Collections
 						// Recalculate original indexes upon moving
 						foreach ( var items in updateCandidates.Values )
 						{
+							foreach( var x in items )
+								if( index <= x.Index && x.Index < existing0.Index )
+									x.Index++;
+							/* ForEach is not supported in NETFX_CORE (WinRT)
 							items.ForEach(x => {
 								if ( index <= x.Index && x.Index < existing0.Index )
 								{
 									x.Index++;
 								}
 							});
+							*/
 						}
 					}
 
@@ -558,12 +561,18 @@ namespace Digillect.Collections
 					// Recalculate original indexes upon insertion
 					foreach ( var items in updateCandidates.Values )
 					{
+						foreach( var x in items )
+							if( x.Index >= index )
+								x.Index++;
+
+						/* ForEach is not supported in NETFX_CORE (WinRT)
 						items.ForEach(x => {
 							if ( x.Index >= index )
 							{
 								x.Index++;
 							}
 						});
+						*/
 					}
 				}
 
@@ -579,6 +588,13 @@ namespace Digillect.Collections
 					// »значально гарантировано, что его элементы идут в правильном пор€дке, т.е. по возрастанию индексов оригинальной коллекции
 					items.Reverse();
 
+					foreach( var x in items )
+					{
+						Contract.Assume( x.Index >= 0 );
+						this.Items.RemoveAt( x.Index );
+						removed++;
+					}
+					/* ForEach is not supported in NETFX_CORE (WinRT)
 					items.ForEach(x => {
 						// » еще один safeguard, дл€ пор€дку
 						//Contract.Assert(x.Index < this.Items.Count);
@@ -586,6 +602,7 @@ namespace Digillect.Collections
 						this.Items.RemoveAt(x.Index);
 						removed++;
 					});
+					*/
 				}
 			}
 

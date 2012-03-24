@@ -5,21 +5,19 @@ using System.ComponentModel;
 using System.Diagnostics.Contracts;
 using System.Runtime.Serialization;
 
-using Digillect.Properties;
-
 namespace Digillect.Collections
 {
-#if !SILVERLIGHT
+#if !(SILVERLIGHT || NETFX_CORE)
 	[Serializable]
 #endif
 	public class XKeyedCollection<TId, TObject> : XUniqueCollection<TObject>
-#if !SILVERLIGHT
+#if !(SILVERLIGHT || NETFX_CORE)
 		, IDeserializationCallback
 #endif
 		where TId : IEquatable<TId>
 		where TObject : XObject, IXIdentifiable<TId>
 	{
-#if !SILVERLIGHT
+#if !(SILVERLIGHT || NETFX_CORE)
 		[NonSerialized]
 #endif
 		private IDictionary<TId, TObject> m_dictionary = new Dictionary<TId, TObject>();
@@ -134,7 +132,7 @@ namespace Digillect.Collections
 
 			if ( this.Items.IsReadOnly )
 			{
-				throw new NotSupportedException(Resources.XCollectionReadOnlyException);
+				throw new NotSupportedException("The target collection is read-only.");
 			}
 
 			if ( options == CollectionUpdateOptions.None || !IsUpdateRequired(source, options) )
@@ -190,7 +188,7 @@ namespace Digillect.Collections
 		#endregion
 
 		#region IDeserializationCallback Members
-#if !SILVERLIGHT
+#if !(SILVERLIGHT || NETFX_CORE)
 		void IDeserializationCallback.OnDeserialization(object sender)
 		{
 			OnDeserialization();
