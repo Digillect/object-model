@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Diagnostics.Contracts;
 
+using Digillect.Properties;
+
 namespace Digillect.Collections
 {
 	public static class XCollectionsUtil
@@ -277,7 +279,7 @@ namespace Digillect.Collections
 
 			bool IXCollection<T>.Remove(XKey key)
 			{
-				throw new NotSupportedException( "The target collection is read-only." );
+				throw new NotSupportedException( Resources.XCollectionReadOnlyException );
 			}
 
 			IEnumerable<XKey> IXCollection<T>.GetKeys()
@@ -300,12 +302,12 @@ namespace Digillect.Collections
 
 			void IXUpdatable<IXCollection<T>>.BeginUpdate()
 			{
-				throw new NotSupportedException( "The target collection is read-only." );
+				throw new NotSupportedException( Resources.XCollectionReadOnlyException );
 			}
 
 			void IXUpdatable<IXCollection<T>>.EndUpdate()
 			{
-				throw new NotSupportedException( "The target collection is read-only." );
+				throw new NotSupportedException( Resources.XCollectionReadOnlyException );
 			}
 
 			bool IXUpdatable<IXCollection<T>>.IsUpdateRequired(IXCollection<T> source)
@@ -315,19 +317,19 @@ namespace Digillect.Collections
 
 			void IXUpdatable<IXCollection<T>>.Update(IXCollection<T> source )
 			{
-				throw new NotSupportedException( "The target collection is read-only." );
+				throw new NotSupportedException( Resources.XCollectionReadOnlyException );
 			}
 			#endregion
 
 			#region ICollection`1 Members
 			void ICollection<T>.Add(T item)
 			{
-				throw new NotSupportedException( "The target collection is read-only." );
+				throw new NotSupportedException( Resources.XCollectionReadOnlyException );
 			}
 
 			void ICollection<T>.Clear()
 			{
-				throw new NotSupportedException( "The target collection is read-only." );
+				throw new NotSupportedException( Resources.XCollectionReadOnlyException );
 			}
 
 			bool ICollection<T>.Contains(T item)
@@ -352,7 +354,7 @@ namespace Digillect.Collections
 
 			bool ICollection<T>.Remove(T item)
 			{
-				throw new NotSupportedException( "The target collection is read-only." );
+				throw new NotSupportedException( Resources.XCollectionReadOnlyException );
 			}
 			#endregion
 
@@ -455,18 +457,18 @@ namespace Digillect.Collections
 
 			void IList<T>.Insert(int index, T item)
 			{
-				throw new NotSupportedException( "The target collection is read-only." );
+				throw new NotSupportedException( Resources.XCollectionReadOnlyException );
 			}
 
 			void IList<T>.RemoveAt(int index)
 			{
-				throw new NotSupportedException( "The target collection is read-only." );
+				throw new NotSupportedException( Resources.XCollectionReadOnlyException );
 			}
 
 			T IList<T>.this[int index]
 			{
 				get { return this.collection[index]; }
-				set { throw new NotSupportedException( "The target collection is read-only." ); }
+				set { throw new NotSupportedException( Resources.XCollectionReadOnlyException ); }
 			}
 			#endregion
 

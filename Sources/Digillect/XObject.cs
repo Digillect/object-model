@@ -4,6 +4,8 @@ using System.ComponentModel;
 using System.Diagnostics.Contracts;
 using System.Runtime.Serialization;
 
+using Digillect.Properties;
+
 namespace Digillect
 {
 	/// <summary>
@@ -173,7 +175,7 @@ namespace Digillect
 		public void Update( XObject source )
 		{
 			if( !IsObjectCompatible( source ) )
-				throw new ArgumentException( "Source object is not compatible with the current one.", "source" );
+				throw new ArgumentException( Resources.XObjectSourceNotCompatibleException, "source" );
 
 			if( IsUpdateRequired( source ) )
 			{

@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics.Contracts;
 
+using Digillect.Properties;
+
 namespace Digillect.Collections
 {
 	/// <summary>
@@ -41,7 +43,7 @@ namespace Digillect.Collections
 
 			if ( Contains(item.GetKey()) )
 			{
-				throw new ArgumentException("This object is already a member of the collection.", "item");
+				throw new ArgumentException(Resources.XCollectionItemDuplicateException, "item");
 			}
 		}
 
@@ -51,7 +53,7 @@ namespace Digillect.Collections
 
 			if ( !Equals(newItem.GetKey(), oldItem.GetKey()) && Contains(newItem.GetKey()) )
 			{
-				throw new ArgumentException("This object is already a member of the collection.", "newItem");
+				throw new ArgumentException(Resources.XCollectionItemDuplicateException, "newItem");
 			}
 		}
 		#endregion

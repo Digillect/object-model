@@ -8,6 +8,8 @@ using System.Diagnostics;
 using System.Diagnostics.Contracts;
 using System.Linq;
 
+using Digillect.Properties;
+
 namespace Digillect.Collections
 {
 	/// <summary>
@@ -352,7 +354,7 @@ namespace Digillect.Collections
 		{
 			if ( this.Items.IsReadOnly )
 			{
-				throw new NotSupportedException("The target collection is read-only.");
+				throw new NotSupportedException(Resources.XCollectionReadOnlyException);
 			}
 
 			++this.updateCount;
@@ -369,7 +371,7 @@ namespace Digillect.Collections
 		{
 			if ( this.Items.IsReadOnly )
 			{
-				throw new NotSupportedException( "The target collection is read-only." );
+				throw new NotSupportedException( Resources.XCollectionReadOnlyException );
 			}
 
 			if ( this.updateCount == 0 )
@@ -440,7 +442,7 @@ namespace Digillect.Collections
 
 			if ( this.Items.IsReadOnly )
 			{
-				throw new NotSupportedException( "The target collection is read-only." );
+				throw new NotSupportedException( Resources.XCollectionReadOnlyException );
 			}
 
 			if ( options == CollectionUpdateOptions.None || !IsUpdateRequired(source, options) )
