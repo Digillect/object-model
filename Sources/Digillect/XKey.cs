@@ -183,7 +183,7 @@ namespace Digillect
 		#endregion
 
 		#region class SimpleKey`1
-		[DebuggerDisplay("Key = {Key}")]
+		[DebuggerDisplay("Key = {m_key}")]
 #if !(SILVERLIGHT || NETFX_CORE)
 		[Serializable]
 #endif
@@ -230,7 +230,7 @@ namespace Digillect
 						return -1;
 				}
 
-				int result = parentKey.CompareTo(other.parentKey);
+				int result = parentKey == null ? 0 : parentKey.CompareTo( other.parentKey );
 
 				if ( result == 0 )
 				{
@@ -270,7 +270,7 @@ namespace Digillect
 						return false;
 				}
 
-				return parentKey.Equals(other.parentKey);
+				return parentKey == null || parentKey.Equals( other.parentKey );
 			}
 
 			public override int GetHashCode()
