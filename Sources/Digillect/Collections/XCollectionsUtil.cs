@@ -24,12 +24,12 @@ namespace Digillect.Collections
 		#region RemoveAll`2 Extension
 		public static bool RemoveAll<T>(this ICollection<T> source, IEnumerable<T> collection)
 		{
-			Contract.Requires(source != null, "source");
-
 			if ( source == null )
 			{
 				throw new ArgumentNullException("source");
 			}
+
+			Contract.EndContractBlock();
 
 			bool modified = false;
 
@@ -50,12 +50,12 @@ namespace Digillect.Collections
 		public static bool RemoveAll<T>(this IXCollection<T> source, IEnumerable<XKey> collection)
 			where T : XObject
 		{
-			Contract.Requires(source != null, "source");
-
 			if ( source == null )
 			{
 				throw new ArgumentNullException("source");
 			}
+
+			Contract.EndContractBlock();
 
 			bool modified = false;
 
@@ -78,12 +78,12 @@ namespace Digillect.Collections
 #if false // Not fully implemented yet
 		public static bool RetainAll<T>(this ICollection<T> source, IEnumerable<T> collection)
 		{
-			Contract.Requires(source != null, "source");
-
 			if ( source == null )
 			{
 				throw new ArgumentNullException("source");
 			}
+
+			Contract.EndContractBlock();
 
 			if ( collection == null )
 			{
@@ -136,9 +136,6 @@ namespace Digillect.Collections
 		public static XCollectionDifference<T> Difference<T>(this IXCollection<T> source, IEnumerable<T> target)
 			where T : XObject
 		{
-			Contract.Requires(source != null, "source");
-			Contract.Requires(target != null, "target");
-
 			if ( source == null )
 			{
 				throw new ArgumentNullException("source");
@@ -149,6 +146,8 @@ namespace Digillect.Collections
 				throw new ArgumentNullException("target");
 			}
 
+			Contract.EndContractBlock();
+
 			IXCollection<T> added = new XCollection<T>();
 			IXCollection<T> changed = new XCollection<T>();
 			IXCollection<T> deleted = new XCollection<T>(source);
@@ -157,26 +156,31 @@ namespace Digillect.Collections
 
 			foreach ( T targetObject in target )
 			{
-				T sourceObject;
-
-				if ( targetObject != null && (sourceObject = source.Find(targetObject.GetKey())) != null )
+				// IXCollection does not allow null items - ignore such items
+				if ( targetObject != null )
 				{
-					deleted.Remove(sourceObject.GetKey());
+					XKey targetKey;
+					T sourceObject;
 
-					if ( !sourceObject.Equals(targetObject) )
+					if ( (targetKey = targetObject.GetKey()) != null && (sourceObject = source.Find(targetKey)) != null )
 					{
-						changed.Add(targetObject);
-						modified.Add(targetObject);
+						deleted.Remove(sourceObject);
+
+						if ( !sourceObject.Equals(targetObject) )
+						{
+							changed.Add(targetObject);
+							modified.Add(targetObject);
+						}
+						else
+						{
+							nonModified.Add(sourceObject);
+						}
 					}
 					else
 					{
-						nonModified.Add(sourceObject);
+						added.Add(targetObject);
+						modified.Add(targetObject);
 					}
-				}
-				else
-				{
-					added.Add(targetObject);
-					modified.Add(targetObject);
 				}
 			}
 
@@ -213,22 +217,53 @@ namespace Digillect.Collections
 		#endregion
 
 		#region FilteredList
-		public static XFilteredCollection<T> FilteredList<T>(IXList<T> collection, Predicate<T> filter)
-			where T : XObject
-		{
-			Contract.Requires( collection != null );
-			Contract.Requires( filter != null );
-
-			return new PredicateFilteredCollection<T>( collection, filter );
-		}
-
 		public static XFilteredCollection<T> FilteredList<T>(IXList<T> collection, Func<T, bool> filter)
 			where T : XObject
 		{
-			Contract.Requires( collection != null );
-			Contract.Requires( filter != null );
+			Contract.Requires(collection != null);
+			Contract.Requires(filter != null);
 
-			return new FuncFilteredCollection<T>( collection, filter );
+			return new FuncFilteredCollection<T>(collection, filter);
+		}
+
+		public static XFilteredCollection<T> FilteredList<T>(IXList<T> collection, Predicate<T> filter)
+			where T : XObject
+		{
+			Contract.Requires(collection != null);
+			Contract.Requires(filter != null);
+
+			return FilteredList(collection, filter.ToFunction());
+		}
+		#endregion
+
+		#region Predicate<T> -> Func<T, bool>
+		public static Func<T, bool> ToFunction<T>(this Predicate<T> predicate)
+		{
+			Contract.Requires(predicate != null);
+
+			return new Func<T, bool>(new PredicateToFunctionConverter<T>(predicate).Function);
+		}
+
+		private sealed class PredicateToFunctionConverter<T>
+		{
+			private readonly Predicate<T> predicate;
+
+			public PredicateToFunctionConverter(Predicate<T> predicate)
+			{
+				if ( predicate == null )
+				{
+					throw new ArgumentNullException("predicate");
+				}
+
+				Contract.EndContractBlock();
+
+				this.predicate = predicate;
+			}
+
+			public bool Function(T arg)
+			{
+				return this.predicate(arg);
+			}
 		}
 		#endregion
 
@@ -246,37 +281,31 @@ namespace Digillect.Collections
 			#region Constructor
 			public ReadOnlyXCollection(IXCollection<T> collection)
 			{
-				Contract.Requires(collection != null, "collection");
-
 				if ( collection == null )
 				{
 					throw new ArgumentNullException("collection");
 				}
 
+				Contract.EndContractBlock();
+
 				this.collection = collection;
 			}
 			#endregion
 
-			#region ObjectInvariant
-			[ContractInvariantMethod]
-			[System.Diagnostics.CodeAnalysis.SuppressMessage( "Microsoft.Performance", "CA1822:MarkMembersAsStatic", Justification = "Required for code contracts." )]
-			private void ObjectInvariant()
-			{
-				Contract.Invariant(this.Count == this.collection.Count);
-			}
-			#endregion
-
 			#region IXCollection`1 Members
-			bool IXCollection<T>.Contains(XKey key)
+			[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Contracts", "CC1055", Justification = "Validation performed by underlying collection")]
+			bool IXCollection<T>.ContainsKey(XKey key)
 			{
-				return this.collection.Contains(key);
+				return this.collection.ContainsKey(key);
 			}
 
+			[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Contracts", "CC1055", Justification = "Validation performed by underlying collection")]
 			T IXCollection<T>.Find(XKey key)
 			{
 				return this.collection.Find( key );
 			}
 
+			[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Contracts", "CC1055", Justification = "Validation not needed since argument not used")]
 			bool IXCollection<T>.Remove(XKey key)
 			{
 				throw new NotSupportedException( Resources.XCollectionReadOnlyException );
@@ -287,9 +316,9 @@ namespace Digillect.Collections
 				return this.collection.GetKeys();
 			}
 
-			IXCollection<T> IXCollection<T>.Clone( bool deep )
+			public IXCollection<T> Clone(bool deep)
 			{
-				return this.collection.Clone( deep );
+				return new ReadOnlyXCollection<T>(deep ? this.collection.Clone(deep) : this.collection);
 			}
 			#endregion
 
@@ -310,11 +339,13 @@ namespace Digillect.Collections
 				throw new NotSupportedException( Resources.XCollectionReadOnlyException );
 			}
 
+			[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Contracts", "CC1055", Justification = "Validation not needed since argument not used")]
 			bool IXUpdatable<IXCollection<T>>.IsUpdateRequired(IXCollection<T> source)
 			{
-				return this.collection.IsUpdateRequired( source );
+				return false;
 			}
 
+			[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Contracts", "CC1055", Justification = "Validation not needed since argument not used")]
 			void IXUpdatable<IXCollection<T>>.Update(IXCollection<T> source )
 			{
 				throw new NotSupportedException( Resources.XCollectionReadOnlyException );
@@ -391,7 +422,7 @@ namespace Digillect.Collections
 			#region ICloneable Members
 			object ICloneable.Clone()
 			{
-				return this.collection.Clone( true );
+				return Clone(true);
 			}
 			#endregion
 #endif
@@ -410,6 +441,15 @@ namespace Digillect.Collections
 			public override string ToString()
 			{
 				return this.collection.ToString();
+			}
+			#endregion
+
+			#region ObjectInvariant
+			[ContractInvariantMethod]
+			[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1822:MarkMembersAsStatic", Justification = "Required for code contracts.")]
+			private void ObjectInvariant()
+			{
+				Contract.Invariant(this.Count == this.collection.Count);
 			}
 			#endregion
 		}
@@ -433,16 +473,8 @@ namespace Digillect.Collections
 			}
 			#endregion
 
-			#region ObjectInvariant
-			[ContractInvariantMethod]
-			[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1822:MarkMembersAsStatic", Justification = "Required for code contracts.")]
-			private void ObjectInvariant()
-			{
-				Contract.Invariant(this.Count == this.collection.Count);
-			}
-			#endregion
-
 			#region IXList`1 Members
+			[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Contracts", "CC1055", Justification = "Validation performed by underlying collection")]
 			int IXList<T>.IndexOf(XKey key)
 			{
 				return this.collection.IndexOf(key);
@@ -478,39 +510,15 @@ namespace Digillect.Collections
 				return this.collection.Equals(other);
 			}
 			#endregion
-		}
-		#endregion
 
-		#region class PredicateFilteredCollection`1
-		private class PredicateFilteredCollection<T> : XFilteredCollection<T>
-			where T : XObject
-		{
-			private readonly Predicate<T> filter;
-
-			public PredicateFilteredCollection(IXList<T> collection, Predicate<T> filter)
-				: base(collection)
+			#region ObjectInvariant
+			[ContractInvariantMethod]
+			[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1822:MarkMembersAsStatic", Justification = "Required for code contracts.")]
+			private void ObjectInvariant()
 			{
-				Contract.Requires( collection != null );
-				Contract.Requires( filter != null );
-
-				this.filter = filter;
+				Contract.Invariant(this.Count == this.collection.Count);
 			}
-
-			protected override XFilteredCollection<T> CreateInstanceOfSameType( IXList<T> collection )
-			{
-#if !(SILVERLIGHT || NETFX_CORE)
-				Predicate<T> filter = (Predicate<T>) this.filter.Clone();
-#else
-				Predicate<T> filter = this.filter;
-#endif
-
-				return new PredicateFilteredCollection<T>( collection, filter );
-			}
-
-			protected override bool Filter(T obj)
-			{
-				return this.filter(obj);
-			}
+			#endregion
 		}
 		#endregion
 
@@ -518,18 +526,22 @@ namespace Digillect.Collections
 		private class FuncFilteredCollection<T> : XFilteredCollection<T>
 			where T : XObject
 		{
-			private Func<T, bool> filter;
+			private readonly Func<T, bool> filter;
 
 			public FuncFilteredCollection(IXList<T> collection, Func<T, bool> filter)
 				: base(collection)
 			{
-				Contract.Requires( collection != null );
-				Contract.Requires( filter != null );
+				if ( filter == null )
+				{
+					throw new ArgumentNullException("filter");
+				}
+
+				Contract.Requires(collection != null);
 
 				this.filter = filter;
 			}
 
-			protected override XFilteredCollection<T> CreateInstanceOfSameType( IXList<T> collection )
+			protected override XFilteredCollection<T> CreateInstanceOfSameType(IXList<T> originalCollection)
 			{
 #if !(SILVERLIGHT || NETFX_CORE)
 				Func<T, bool> filter = (Func<T, bool>) this.filter.Clone();
@@ -537,7 +549,7 @@ namespace Digillect.Collections
 				Func<T, bool> filter = this.filter;
 #endif
 
-				return new FuncFilteredCollection<T>( collection, filter );
+				return new FuncFilteredCollection<T>(originalCollection, filter);
 			}
 
 			protected override bool Filter(T obj)

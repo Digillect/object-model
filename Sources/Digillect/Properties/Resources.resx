@@ -126,6 +126,9 @@
   <data name="XCollectionReadOnlyException" xml:space="preserve">
     <value>The target collection is read-only.</value>
   </data>
+  <data name="XObjectNullKeyException" xml:space="preserve">
+    <value>The object's key is null.</value>
+  </data>
   <data name="XObjectSourceNotCompatibleException" xml:space="preserve">
     <value>Source object is not compatible with the current one.</value>
   </data>

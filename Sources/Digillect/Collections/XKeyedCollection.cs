@@ -132,6 +132,8 @@ namespace Digillect.Collections
 				throw new ArgumentNullException("source");
 			}
 
+			Contract.Ensures(Contract.Result<CollectionUpdateResults>() != null);
+
 			if ( this.Items.IsReadOnly )
 			{
 				throw new NotSupportedException(Resources.XCollectionReadOnlyException);

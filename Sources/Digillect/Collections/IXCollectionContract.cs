@@ -6,15 +6,15 @@ using System.Diagnostics.Contracts;
 namespace Digillect.Collections
 {
 	[ContractClassFor(typeof(IXCollection<>))]
-	internal abstract class IXCollectionContract<T> : IXCollection<T>
+	abstract class IXCollectionContract<T> : IXCollection<T>
 	{
 		protected IXCollectionContract()
 		{
 		}
 
-		public bool Contains(XKey key)
+		public bool ContainsKey(XKey key)
 		{
-			Contract.Requires(key != null, "key");
+			Contract.Requires<ArgumentNullException>(key != null, "key");
 			Contract.Ensures(!Contract.Result<bool>() || this.Count > 0);
 
 			return false;
@@ -22,29 +22,30 @@ namespace Digillect.Collections
 
 		public T Find(XKey key)
 		{
-			Contract.Requires(key != null, "key");
-			//Contract.Ensures(Equals(Contract.Result<T>(), default(T)) || this.Count > 0);
+			Contract.Requires<ArgumentNullException>(key != null, "key");
+			//Contract.Ensures(Object.Equals(Contract.Result<T>(), default(T)) || this.Count > 0);
 
 			return default(T);
 		}
 
 		public bool Remove(XKey key)
 		{
-			Contract.Requires(key != null, "key");
+			Contract.Requires<ArgumentNullException>(key != null, "key");
 
 			return false;
-		}
-
-		public IXCollection<T> Clone( bool deep )
-		{
-			Contract.Ensures( Contract.Result<IXCollection<T>>() != null );
-
-			return null;
 		}
 
 		public IEnumerable<XKey> GetKeys()
 		{
 			Contract.Ensures(Contract.Result<IEnumerable<XKey>>() != null);
+
+			return null;
+		}
+
+		public IXCollection<T> Clone(bool deep)
+		{
+			Contract.Ensures(Contract.Result<IXCollection<T>>() != null);
+			//Contract.Ensures(Contract.Result<IXCollection<T>>().Equals(this));
 
 			return null;
 		}

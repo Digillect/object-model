@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
-using System.Diagnostics;
 using System.Diagnostics.Contracts;
 using System.Linq;
 
@@ -28,7 +27,7 @@ namespace Digillect.Collections
 #if !(SILVERLIGHT || NETFX_CORE)
 		[NonSerialized]
 #endif
-		private short updateCount;
+		private ushort updateCount;
 
 		#region Constructor
 		/// <summary>
@@ -126,32 +125,38 @@ namespace Digillect.Collections
 		/// </summary>
 		/// <param name="key">The key of an item to locate in the <see cref="IXCollection&lt;T&gt;"/>.</param>
 		/// <returns><see langword="true"/> if item is found in the <see cref="IXCollection&lt;T&gt;"/>; otherwise, <see langword="false"/>.</returns>
-		public bool Contains(XKey key)
+		[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Contracts", "CC1055", Justification = "Validation performed in IndexOf method")]
+		public bool ContainsKey(XKey key)
 		{
 			return IndexOf(key) != -1;
 		}
 
-		public XCollection<T> Derive(Predicate<T> filter)
+		[Pure]
+		public XCollection<T> Derive(Func<T, bool> predicate)
 		{
-			Contract.Requires(filter != null, "filter");
-			Contract.Ensures( Contract.Result<XCollection<T>>() != null );
-
-			if ( filter == null )
+			if ( predicate == null )
 			{
-				throw new ArgumentNullException("filter");
+				throw new ArgumentNullException("predicate");
 			}
 
-			var derived = (XCollection<T>) CreateInstanceOfSameType();
+			Contract.Ensures(Contract.Result<XCollection<T>>() != null);
 
-			foreach ( var item in this.Items )
-			{
-				if ( filter(item) )
-				{
-					derived.Items.Add(item);
-				}
-			}
+			var derived = CreateInstanceOfSameType();
+
+			Contract.Assume(this.Items != null);
+
+			derived.AddRange(this.Items.Where(predicate));
 
 			return derived;
+		}
+
+		[Pure]
+		public XCollection<T> Derive(Predicate<T> predicate)
+		{
+			Contract.Requires(predicate != null);
+			Contract.Ensures(Contract.Result<XCollection<T>>() != null);
+
+			return Derive(predicate.ToFunction());
 		}
 
 		/// <summary>
@@ -159,6 +164,7 @@ namespace Digillect.Collections
 		/// </summary>
 		/// <param name="key">The key of the item to find.</param>
 		/// <returns>An item with the specified key if the item exists in the <b>collection</b>; otherwise, <see langword="null"/>.</returns>
+		[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Contracts", "CC1055", Justification = "Validation performed in IndexOf method")]
 		public T Find(XKey key)
 		{
 			int index = IndexOf(key);
@@ -170,19 +176,16 @@ namespace Digillect.Collections
 
 		public void ForEach(Action<T> action)
 		{
-			Contract.Requires(action != null, "action");
-
 			if ( action == null )
 			{
 				throw new ArgumentNullException("action");
 			}
 
-			if( this.Items.Count > 0 )
+			Contract.EndContractBlock();
+
+			for ( int i = 0; i < this.Items.Count; i++ )
 			{
-				for ( int i = 0; i < this.Items.Count; i++ )
-				{
-					action(this.Items[i]);
-				}
+				action(this.Items[i]);
 			}
 		}
 
@@ -190,7 +193,7 @@ namespace Digillect.Collections
 		{
 			Contract.Assume(this.Items != null);
 
-			return this.Items.Select( obj => obj == null ? null : obj.GetKey() );
+			return this.Items.Select(x => x.GetKey());
 		}
 
 		/// <summary>
@@ -200,11 +203,16 @@ namespace Digillect.Collections
 		/// <returns>The index of item if found in the list; otherwise, -1.</returns>
 		public int IndexOf(XKey key)
 		{
+			if ( key == null )
+			{
+				throw new ArgumentNullException("key");
+			}
+
+			Contract.EndContractBlock();
+
 			for ( int i = 0; i < this.Items.Count; i++ )
 			{
-				var item = this.Items[i];
-
-				if ( item != null && Equals(item.GetKey(), key) )
+				if ( key.Equals(this.Items[i].GetKey()) )
 				{
 					Contract.Assume(i < this.Count);
 
@@ -217,10 +225,7 @@ namespace Digillect.Collections
 
 		public void InsertRange(int index, IEnumerable<T> collection)
 		{
-			Contract.Requires(0 <= index && index <= this.Count, "index");
-			Contract.Requires(collection != null, "collection");
-
-			if ( 0 < index || index > this.Count )
+			if ( index < 0 || index > this.Count )
 			{
 				throw new ArgumentOutOfRangeException("index");
 			}
@@ -230,22 +235,25 @@ namespace Digillect.Collections
 				throw new ArgumentNullException("collection");
 			}
 
+			Contract.EndContractBlock();
+
 			List<T> is2 = this.Items as List<T>;
 
 			if ( is2 != null )
 			{
+				var items = collection.Where(x => x != null).ToArray();
 				Contract.Assume(index <= is2.Count);
-				is2.InsertRange(index, collection);
-				OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Add, collection.ToArray(), index));
+				is2.InsertRange(index, items);
+				OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Add, items, index));
 			}
 			else
 			{
-				using ( IEnumerator<T> enumerator = collection.GetEnumerator() )
+				foreach ( var item in collection )
 				{
-					while ( enumerator.MoveNext() )
+					if ( item != null )
 					{
-						Contract.Assume(index <= this.Count);
-						Insert(index++, enumerator.Current);
+						Contract.Assume(0 <= index && index <= this.Count);
+						Insert(index++, item);
 					}
 				}
 			}
@@ -259,6 +267,7 @@ namespace Digillect.Collections
 		/// <see langword="true"/> if item was successfully removed from the <b>collection</b>; otherwise, <see langword="false"/>.
 		/// This method also returns <see langword="false"/> if an item was not found in the <b>collection</b>.
 		/// </returns>
+		[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Contracts", "CC1055", Justification = "Validation performed in IndexOf method")]
 		public bool Remove(XKey key)
 		{
 			int index = IndexOf(key);
@@ -273,6 +282,7 @@ namespace Digillect.Collections
 			return true;
 		}
 
+		[Pure]
 		public T[] ToArray()
 		{
 			Contract.Ensures( Contract.Result<T[]>() != null );
@@ -284,7 +294,6 @@ namespace Digillect.Collections
 			return array;
 		}
 		#endregion
-
 
 #if !(SILVERLIGHT || NETFX_CORE)
 		#region ICloneable Members
@@ -308,6 +317,8 @@ namespace Digillect.Collections
 		/// <returns>Cloned copy of the collection.</returns>
 		public virtual XCollection<T> Clone( bool deep )
 		{
+			Contract.Ensures(Contract.Result<XCollection<T>>() != null);
+
 			var clone = CreateInstanceOfSameType();
 
 			ProcessClone( clone, deep );
@@ -317,10 +328,12 @@ namespace Digillect.Collections
 
 		protected virtual void ProcessClone( XCollection<T> clone, bool deep )
 		{
-			if( clone == null )
+			if ( clone == null )
 			{
-				throw new ArgumentNullException( "clone" );
+				throw new ArgumentNullException("clone");
 			}
+
+			Contract.EndContractBlock();
 
 			foreach( var item in this.Items )
 			{
@@ -332,6 +345,7 @@ namespace Digillect.Collections
 		#endregion
 
 		[EditorBrowsable( EditorBrowsableState.Advanced )]
+		[Pure]
 #if false // !(SILVERLIGHT || NETFX_CORE)
 		[System.Security.Permissions.ReflectionPermission(System.Security.Permissions.SecurityAction.Demand, RestrictedMemberAccess = true)]
 #endif
@@ -386,6 +400,7 @@ namespace Digillect.Collections
 			}
 		}
 
+		[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Contracts", "CC1055", Justification = "Validation performed by delegated method")]
 		bool IXUpdatable<IXCollection<T>>.IsUpdateRequired(IXCollection<T> source)
 		{
 			return IsUpdateRequired(source, CollectionUpdateOptions.All);
@@ -399,9 +414,10 @@ namespace Digillect.Collections
 		/// <returns><see langword="false"/> if two collections are the same (equal by reference), otherwise, <see langword="true"/>.</returns>
 		public virtual bool IsUpdateRequired(IEnumerable<T> source, CollectionUpdateOptions options)
 		{
-			return !ReferenceEquals(this, source);
+			return !Object.ReferenceEquals(this, source);
 		}
 
+		[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Contracts", "CC1055", Justification = "Validation performed by delegated method")]
 		void IXUpdatable<IXCollection<T>>.Update(IXCollection<T> source)
 		{
 			Update(source, CollectionUpdateOptions.All);
@@ -417,7 +433,7 @@ namespace Digillect.Collections
 		/// </remarks>
 		public CollectionUpdateResults Update(IEnumerable<T> source)
 		{
-			Contract.Requires(source != null, "source");
+			Contract.Requires(source != null);
 			Contract.Ensures(Contract.Result<CollectionUpdateResults>() != null);
 
 			return Update(source, CollectionUpdateOptions.All);
@@ -432,13 +448,12 @@ namespace Digillect.Collections
 		[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Maintainability", "CA1502:AvoidExcessiveComplexity")]
 		public virtual CollectionUpdateResults Update(IEnumerable<T> source, CollectionUpdateOptions options)
 		{
-			Contract.Requires(source != null, "source");
-			Contract.Ensures(Contract.Result<CollectionUpdateResults>() != null);
-
 			if ( source == null )
 			{
 				throw new ArgumentNullException("source");
 			}
+
+			Contract.Ensures(Contract.Result<CollectionUpdateResults>() != null);
 
 			if ( this.Items.IsReadOnly )
 			{
@@ -635,7 +650,9 @@ namespace Digillect.Collections
 
 			foreach ( T item in this.Items )
 			{
-				if ( item == null || !Equals(item, other.Find(item.GetKey())) )
+				XKey key = item.GetKey();
+
+				if ( key == null || !item.Equals(other.Find(key)) )
 				{
 					return false;
 				}
@@ -651,17 +668,21 @@ namespace Digillect.Collections
 				return false;
 			}
 
+#if true
+			return this.Items.SequenceEqual(other);
+#else
 			for ( int i = 0; i < this.Items.Count; i++ )
 			{
 				T item = this.Items[i];
 
-				if ( !Equals(item, other[i]) )
+				if ( !Object.Equals(item, other[i]) )
 				{
 					return false;
 				}
 			}
 
 			return true;
+#endif
 		}
 		#endregion
 
@@ -718,7 +739,7 @@ namespace Digillect.Collections
 		{
 			T oldItem = this.Items[index];
 
-			if ( ReferenceEquals(item, oldItem) )
+			if ( Object.ReferenceEquals(item, oldItem) )
 			{
 				return;
 			}
@@ -793,20 +814,30 @@ namespace Digillect.Collections
 		public override bool Equals(object obj)
 		{
 			if ( obj == null || GetType() != obj.GetType() )
+			{
 				return false;
+			}
 
-			XCollection<T> src = (XCollection<T>) obj;
+			XCollection<T> other = (XCollection<T>) obj;
 
-			if ( this.Items.Count != src.Items.Count )
+			if ( this.Items.Count != other.Items.Count )
+			{
 				return false;
+			}
 
+#if true
+			return this.Items.SequenceEqual(other.Items);
+#else
 			for ( int i = 0; i < this.Items.Count; i++ )
 			{
-				if ( !Equals(this.Items[i], src.Items[i]) )
+				if ( !Object.Equals(this.Items[i], other.Items[i]) )
+				{
 					return false;
+				}
 			}
 
 			return true;
+#endif
 		}
 
 		public override int GetHashCode()
@@ -814,8 +845,9 @@ namespace Digillect.Collections
 			int hashCode = this.Items.Count;
 
 			foreach ( T item in this.Items )
-				if( item != null )
-					hashCode ^= item.GetHashCode();
+			{
+				hashCode ^= item.GetHashCode();
+			}
 
 			return hashCode;
 		}

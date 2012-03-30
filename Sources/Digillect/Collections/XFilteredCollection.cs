@@ -10,6 +10,7 @@ using Digillect.Properties;
 
 namespace Digillect.Collections
 {
+	[ContractClass(typeof(XFilteredCollectionContract<>))]
 #if !(SILVERLIGHT || NETFX_CORE)
 	[Serializable]
 #endif
@@ -27,12 +28,12 @@ namespace Digillect.Collections
 		#region Constructor/Disposer
 		protected XFilteredCollection(IXList<T> originalCollection)
 		{
-			Contract.Requires(originalCollection != null, "originalCollection");
-
 			if ( originalCollection == null )
 			{
 				throw new ArgumentNullException("originalCollection");
 			}
+
+			Contract.EndContractBlock();
 
 			this.originalCollection = originalCollection;
 
@@ -62,6 +63,7 @@ namespace Digillect.Collections
 		#endregion
 
 		#region IXList`1 Members
+		[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Contracts", "CC1055", Justification = "Validation performed by underlying collection")]
 		public int IndexOf(XKey key)
 		{
 			return CalcFilteredIndex(this.originalCollection.IndexOf(key));
@@ -71,11 +73,13 @@ namespace Digillect.Collections
 		#region IXCollection`1 Members
 		public event NotifyCollectionChangedEventHandler CollectionChanged;
 
-		public bool Contains(XKey key)
+		[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Contracts", "CC1055", Justification = "Validation performed in Find method")]
+		public bool ContainsKey(XKey key)
 		{
 			return Find(key) != null;
 		}
 
+		[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Contracts", "CC1055", Justification = "Validation performed by underlying collection")]
 		public T Find(XKey key)
 		{
 			T obj = this.originalCollection.Find(key);
@@ -85,9 +89,10 @@ namespace Digillect.Collections
 
 		public IEnumerable<XKey> GetKeys()
 		{
-			return this.Select(obj => obj == null ? null : obj.GetKey());
+			return this.Select(x => x.GetKey());
 		}
 
+		[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Contracts", "CC1055", Justification = "Validation not needed since argument not used")]
 		bool IXCollection<T>.Remove(XKey key)
 		{
 			throw new NotSupportedException( Resources.XCollectionReadOnlyException );
@@ -100,7 +105,9 @@ namespace Digillect.Collections
 
 		public virtual XFilteredCollection<T> Clone( bool deep )
 		{
-			IXList<T> collection = deep ? (IXList<T>) this.originalCollection.Clone( true ) : this.originalCollection;
+			Contract.Ensures(Contract.Result<XFilteredCollection<T>>() != null);
+
+			IXList<T> collection = deep ? (IXList<T>) this.originalCollection.Clone(true) : this.originalCollection;
 
 			return CreateInstanceOfSameType( collection );
 		}
@@ -123,12 +130,14 @@ namespace Digillect.Collections
 			throw new NotSupportedException(Resources.XCollectionReadOnlyException);
 		}
 
+		[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Contracts", "CC1055", Justification = "Validation not needed since argument not used")]
 		bool IXUpdatable<IXCollection<T>>.IsUpdateRequired(IXCollection<T> source)
 		{
 			return false;
 		}
 
-		void IXUpdatable<IXCollection<T>>.Update( IXCollection<T> source )
+		[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Contracts", "CC1055", Justification = "Validation not needed since argument not used")]
+		void IXUpdatable<IXCollection<T>>.Update(IXCollection<T> source)
 		{
 			throw new NotSupportedException(Resources.XCollectionReadOnlyException);
 		}
@@ -277,7 +286,9 @@ namespace Digillect.Collections
 
 			foreach ( T item in this )
 			{
-				if ( item == null || !Equals(item, other.Find(item.GetKey())) )
+				XKey key = item.GetKey();
+
+				if ( key == null || !item.Equals(other.Find(key)) )
 				{
 					return false;
 				}
@@ -293,17 +304,19 @@ namespace Digillect.Collections
 				return false;
 			}
 
+#if true
+			return this.SequenceEqual(other);
+#else
 			for ( int i = 0; i < this.Count; i++ )
 			{
-				T item = this[i];
-
-				if ( !Equals(item, other[i]) )
+				if ( !Object.Equals(this[i], other[i]) )
 				{
 					return false;
 				}
 			}
 
 			return true;
+#endif		
 		}
 		#endregion
 
@@ -317,13 +330,20 @@ namespace Digillect.Collections
 #endif
 
 		#region Protected Methods
-		protected abstract XFilteredCollection<T> CreateInstanceOfSameType( IXList<T> collection );
+		/// <summary>
+		/// This method supports the <see cref="Clone"/> infrastructure.
+		/// </summary>
+		/// <param name="originalCollection">The original collection used to construct a filtered one.</param>
+		/// <returns>New collection identical to the current one.</returns>
+		[Pure]
+		protected abstract XFilteredCollection<T> CreateInstanceOfSameType(IXList<T> originalCollection);
 
 		/// <summary>
 		/// Determines whether an item satisfies a filtering criteria.
 		/// </summary>
 		/// <param name="obj">An item to check.</param>
 		/// <returns><see langword="true"/> if the item passes the filter; otherwise, <see langword="false"/>.</returns>
+		[Pure]
 		protected abstract bool Filter(T obj);
 
 		protected int CalcFilteredIndex(int originalIndex)
@@ -475,4 +495,23 @@ namespace Digillect.Collections
 		}
 		#endregion
 	}
+
+	#region class XFilteredCollectionContract`1
+	[ContractClassFor(typeof(XFilteredCollection<>))]
+	abstract class XFilteredCollectionContract<T> : XFilteredCollection<T>
+		where T : XObject
+	{
+		protected XFilteredCollectionContract()
+			: base(null)
+		{
+		}
+
+		protected override XFilteredCollection<T> CreateInstanceOfSameType(IXList<T> originalCollection)
+		{
+			Contract.Ensures(Contract.Result<XFilteredCollection<T>>() != null);
+
+			return null;
+		}
+	}
+	#endregion
 }

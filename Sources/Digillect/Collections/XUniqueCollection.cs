@@ -41,7 +41,14 @@ namespace Digillect.Collections
 		{
 			base.OnInsert(index, item);
 
-			if ( Contains(item.GetKey()) )
+			XKey key = item.GetKey();
+
+			if ( key == null )
+			{
+				throw new ArgumentException(Resources.XObjectNullKeyException, "item");
+			}
+
+			if ( ContainsKey(key) )
 			{
 				throw new ArgumentException(Resources.XCollectionItemDuplicateException, "item");
 			}
@@ -51,7 +58,14 @@ namespace Digillect.Collections
 		{
 			base.OnSet(index, oldItem, newItem);
 
-			if ( !Equals(newItem.GetKey(), oldItem.GetKey()) && Contains(newItem.GetKey()) )
+			XKey key = newItem.GetKey();
+
+			if ( key == null )
+			{
+				throw new ArgumentException(Resources.XObjectNullKeyException, "newItem");
+			}
+
+			if ( !key.Equals(oldItem.GetKey()) && ContainsKey(key) )
 			{
 				throw new ArgumentException(Resources.XCollectionItemDuplicateException, "newItem");
 			}

@@ -6,7 +6,7 @@ using System.Diagnostics.Contracts;
 namespace Digillect.Collections
 {
 	[ContractClassFor(typeof(IXList<>))]
-	internal abstract class IXListContract<T> : IXList<T>
+	abstract class IXListContract<T> : IXList<T>
 	{
 		protected IXListContract()
 		{
@@ -14,15 +14,16 @@ namespace Digillect.Collections
 
 		public int IndexOf(XKey key)
 		{
-			Contract.Requires(key != null, "key");
+			Contract.Requires<ArgumentNullException>(key != null, "key");
 			Contract.Ensures(Contract.Result<int>() >= -1);
 			Contract.Ensures(Contract.Result<int>() < this.Count);
+			Contract.Ensures(Contract.Result<int>() == -1 || this.Count > 0);
 
 			return -1;
 		}
 
 		#region IXCollection<T> Members
-		bool IXCollection<T>.Contains(XKey key)
+		bool IXCollection<T>.ContainsKey(XKey key)
 		{
 			return false;
 		}
@@ -42,10 +43,8 @@ namespace Digillect.Collections
 			return null;
 		}
 
-		public IXCollection<T> Clone( bool deep )
+		IXCollection<T> IXCollection<T>.Clone(bool deep)
 		{
-			Contract.Ensures( Contract.Result<IXCollection<T>>() != null );
-
 			return null;
 		}
 		#endregion

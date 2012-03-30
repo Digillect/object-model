@@ -135,7 +135,6 @@ namespace Digillect
 		}
 		#endregion
 
-
 #if !(SILVERLIGHT || NETFX_CORE)
 		#region ICloneable Members
 		object ICloneable.Clone()
@@ -148,6 +147,8 @@ namespace Digillect
 		#region Clone/Update
 		public XObject Clone( bool deep )
 		{
+			Contract.Ensures(Contract.Result<XObject>() != null);
+
 			XObject clone = CreateInstanceOfSameType();
 
 			clone.ProcessCopy( this, true, deep );
@@ -159,22 +160,37 @@ namespace Digillect
 		/// </summary>
 		/// <param name="source">Source object to compare with.</param>
 		/// <returns>
-		///   <c>true</c> if update is required; otherwise, <c>false</c>.
+		/// <c>true</c> if update is required; otherwise, <c>false</c>.
 		/// </returns>
-		/// <remarks>Overrride to provide custom logic. Default implementation requires update any time when
-		/// objects are not equal by reference.</remarks>
-		public virtual bool IsUpdateRequired( XObject source )
+		/// <remarks>
+		/// Overrride to provide custom logic. Default implementation requires update any time when objects are not equal by reference.
+		/// </remarks>
+		public virtual bool IsUpdateRequired(XObject source)
 		{
-			return !ReferenceEquals( this, source );
+			if ( source == null )
+			{
+				throw new ArgumentNullException("source");
+			}
+
+			Contract.EndContractBlock();
+
+			return !Object.ReferenceEquals(this, source);
 		}
 
 		/// <summary>
 		/// Updates object from the specified source.
 		/// </summary>
 		/// <param name="source">The source.</param>
-		public void Update( XObject source )
+		public void Update(XObject source)
 		{
-			if( !IsObjectCompatible( source ) )
+			if ( source == null )
+			{
+				throw new ArgumentNullException("source");
+			}
+
+			Contract.EndContractBlock();
+
+			if ( !IsObjectCompatible(source) )
 				throw new ArgumentException( Resources.XObjectSourceNotCompatibleException, "source" );
 
 			if( IsUpdateRequired( source ) )
@@ -193,12 +209,12 @@ namespace Digillect
 		/// <param name="deepCloning"><c>true</c> if performing deep cloning, otherwise, <c>false</c>.</param>
 		protected virtual void ProcessCopy( XObject source, bool cloning, bool deepCloning )
 		{
-			Contract.Requires(source != null, "source");
-
 			if ( source == null )
 			{
 				throw new ArgumentNullException("source");
 			}
+
+			Contract.EndContractBlock();
 
 			this.key = source.key;
 		}
@@ -208,13 +224,15 @@ namespace Digillect
 		/// </summary>
 		/// <param name="obj">The obj.</param>
 		/// <returns><c>true</c> if <paramref name="obj"/> can be used as source for <see cref="Update"/>, otherwise <c>false</c>.</returns>
-		[Pure, EditorBrowsable( EditorBrowsableState.Advanced )]
+		[EditorBrowsable(EditorBrowsableState.Advanced)]
+		[Pure]
 		public virtual bool IsObjectCompatible( XObject obj )
 		{
 			return obj != null && obj.GetType() == GetType();
 		}
 
 		[EditorBrowsable( EditorBrowsableState.Advanced )]
+		[Pure]
 #if false // !(SILVERLIGHT || NETFX_CORE)
 		[System.Security.Permissions.ReflectionPermission(System.Security.Permissions.SecurityAction.Demand, RestrictedMemberAccess = true)]
 #endif

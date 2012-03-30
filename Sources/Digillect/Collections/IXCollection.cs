@@ -18,7 +18,7 @@ namespace Digillect.Collections
 		/// <param name="key">The key of an item to locate in the <see cref="IXCollection&lt;T&gt;"/>.</param>
 		/// <returns><see langword="true"/> if item is found in the <see cref="IXCollection&lt;T&gt;"/>; otherwise, <see langword="false"/>.</returns>
 		[Pure]
-		bool Contains(XKey key);
+		bool ContainsKey(XKey key);
 
 		/// <summary>
 		/// Gets an item with the specific key.
@@ -51,6 +51,7 @@ namespace Digillect.Collections
 		/// </summary>
 		/// <param name="deep"><see langword="true"/> to deep-clone inner collections (including their members), <see langword="false"/> to clone only inner collections but not their members.</param>
 		/// <returns>Cloned copy of the collection.</returns>
+		[Pure]
 		IXCollection<T> Clone( bool deep );
 	}
 }

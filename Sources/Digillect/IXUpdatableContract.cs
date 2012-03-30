@@ -4,7 +4,7 @@ using System.Diagnostics.Contracts;
 namespace Digillect
 {
 	[ContractClassFor(typeof(IXUpdatable<>))]
-	internal abstract class IXUpdatableContract<T> : IXUpdatable<T>
+	abstract class IXUpdatableContract<T> : IXUpdatable<T>
 		where T : IXUpdatable<T>
 	{
 		protected IXUpdatableContract()
@@ -18,14 +18,14 @@ namespace Digillect
 
 		public bool IsUpdateRequired(T source)
 		{
-			Contract.Requires(source != null, "source");
+			Contract.Requires<ArgumentNullException>(source != null, "source");
 
 			return false;
 		}
 
 		public void Update(T source)
 		{
-			Contract.Requires(source != null, "source");
+			Contract.Requires<ArgumentNullException>(source != null, "source");
 		}
 	}
 }
