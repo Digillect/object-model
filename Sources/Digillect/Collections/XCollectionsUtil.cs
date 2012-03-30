@@ -546,6 +546,7 @@ namespace Digillect.Collections
 #if !(SILVERLIGHT || NETFX_CORE)
 				Func<T, bool> filter = (Func<T, bool>) this.filter.Clone();
 #else
+				Contract.Assume(this.filter != null);
 				Func<T, bool> filter = this.filter;
 #endif
 

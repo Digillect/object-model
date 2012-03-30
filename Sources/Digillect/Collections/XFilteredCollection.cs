@@ -74,6 +74,7 @@ namespace Digillect.Collections
 		public event NotifyCollectionChangedEventHandler CollectionChanged;
 
 		[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Contracts", "CC1055", Justification = "Validation performed in Find method")]
+		[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Contracts", "Ensures", Justification = "Ensured by Find method")]
 		public bool ContainsKey(XKey key)
 		{
 			return Find(key) != null;
