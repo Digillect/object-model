@@ -126,6 +126,9 @@
   <data name="XCollectionReadOnlyException" xml:space="preserve">
     <value>The target collection is read-only.</value>
   </data>
+  <data name="XObjectIdentifierNotCloneable" xml:space="preserve">
+    <value>The identifier dos not support the ICloneable interface required for object cloning.</value>
+  </data>
   <data name="XObjectNullKeyException" xml:space="preserve">
     <value>The object's key is null.</value>
   </data>

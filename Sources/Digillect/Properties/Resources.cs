@@ -43,6 +43,14 @@ namespace Digillect.Properties
 			}
 		}
 
+		internal static string XObjectIdentifierNotCloneable
+		{
+			get
+			{
+				return ResourceLoader.GetString("XObjectIdentifierNotCloneable");
+			}
+		}
+
 		internal static string XObjectNullKeyException
 		{
 			get

@@ -88,6 +88,15 @@ namespace Digillect.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The identifier dos not support the ICloneable interface required for object cloning..
+        /// </summary>
+        internal static string XObjectIdentifierNotCloneable {
+            get {
+                return ResourceManager.GetString("XObjectIdentifierNotCloneable", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The object&apos;s key is null..
         /// </summary>
         internal static string XObjectNullKeyException {

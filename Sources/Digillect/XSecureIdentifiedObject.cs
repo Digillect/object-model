@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Runtime.Serialization;
 
+using Digillect.Properties;
+
 namespace Digillect
 {
 	/// <summary>
@@ -109,16 +111,35 @@ namespace Digillect
 		/// <param name="source">The source.</param>
 		/// <param name="cloning"><c>true</c> if cloning source, otherwise, <c>false</c>.</param>
 		/// <param name="deepCloning"><c>true</c> if performing deep cloning, otherwise, <c>false</c>.</param>
+		[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Contracts", "CC1055", Justification = "Validation performed in base method")]
 		protected override void ProcessCopy( XObject source, bool cloning, bool deepCloning )
 		{
 			base.ProcessCopy( source, cloning, deepCloning );
 
-			/*
-			 * GN: IMHO not needed, since IsObjectCompatible ensures that source object has the same id.
 			XSecureIdentifiedObject<TId> obj = (XSecureIdentifiedObject<TId>) source;
 
-			this.id = obj.id;
-			*/
+			if ( cloning )
+			{
+				if ( obj.id is ValueType || obj.id is string )
+				{
+					this.id = obj.id;
+				}
+				else
+				{
+#if !(SILVERLIGHT || NETFX_CORE)
+					ICloneable icl = obj.id as ICloneable;
+
+					if ( icl != null )
+					{
+						this.id = (TId) icl.Clone();
+					}
+					else
+#endif
+					{
+						throw new InvalidOperationException(Resources.XObjectIdentifierNotCloneable);
+					}
+				}
+			}
 		}
 
 		/// <summary>
