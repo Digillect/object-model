@@ -9,7 +9,9 @@ namespace Digillect.Collections
 	/// Represents a collection of objects which can be accessed by a key.
 	/// </summary>
 	/// <typeparam name="T">Type of the collection's members.</typeparam>
+#if DEBUG || CONTRACTS_FULL
 	[ContractClass(typeof(IXCollectionContract<>))]
+#endif
 	public interface IXCollection<T> : ICollection<T>, IXUpdatable<IXCollection<T>>, IEquatable<IXCollection<T>>, INotifyCollectionChanged
 	{
 		/// <summary>

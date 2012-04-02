@@ -5,6 +5,7 @@ using System.Diagnostics.Contracts;
 
 namespace Digillect.Collections
 {
+#if DEBUG || CONTRACTS_FULL
 	[ContractClassFor(typeof(IXCollection<>))]
 	abstract class IXCollectionContract<T> : IXCollection<T>
 	{
@@ -138,4 +139,5 @@ namespace Digillect.Collections
 		}
 		#endregion
 	}
+#endif
 }

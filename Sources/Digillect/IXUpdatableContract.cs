@@ -3,6 +3,7 @@ using System.Diagnostics.Contracts;
 
 namespace Digillect
 {
+#if DEBUG || CONTRACTS_FULL
 	[ContractClassFor(typeof(IXUpdatable<>))]
 	abstract class IXUpdatableContract<T> : IXUpdatable<T>
 		where T : IXUpdatable<T>
@@ -28,4 +29,5 @@ namespace Digillect
 			Contract.Requires<ArgumentNullException>(source != null, "source");
 		}
 	}
+#endif
 }

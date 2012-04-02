@@ -10,7 +10,9 @@ using Digillect.Properties;
 
 namespace Digillect.Collections
 {
+#if DEBUG || CONTRACTS_FULL
 	[ContractClass(typeof(XFilteredCollectionContract<>))]
+#endif
 #if !(SILVERLIGHT || NETFX_CORE)
 	[Serializable]
 #endif
@@ -498,6 +500,7 @@ namespace Digillect.Collections
 	}
 
 	#region class XFilteredCollectionContract`1
+#if DEBUG || CONTRACTS_FULL
 	[ContractClassFor(typeof(XFilteredCollection<>))]
 	abstract class XFilteredCollectionContract<T> : XFilteredCollection<T>
 		where T : XObject
@@ -514,5 +517,6 @@ namespace Digillect.Collections
 			return null;
 		}
 	}
+#endif
 	#endregion
 }

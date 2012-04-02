@@ -7,7 +7,9 @@ namespace Digillect
 	/// Specifies that class supports update operations.
 	/// </summary>
 	/// <typeparam name="T"></typeparam>
+#if DEBUG || CONTRACTS_FULL
 	[ContractClass( typeof( IXUpdatableContract<> ) )]
+#endif
 	public interface IXUpdatable<T>
 		where T : IXUpdatable<T>
 	{

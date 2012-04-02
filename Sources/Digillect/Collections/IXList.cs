@@ -8,7 +8,9 @@ namespace Digillect.Collections
 	/// Represents an indexed collection of objects which can also be accessed by a key.
 	/// </summary>
 	/// <typeparam name="T">Type of the collection's members.</typeparam>
+#if DEBUG || CONTRACTS_FULL
 	[ContractClass(typeof(IXListContract<>))]
+#endif
 	[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1710:IdentifiersShouldHaveCorrectSuffix")]
 	public interface IXList<T> : IXCollection<T>, IList<T>, IEquatable<IXList<T>>
 	{
