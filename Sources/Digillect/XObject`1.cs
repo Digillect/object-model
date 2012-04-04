@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Diagnostics.Contracts;
 using System.Runtime.Serialization;
 
 using Digillect.Properties;
@@ -82,10 +83,16 @@ namespace Digillect
 		/// <param name="source">The source of update.</param>
 		/// <param name="cloning"><c>true</c> if cloning source, otherwise, <c>false</c>.</param>
 		/// <param name="deepCloning"><c>true</c> if performing deep cloning, otherwise, <c>false</c>.</param>
-		[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Contracts", "CC1055", Justification = "Validation performed in base method")]
 		protected override void ProcessCopy( XObject source, bool cloning, bool deepCloning )
 		{
-			base.ProcessCopy( source, cloning, deepCloning );
+			if ( source == null )
+			{
+				throw new ArgumentNullException("source");
+			}
+
+			Contract.EndContractBlock();
+
+			base.ProcessCopy(source, cloning, deepCloning);
 
 			XObject<TId> obj = (XObject<TId>) source;
 

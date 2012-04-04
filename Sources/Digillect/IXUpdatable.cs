@@ -28,7 +28,7 @@ namespace Digillect
 		/// Ends the mass-update operation.
 		/// </summary>
 		/// <remarks>
-		/// Do not forget to call this method for each corresponding <see cref="BeginUpdate"/> method you called.
+		/// Do not forget to call this method for each corresponding <see cref="BeginUpdate"/> method you've called.
 		/// Until the last corresponding <see cref="EndUpdate()"/> method is called none of the <see cref="Updated"/> events are raised.
 		/// </remarks>
 		void EndUpdate();
@@ -46,8 +46,8 @@ namespace Digillect
 		/// </summary>
 		/// <param name="source">Source object.</param>
 		/// <remarks>
-		/// At the end of update <see cref="Updated"/> event is raised if not blocked by call to <see cref="BeginUpdate"/>. In the
-		/// later scenario <see cref="Updated"/> event will be raised upon the call to <see cref="EndUpdate"/>.
+		/// At the end of update <see cref="Updated"/> event is raised if not blocked by call to <see cref="BeginUpdate"/>.
+		/// In the later scenario <see cref="Updated"/> event will be raised upon the call to <see cref="EndUpdate"/>.
 		/// </remarks>
 		void Update(T source);
 	}

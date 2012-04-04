@@ -92,8 +92,8 @@
     </Compile>
     <Compile Include="Runtime\CompilerServices\AutoNotifyPropertyChangesAttribute.cs" />
     <Compile Include="Runtime\CompilerServices\AutoNotifyPropertyChangesMethodsAttribute.cs" />
-    <Compile Include="Collections\CollectionUpdateOptions.cs" />
-    <Compile Include="Collections\CollectionUpdateResults.cs" />
+    <Compile Include="Collections\CollectionMergeOptions.cs" />
+    <Compile Include="Collections\CollectionMergeResults.cs" />
     <Compile Include="Collections\IXCollection.cs" />
     <Compile Include="Collections\IXList.cs" />
     <Compile Include="Collections\XCollection.cs" />
@@ -104,6 +104,7 @@
     <Compile Include="ComponentModel\PropertyChangingEventArgs.cs" />
     <Compile Include="Runtime\CompilerServices\AutoNotifyAdditionalPropertiesAttribute.cs" />
     <Compile Include="Runtime\CompilerServices\GenerateEqualsAndGetHashCodeAttribute.cs" />
+    <Compile Include="ContractExtensions.cs" />
     <Compile Include="GlobalSuppressions.cs" />
     <Compile Include="IXIdentifiable.cs" />
     <Compile Include="IXUpdatable.cs" />
@@ -128,6 +129,12 @@
     </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <CompileDependsOn>$(CompileDependsOn);CheckForCodeContracts</CompileDependsOn>
+  </PropertyGroup>
+  <Target Name="CheckForCodeContracts" Condition=" '$(CodeContractsImported)' != 'true' ">
+    <Error Text="Project requires Code Contracts http://msdn.microsoft.com/en us/devlabs/dd491992.aspx" />
+  </Target>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">

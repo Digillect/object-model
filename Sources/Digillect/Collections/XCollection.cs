@@ -44,6 +44,7 @@ namespace Digillect.Collections
 		public XCollection(IEnumerable<T> collection)
 			: base(new List<T>(collection))
 		{
+			ValidateCollection(collection);
 		}
 
 #if false
@@ -116,6 +117,7 @@ namespace Digillect.Collections
 		public void AddRange(IEnumerable<T> collection)
 		{
 			Contract.Requires( collection != null );
+			Contract.Requires(Contract.ForAll(collection, x => x != null));
 
 			InsertRange(this.Count, collection);
 		}
@@ -125,13 +127,15 @@ namespace Digillect.Collections
 		/// </summary>
 		/// <param name="key">The key of an item to locate in the <see cref="IXCollection&lt;T&gt;"/>.</param>
 		/// <returns><see langword="true"/> if item is found in the <see cref="IXCollection&lt;T&gt;"/>; otherwise, <see langword="false"/>.</returns>
-		[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Contracts", "CC1055", Justification = "Validation performed in IndexOf method")]
 		public bool ContainsKey(XKey key)
 		{
 			return IndexOf(key) != -1;
 		}
 
 		[Pure]
+#if WINDOWS_PHONE && CODE_ANALYSIS
+		[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA2140:TransparentMethodsMustNotReferenceCriticalCodeFxCopRule")]
+#endif
 		public XCollection<T> Derive(Func<T, bool> predicate)
 		{
 			if ( predicate == null )
@@ -159,11 +163,15 @@ namespace Digillect.Collections
 			return Derive(predicate.ToFunction());
 		}
 
+#if false
 		/// <summary>
 		/// Gets an item with the specific key.
 		/// </summary>
 		/// <param name="key">The key of the item to find.</param>
 		/// <returns>An item with the specified key if the item exists in the <b>collection</b>; otherwise, <see langword="null"/>.</returns>
+#if WINDOWS_PHONE && CODE_ANALYSIS
+		[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA2140:TransparentMethodsMustNotReferenceCriticalCodeFxCopRule")]
+#endif
 		[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Contracts", "CC1055", Justification = "Validation performed in IndexOf method")]
 		public T Find(XKey key)
 		{
@@ -173,6 +181,7 @@ namespace Digillect.Collections
 
 			return index == -1 ? null : this.Items[index];
 		}
+#endif
 
 		public void ForEach(Action<T> action)
 		{
@@ -189,6 +198,9 @@ namespace Digillect.Collections
 			}
 		}
 
+#if WINDOWS_PHONE && CODE_ANALYSIS
+		[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA2140:TransparentMethodsMustNotReferenceCriticalCodeFxCopRule")]
+#endif
 		public IEnumerable<XKey> GetKeys()
 		{
 			Contract.Assume(this.Items != null);
@@ -201,6 +213,9 @@ namespace Digillect.Collections
 		/// </summary>
 		/// <param name="key">The key of an item to locate in the <b>collection</b>.</param>
 		/// <returns>The index of item if found in the list; otherwise, -1.</returns>
+#if WINDOWS_PHONE && CODE_ANALYSIS
+		[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA2140:TransparentMethodsMustNotReferenceCriticalCodeFxCopRule")]
+#endif
 		public int IndexOf(XKey key)
 		{
 			if ( key == null )
@@ -223,6 +238,10 @@ namespace Digillect.Collections
 			return -1;
 		}
 
+#if WINDOWS_PHONE && CODE_ANALYSIS
+		[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA2140:TransparentMethodsMustNotReferenceCriticalCodeFxCopRule")]
+#endif
+		[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1062:Validate arguments of public methods", MessageId = "1", Justification = "Indeed validated")]
 		public void InsertRange(int index, IEnumerable<T> collection)
 		{
 			if ( index < 0 || index > this.Count )
@@ -230,10 +249,7 @@ namespace Digillect.Collections
 				throw new ArgumentOutOfRangeException("index");
 			}
 
-			if ( collection == null )
-			{
-				throw new ArgumentNullException("collection");
-			}
+			ValidateCollection(collection);
 
 			Contract.EndContractBlock();
 
@@ -241,10 +257,9 @@ namespace Digillect.Collections
 
 			if ( is2 != null )
 			{
-				var items = collection.Where(x => x != null).ToArray();
 				Contract.Assume(index <= is2.Count);
-				is2.InsertRange(index, items);
-				OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Add, items, index));
+				is2.InsertRange(index, collection);
+				OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Add, collection.ToArray(), index));
 			}
 			else
 			{
@@ -267,7 +282,6 @@ namespace Digillect.Collections
 		/// <see langword="true"/> if item was successfully removed from the <b>collection</b>; otherwise, <see langword="false"/>.
 		/// This method also returns <see langword="false"/> if an item was not found in the <b>collection</b>.
 		/// </returns>
-		[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Contracts", "CC1055", Justification = "Validation performed in IndexOf method")]
 		public bool Remove(XKey key)
 		{
 			int index = IndexOf(key);
@@ -400,10 +414,9 @@ namespace Digillect.Collections
 			}
 		}
 
-		[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Contracts", "CC1055", Justification = "Validation performed by delegated method")]
 		bool IXUpdatable<IXCollection<T>>.IsUpdateRequired(IXCollection<T> source)
 		{
-			return IsUpdateRequired(source, CollectionUpdateOptions.All);
+			return IsUpdateRequired(source, CollectionMergeOptions.Full);
 		}
 
 		/// <summary>
@@ -411,223 +424,72 @@ namespace Digillect.Collections
 		/// </summary>
 		/// <param name="source">Source <b>collection</b> to compare with.</param>
 		/// <param name="options">Update options.</param>
-		/// <returns><see langword="false"/> if two collections are the same (equal by reference), otherwise, <see langword="true"/>.</returns>
-		public virtual bool IsUpdateRequired(IEnumerable<T> source, CollectionUpdateOptions options)
+		/// <returns>
+		/// <see langword="false"/> if two collections are the same (equal by reference) or <paramref name="options"/> are <see cref="CollectionMergeOptions.None"/>, otherwise, <see langword="true"/>.
+		/// </returns>
+		public virtual bool IsUpdateRequired(IEnumerable<T> source, CollectionMergeOptions options)
 		{
-			return !Object.ReferenceEquals(this, source);
+			return !Object.ReferenceEquals(this, source) && options != CollectionMergeOptions.None;
 		}
 
-		[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Contracts", "CC1055", Justification = "Validation performed by delegated method")]
+		[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Contracts", "Requires", Justification = "Can't restrict interface requirements")]
 		void IXUpdatable<IXCollection<T>>.Update(IXCollection<T> source)
 		{
-			Update(source, CollectionUpdateOptions.All);
+			Update(source, CollectionMergeOptions.Full);
 		}
 
 		/// <summary>
 		/// Обновляет текущую коллекцию на основе другой коллекции.
 		/// </summary>
-		/// <param name="source">Источник изменений.</param>
-		/// <returns>The <see cref="CollectionUpdateResults">results</see> of the operation.</returns>
+		/// <param name="collection">Источник изменений.</param>
+		/// <returns>The <see cref="CollectionMergeResults">results</see> of the operation.</returns>
 		/// <remarks>
-		/// Вызов данного метода эквивалентен вызову метода <see cref="Update(IEnumerable&lt;T&gt;,CollectionUpdateOptions)"/> со вторым параметром, равным <see cref="CollectionUpdateOptions.All"/>.
+		/// Вызов данного метода эквивалентен вызову метода <see cref="Update(IEnumerable&lt;T&gt;,CollectionMergeOptions)"/> со вторым параметром, равным <see cref="CollectionMergeOptions.Full"/>.
 		/// </remarks>
-		public CollectionUpdateResults Update(IEnumerable<T> source)
+		public CollectionMergeResults Update(IEnumerable<T> collection)
 		{
-			Contract.Requires(source != null);
-			Contract.Ensures(Contract.Result<CollectionUpdateResults>() != null);
+			Contract.Requires(collection != null);
+			Contract.Requires(Contract.ForAll(collection, x => x != null));
+			Contract.Ensures(Contract.Result<CollectionMergeResults>() != null);
 
-			return Update(source, CollectionUpdateOptions.All);
+			return Update(collection, CollectionMergeOptions.Full);
 		}
 
 		/// <summary>
 		/// Обновляет текущую коллекцию на основе другой коллекции.
 		/// </summary>
-		/// <param name="source">Источник изменений.</param>
+		/// <param name="collection">Источник изменений.</param>
 		/// <param name="options">Операции, которые надо произвести с объектами, находящимися в данной коллекции.</param>
-		/// <returns>The <see cref="CollectionUpdateResults">results</see> of the operation.</returns>
-		[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Maintainability", "CA1502:AvoidExcessiveComplexity")]
-		public virtual CollectionUpdateResults Update(IEnumerable<T> source, CollectionUpdateOptions options)
+		/// <returns>The <see cref="CollectionMergeResults">results</see> of the operation.</returns>
+		/// <seealso cref="XCollectionsUtil.Merge"/>
+#if WINDOWS_PHONE && CODE_ANALYSIS
+		[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA2140:TransparentMethodsMustNotReferenceCriticalCodeFxCopRule")]
+#endif
+		public virtual CollectionMergeResults Update(IEnumerable<T> collection, CollectionMergeOptions options)
 		{
-			if ( source == null )
-			{
-				throw new ArgumentNullException("source");
-			}
+			ValidateCollection(collection);
 
-			Contract.Ensures(Contract.Result<CollectionUpdateResults>() != null);
+			Contract.Ensures(Contract.Result<CollectionMergeResults>() != null);
 
 			if ( this.Items.IsReadOnly )
 			{
 				throw new NotSupportedException( Resources.XCollectionReadOnlyException );
 			}
 
-			if ( options == CollectionUpdateOptions.None || !IsUpdateRequired(source, options) )
+			if ( !IsUpdateRequired(collection, options) )
 			{
-				return CollectionUpdateResults.Empty;
+				return CollectionMergeResults.Empty;
 			}
 
-			int added = 0;
-			int updated = 0;
-			int removed = 0;
+			Contract.Assume(this.Items != null);
 
-			int index = 0;
+			var results = this.Items.Merge(collection, options);
 
-			while ( index < this.Items.Count )
-			{
-				if ( this.Items[index] == null )
-				{
-					this.Items.RemoveAt(index);
-					removed++;
-
-					continue;
-				}
-
-				index++;
-			}
-
-			IDictionary<XKey, List<XUpdateItem>> updateCandidates = new Dictionary<XKey, List<XUpdateItem>>();
-
-			for ( int i = 0; i < this.Items.Count; i++ )
-			{
-				T item = this.Items[i];
-
-				Contract.Assume(item != null); // Since we've removed all nulls in the previous step.
-
-				XKey key = item.GetKey();
-				List<XUpdateItem> items;
-
-				if ( updateCandidates.ContainsKey(key) )
-				{
-					items = updateCandidates[key];
-				}
-				else
-				{
-					items = new List<XUpdateItem>();
-					updateCandidates.Add(key, items);
-				}
-
-				items.Add(new XUpdateItem() { Item = item, Index = i });
-			}
-
-			index = 0;
-
-			foreach ( T item in source )
-			{
-				XKey key;
-
-				if ( item != null && updateCandidates.ContainsKey(key = item.GetKey()) )
-				{
-					var existing = updateCandidates[key];
-
-					Contract.Assume( existing != null );
-					Contract.Assume(existing.Count > 0);
-
-					if ( (options & CollectionUpdateOptions.UpdateExisting) == CollectionUpdateOptions.UpdateExisting )
-					{
-						// Take first item to update
-						var existing0 = existing[0];
-
-						existing0.Item.Update(item);
-						updated++;
-
-						Contract.Assert(index <= existing0.Index);
-						Contract.Assume(existing0.Index < this.Items.Count);
-
-						// Move the updated item to the current (source) position
-						// HACK: instead of remove-then-insert we will change indexes of all affected items
-
-						// Move range [index..existing0.Index) one element up
-						for ( int i = existing0.Index; i > index; i-- )
-						{
-							this.Items[i] = this.Items[i - 1];
-						}
-
-						// Set updated item at the corect (source) position
-						this.Items[index] = existing0.Item;
-
-						// Recalculate original indexes upon moving
-						foreach ( var items in updateCandidates.Values )
-						{
-							foreach( var x in items )
-								if( index <= x.Index && x.Index < existing0.Index )
-									x.Index++;
-							/* ForEach is not supported in NETFX_CORE (WinRT)
-							items.ForEach(x => {
-								if ( index <= x.Index && x.Index < existing0.Index )
-								{
-									x.Index++;
-								}
-							});
-							*/
-						}
-					}
-
-					// Remove updated item form candidates
-					existing.RemoveAt(0);
-
-					if ( existing.Count == 0 )
-					{
-						// No more candidates exist for the given key
-						updateCandidates.Remove(key);
-					}
-				}
-				else if ( (options & CollectionUpdateOptions.AddNew) == CollectionUpdateOptions.AddNew )
-				{
-					this.Items.Insert(index, item);
-					added++;
-
-					// Recalculate original indexes upon insertion
-					foreach ( var items in updateCandidates.Values )
-					{
-						foreach( var x in items )
-							if( x.Index >= index )
-								x.Index++;
-
-						/* ForEach is not supported in NETFX_CORE (WinRT)
-						items.ForEach(x => {
-							if ( x.Index >= index )
-							{
-								x.Index++;
-							}
-						});
-						*/
-					}
-				}
-
-				index++;
-			}
-
-			if ( (options & CollectionUpdateOptions.RemoveOld) == CollectionUpdateOptions.RemoveOld )
-			{
-				foreach ( var items in updateCandidates.Values )
-				{
-					// Тут нужна сортировка по индексу в порядке убывания, чтобы не вылететь за границы коллекции
-					// Т.к. items в дальнейшем нам больше не нужен, можем смело его "испортить"
-					// Изначально гарантировано, что его элементы идут в правильном порядке, т.е. по возрастанию индексов оригинальной коллекции
-					items.Reverse();
-
-					foreach( var x in items )
-					{
-						Contract.Assume( x.Index >= 0 );
-						this.Items.RemoveAt( x.Index );
-						removed++;
-					}
-					/* ForEach is not supported in NETFX_CORE (WinRT)
-					items.ForEach(x => {
-						// И еще один safeguard, для порядку
-						//Contract.Assert(x.Index < this.Items.Count);
-						Contract.Assume(x.Index >= 0);
-						this.Items.RemoveAt(x.Index);
-						removed++;
-					});
-					*/
-				}
-			}
-
-			if ( added != 0 || updated != 0 || removed != 0 )
+			if ( !results.IsEmpty )
 			{
 				OnUpdated(EventArgs.Empty);
 
-				if ( added != 0 || removed != 0 )
+				if ( results.Added != 0 || results.Removed != 0 )
 				{
 					OnPropertyChanged("Count");
 				}
@@ -636,7 +498,7 @@ namespace Digillect.Collections
 				OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset));
 			}
 
-			return new CollectionUpdateResults(added, updated, removed);
+			return results;
 		}
 		#endregion
 
@@ -652,7 +514,7 @@ namespace Digillect.Collections
 			{
 				XKey key = item.GetKey();
 
-				if ( key == null || !item.Equals(other.Find(key)) )
+				if ( !item.Equals(other.FirstOrDefault(x => x.GetKey() == key)) )
 				{
 					return false;
 				}
@@ -773,6 +635,13 @@ namespace Digillect.Collections
 		/// <exclude/>
 		protected virtual void OnInsert(int index, T item)
 		{
+			for ( int i = 0; i < this.Items.Count; i++ )
+			{
+				if ( Object.ReferenceEquals(this.Items[i], item) )
+				{
+					throw new ArgumentException("Duplicate reference.", "item");
+				}
+			}
 		}
 
 		/// <exclude/>
@@ -793,6 +662,13 @@ namespace Digillect.Collections
 		/// <exclude/>
 		protected virtual void OnSet(int index, T oldItem, T newItem)
 		{
+			for ( int i = 0; i < this.Items.Count; i++ )
+			{
+				if ( i != index && Object.ReferenceEquals(this.Items[i], newItem) )
+				{
+					throw new ArgumentException("Duplicate reference.", "newItem");
+				}
+			}
 		}
 
 		/// <exclude/>
@@ -853,12 +729,20 @@ namespace Digillect.Collections
 		}
 		#endregion
 
-		#region class XUpdateItem
-		private sealed class XUpdateItem
+		[ContractArgumentValidator]
+		protected static void ValidateCollection(IEnumerable<T> collection)
 		{
-			public T Item;
-			public int Index;
+			if ( collection == null )
+			{
+				throw new ArgumentNullException("collection");
+			}
+
+			if ( !collection.All(x => x != null) )
+			{
+				throw new ArgumentException("Null element found.", "collection");
+			}
+
+			Contract.EndContractBlock();
 		}
-		#endregion
 	}
 }

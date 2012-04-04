@@ -13,6 +13,9 @@ namespace Digillect.Collections
 		{
 		}
 
+#if WINDOWS_PHONE && CODE_ANALYSIS
+		[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA2140:TransparentMethodsMustNotReferenceCriticalCodeFxCopRule")]
+#endif
 		public int IndexOf(XKey key)
 		{
 			Contract.Requires<ArgumentNullException>(key != null, "key");
@@ -27,11 +30,6 @@ namespace Digillect.Collections
 		bool IXCollection<T>.ContainsKey(XKey key)
 		{
 			return false;
-		}
-
-		T IXCollection<T>.Find(XKey key)
-		{
-			return default(T);
 		}
 
 		bool IXCollection<T>.Remove(XKey key)

@@ -24,6 +24,10 @@ using System.Runtime.InteropServices;
 [assembly: NeutralResourcesLanguage("en-US")]
 [assembly: SatelliteContractVersion(AssemblyInfo.SatelliteContractVersion)]
 
+#if CONTRACTS_FULL
+[assembly: System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Contracts", "CC1055", Justification = "Suppress all those annoying warnings about excess validation")]
+#endif
+
 internal static class AssemblyInfo
 {
 	public const string Major = "4";

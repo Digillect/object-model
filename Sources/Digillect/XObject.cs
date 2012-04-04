@@ -28,10 +28,6 @@ namespace Digillect
 #if !(SILVERLIGHT || NETFX_CORE)
 		[NonSerialized]
 #endif
-		private bool isKeyCreated;
-#if !(SILVERLIGHT || NETFX_CORE)
-		[NonSerialized]
-#endif
 		private XKey key;
 
 		#region Constructor
@@ -107,10 +103,17 @@ namespace Digillect
 		[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1024:UsePropertiesWhereAppropriate")]
 		public XKey GetKey()
 		{
-			if ( !this.isKeyCreated )
+			Contract.Ensures(Contract.Result<XKey>() != null);
+			Contract.EnsuresOnThrow<XKeyNotAvailableException>(this.key == null);
+
+			if ( this.key == null )
 			{
-				this.isKeyCreated = true;
 				this.key = CreateKey();
+
+				if ( this.key == null )
+				{
+					throw new XKeyNotAvailableException(Resources.XObjectNullKeyException);
+				}
 			}
 
 			return this.key;
@@ -121,7 +124,6 @@ namespace Digillect
 		/// </summary>
 		protected void ResetKey()
 		{
-			this.isKeyCreated = false;
 			this.key = null;
 		}
 
@@ -131,7 +133,9 @@ namespace Digillect
 		/// <returns>Created key.</returns>
 		protected virtual XKey CreateKey()
 		{
-			return null;
+			Contract.Ensures(Contract.Result<XKey>() != null);
+
+			return new RootKey(GetType());
 		}
 		#endregion
 
@@ -209,14 +213,8 @@ namespace Digillect
 		/// <param name="deepCloning"><c>true</c> if performing deep cloning, otherwise, <c>false</c>.</param>
 		protected virtual void ProcessCopy( XObject source, bool cloning, bool deepCloning )
 		{
-			if ( source == null )
-			{
-				throw new ArgumentNullException("source");
-			}
-
-			Contract.EndContractBlock();
-
-			this.key = source.key;
+			// Drop the key to overcome potentional cloning issues
+			this.key = null;
 		}
 
 		/// <summary>
@@ -263,6 +261,68 @@ namespace Digillect
 				return;
 			if( --updateCount == 0 )
 				OnUpdated( EventArgs.Empty );
+		}
+		#endregion
+
+		#region class RootKey
+#if !(SILVERLIGHT || NETFX_CORE)
+		[Serializable]
+#endif
+		private sealed class RootKey : XKey, IComparable<RootKey>, IEquatable<RootKey>
+		{
+			private Type _type;
+
+			public RootKey(Type type)
+			{
+				Contract.Requires(type != null);
+
+				this._type = type;
+			}
+
+			public int CompareTo(RootKey other)
+			{
+				if ( other == null )
+				{
+					return 1;
+				}
+
+				if ( this._type == other._type )
+				{
+					return 0;
+				}
+
+				return String.CompareOrdinal(this._type.AssemblyQualifiedName, other._type.AssemblyQualifiedName);
+			}
+
+			public override int CompareTo(XKey other)
+			{
+				if ( other == null )
+				{
+					return 1;
+				}
+
+				return CompareTo(other as RootKey);
+			}
+
+			public bool Equals(RootKey other)
+			{
+				if ( other == null )
+				{
+					return false;
+				}
+
+				return this._type == other._type;
+			}
+
+			public override bool Equals(XKey other)
+			{
+				return Equals(other as RootKey);
+			}
+
+			public override int GetHashCode()
+			{
+				return this._type.GetHashCode();
+			}
 		}
 		#endregion
 	}

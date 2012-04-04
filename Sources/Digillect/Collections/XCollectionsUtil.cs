@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Diagnostics.Contracts;
+using System.Linq;
 
 using Digillect.Properties;
 
@@ -21,7 +22,7 @@ namespace Digillect.Collections
 		}
 		#endregion
 
-		#region RemoveAll`2 Extension
+		#region RemoveAll`1 Extension
 		public static bool RemoveAll<T>(this ICollection<T> source, IEnumerable<T> collection)
 		{
 			if ( source == null )
@@ -72,9 +73,27 @@ namespace Digillect.Collections
 
 			return modified;
 		}
+
+		public static bool RemoveAll<T>(this IXCollection<T> source, Func<T, bool> predicate)
+			where T : XObject
+		{
+			Contract.Requires(source != null);
+			Contract.Requires(predicate != null);
+
+			return source.RemoveAll(source.Where(predicate).ToArray());
+		}
+
+		public static bool RemoveAll<T>(this IXCollection<T> source, Predicate<T> predicate)
+			where T : XObject
+		{
+			Contract.Requires(source != null);
+			Contract.Requires(predicate != null);
+
+			return source.RemoveAll(predicate.ToFunction());
+		}
 		#endregion
 
-		#region RetainAll`2 Extension
+		#region RetainAll`1 Extension
 #if false // Not fully implemented yet
 		public static bool RetainAll<T>(this ICollection<T> source, IEnumerable<T> collection)
 		{
@@ -109,6 +128,215 @@ namespace Digillect.Collections
 #endif
 		#endregion
 
+		#region Merge`1 Extension
+		/// <summary>
+		/// Merges the specified collection into the current one.
+		/// </summary>
+		/// <typeparam name="T">Type of the collections' members.</typeparam>
+		/// <param name="source">The <see cref="IList&lt;T&gt;"/> to merge into.</param>
+		/// <param name="collection">The <see cref="IEnumerable&lt;T&gt;"/> containing the source of changes.</param>
+		/// <param name="options">The operations to perform on objects within the collections.</param>
+		/// <returns>The <see cref="CollectionMergeResults">results</see> of the operation.</returns>
+		/// <remarks>
+		/// Be careful to not use this method on objects implementing the <see cref="INotifyCollectionChanged"/> interface unless you don't care about events being raised.
+		/// Specifically, in cases of <see cref="IXCollection&lt;T&gt;"/> or <see cref="XCollection&lt;T&gt;"/> use theirs <b>Update</b> methods.
+		/// </remarks>
+		[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Maintainability", "CA1502:AvoidExcessiveComplexity")]
+#if WINDOWS_PHONE && CODE_ANALYSIS
+		[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA2140:TransparentMethodsMustNotReferenceCriticalCodeFxCopRule")]
+#endif
+		public static CollectionMergeResults Merge<T>(this IList<T> source, IEnumerable<T> collection, CollectionMergeOptions options)
+			where T : XObject
+		{
+			if ( source == null )
+			{
+				throw new ArgumentNullException("source");
+			}
+
+			if ( collection == null )
+			{
+				throw new ArgumentNullException("collection");
+			}
+
+			Contract.Ensures(Contract.Result<CollectionMergeResults>() != null);
+
+			if ( source.IsReadOnly )
+			{
+				throw new NotSupportedException(Resources.XCollectionReadOnlyException);
+			}
+
+			if ( Object.ReferenceEquals(source, collection) )
+			{
+				return CollectionMergeResults.Empty;
+			}
+
+			int added = 0;
+			int updated = 0;
+			int removed = 0;
+
+			int index = 0;
+
+			while ( index < source.Count )
+			{
+				if ( source[index] == null )
+				{
+					source.RemoveAt(index);
+					removed++;
+				}
+				else
+				{
+					index++;
+				}
+			}
+
+			IDictionary<XKey, List<XMergeItem<T>>> updateCandidates = new Dictionary<XKey, List<XMergeItem<T>>>();
+
+			for ( int i = 0; i < source.Count; i++ )
+			{
+				T item = source[i];
+
+				Contract.Assume(item != null); // Since we've removed all nulls in the previous step.
+
+				XKey key = item.GetKey();
+				List<XMergeItem<T>> items;
+
+				if ( updateCandidates.ContainsKey(key) )
+				{
+					items = updateCandidates[key];
+				}
+				else
+				{
+					items = new List<XMergeItem<T>>();
+					updateCandidates.Add(key, items);
+				}
+
+				items.Add(new XMergeItem<T>() { Item = item, Index = i });
+			}
+
+			index = 0;
+
+			foreach ( T item in collection )
+			{
+				XKey key;
+
+				if ( item != null && updateCandidates.ContainsKey(key = item.GetKey()) )
+				{
+					var existing = updateCandidates[key];
+
+					Contract.Assume(existing != null);
+					Contract.Assume(existing.Count > 0);
+
+					if ( (options & CollectionMergeOptions.UpdateExisting) == CollectionMergeOptions.UpdateExisting )
+					{
+						// Take first item to update
+						var existing0 = existing[0];
+
+						existing0.Item.Update(item);
+						updated++;
+
+						Contract.Assert(index <= existing0.Index);
+						Contract.Assume(existing0.Index < source.Count);
+
+						// Move the updated item to the current (source) position
+						// HACK: instead of remove-then-insert we will change indexes of all affected items
+
+						// Move range [index..existing0.Index) one element up
+						for ( int i = existing0.Index; i > index; i-- )
+						{
+							source[i] = source[i - 1];
+						}
+
+						// Set updated item at the corect (source) position
+						source[index] = existing0.Item;
+
+						// Recalculate original indexes upon moving
+						foreach ( var items in updateCandidates.Values )
+						{
+#if !NETFX_CORE // List<T>.ForEach is not supported in NETFX_CORE (WinRT)
+							items.ForEach(x =>
+#else
+							foreach ( var x in items )
+#endif
+							{
+								if ( index <= x.Index && x.Index < existing0.Index )
+								{
+									x.Index++;
+								}
+							}
+#if !NETFX_CORE
+							);
+#endif
+						}
+					}
+
+					// Remove updated item form candidates
+					existing.RemoveAt(0);
+
+					if ( existing.Count == 0 )
+					{
+						// No more candidates exist for the given key
+						updateCandidates.Remove(key);
+					}
+				}
+				else if ( (options & CollectionMergeOptions.AddNew) == CollectionMergeOptions.AddNew )
+				{
+					source.Insert(index, item);
+					added++;
+
+					// Recalculate original indexes upon insertion
+					foreach ( var items in updateCandidates.Values )
+					{
+#if !NETFX_CORE // List<T>.ForEach is not supported in NETFX_CORE (WinRT)
+						items.ForEach(x =>
+#else
+						foreach ( var x in items )
+#endif
+						{
+							if ( x.Index >= index )
+							{
+								x.Index++;
+							}
+						}
+#if !NETFX_CORE
+						);
+#endif
+					}
+				}
+
+				index++;
+			}
+
+			if ( (options & CollectionMergeOptions.RemoveOld) == CollectionMergeOptions.RemoveOld )
+			{
+				foreach ( var items in updateCandidates.Values )
+				{
+					// Тут нужна сортировка по индексу в порядке убывания, чтобы не вылететь за границы коллекции
+					// Т.к. items в дальнейшем нам больше не нужен, можем смело его "испортить"
+					// Изначально гарантировано, что его элементы идут в правильном порядке, т.е. по возрастанию индексов оригинальной коллекции
+					items.Reverse();
+
+#if !NETFX_CORE // List<T>.ForEach is not supported in NETFX_CORE (WinRT)
+					items.ForEach(x =>
+#else
+					foreach ( var x in items )
+#endif
+					{
+						// И еще один safeguard, для порядку
+						//Contract.Assert(x.Index < this.Items.Count);
+						Contract.Assume(x.Index >= 0);
+						source.RemoveAt(x.Index);
+						removed++;
+					}
+#if !NETFX_CORE
+					);
+#endif
+				}
+			}
+
+			return new CollectionMergeResults(added, updated, removed);
+		}
+		#endregion
+
 		#region Difference`2 Extension
 		/// <summary>
 		/// Calculates differences between two collections.
@@ -133,6 +361,9 @@ namespace Digillect.Collections
 		///	}
 		/// </code>
 		/// </example>
+#if WINDOWS_PHONE && CODE_ANALYSIS
+		[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA2140:TransparentMethodsMustNotReferenceCriticalCodeFxCopRule")]
+#endif
 		public static XCollectionDifference<T> Difference<T>(this IXCollection<T> source, IEnumerable<T> target)
 			where T : XObject
 		{
@@ -150,9 +381,14 @@ namespace Digillect.Collections
 
 			IXCollection<T> added = new XCollection<T>();
 			IXCollection<T> changed = new XCollection<T>();
+			Contract.Assume(Contract.ForAll(source, x => x != null));
 			IXCollection<T> deleted = new XCollection<T>(source);
 			IXCollection<T> modified = new XCollection<T>();
 			IXCollection<T> nonModified = new XCollection<T>();
+
+#if WINDOWS_PHONE // God knows why it can't be proven by the static checker - old (from Silverlight3) Microsoft.Contracts library?
+			Contract.Assume(source != null);
+#endif
 
 			foreach ( T targetObject in target )
 			{
@@ -162,7 +398,7 @@ namespace Digillect.Collections
 					XKey targetKey;
 					T sourceObject;
 
-					if ( (targetKey = targetObject.GetKey()) != null && (sourceObject = source.Find(targetKey)) != null )
+					if ( (targetKey = targetObject.GetKey()) != null && (sourceObject = source.FirstOrDefault(x => x.GetKey() == targetKey)) != null )
 					{
 						deleted.Remove(sourceObject);
 
@@ -237,9 +473,10 @@ namespace Digillect.Collections
 		#endregion
 
 		#region Predicate<T> -> Func<T, bool>
-		public static Func<T, bool> ToFunction<T>(this Predicate<T> predicate)
+		internal static Func<T, bool> ToFunction<T>(this Predicate<T> predicate)
 		{
 			Contract.Requires(predicate != null);
+			Contract.Ensures(Contract.Result<Func<T, bool>>() != null);
 
 			return new Func<T, bool>(new PredicateToFunctionConverter<T>(predicate).Function);
 		}
@@ -293,19 +530,11 @@ namespace Digillect.Collections
 			#endregion
 
 			#region IXCollection`1 Members
-			[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Contracts", "CC1055", Justification = "Validation performed by underlying collection")]
 			bool IXCollection<T>.ContainsKey(XKey key)
 			{
 				return this.collection.ContainsKey(key);
 			}
 
-			[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Contracts", "CC1055", Justification = "Validation performed by underlying collection")]
-			T IXCollection<T>.Find(XKey key)
-			{
-				return this.collection.Find( key );
-			}
-
-			[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Contracts", "CC1055", Justification = "Validation not needed since argument not used")]
 			bool IXCollection<T>.Remove(XKey key)
 			{
 				throw new NotSupportedException( Resources.XCollectionReadOnlyException );
@@ -339,13 +568,11 @@ namespace Digillect.Collections
 				throw new NotSupportedException( Resources.XCollectionReadOnlyException );
 			}
 
-			[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Contracts", "CC1055", Justification = "Validation not needed since argument not used")]
 			bool IXUpdatable<IXCollection<T>>.IsUpdateRequired(IXCollection<T> source)
 			{
 				return false;
 			}
 
-			[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Contracts", "CC1055", Justification = "Validation not needed since argument not used")]
 			void IXUpdatable<IXCollection<T>>.Update(IXCollection<T> source )
 			{
 				throw new NotSupportedException( Resources.XCollectionReadOnlyException );
@@ -474,7 +701,6 @@ namespace Digillect.Collections
 			#endregion
 
 			#region IXList`1 Members
-			[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Contracts", "CC1055", Justification = "Validation performed by underlying collection")]
 			int IXList<T>.IndexOf(XKey key)
 			{
 				return this.collection.IndexOf(key);
@@ -526,7 +752,7 @@ namespace Digillect.Collections
 		private class FuncFilteredCollection<T> : XFilteredCollection<T>
 			where T : XObject
 		{
-			private readonly Func<T, bool> filter;
+			private readonly Func<T, bool> _filter;
 
 			public FuncFilteredCollection(IXList<T> collection, Func<T, bool> filter)
 				: base(collection)
@@ -538,16 +764,19 @@ namespace Digillect.Collections
 
 				Contract.Requires(collection != null);
 
-				this.filter = filter;
+				this._filter = filter;
 			}
 
+#if WINDOWS_PHONE && CODE_ANALYSIS
+			[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA2140:TransparentMethodsMustNotReferenceCriticalCodeFxCopRule")]
+#endif
 			protected override XFilteredCollection<T> CreateInstanceOfSameType(IXList<T> originalCollection)
 			{
 #if !(SILVERLIGHT || NETFX_CORE)
-				Func<T, bool> filter = (Func<T, bool>) this.filter.Clone();
+				Func<T, bool> filter = (Func<T, bool>) this._filter.Clone();
 #else
-				Contract.Assume(this.filter != null);
-				Func<T, bool> filter = this.filter;
+				Contract.Assume(this._filter != null);
+				Func<T, bool> filter = this._filter;
 #endif
 
 				return new FuncFilteredCollection<T>(originalCollection, filter);
@@ -555,47 +784,81 @@ namespace Digillect.Collections
 
 			protected override bool Filter(T obj)
 			{
-				return this.filter(obj);
+				return this._filter(obj);
 			}
 		} 
+		#endregion
+
+		#region class XMergeItem`1
+		private sealed class XMergeItem<T>
+			where T : XObject
+		{
+			public T Item;
+			public int Index;
+		}
 		#endregion
 	}
 
 	#region class XCollectionDifference`1
+	/// <summary>
+	/// Represents the results of the <see cref="XCollectionsUtil.Difference"/> method.
+	/// </summary>
+	/// <typeparam name="T">Type of the collections' members.</typeparam>
 	public sealed class XCollectionDifference<T>
 	{
+		private readonly IXCollection<T> _added;
+		private readonly IXCollection<T> _changed;
+		private readonly IXCollection<T> _deleted;
+		private readonly IXCollection<T> _modified;
+		private readonly IXCollection<T> _nonModified;
+
+		internal XCollectionDifference(IXCollection<T> added, IXCollection<T> changed, IXCollection<T> deleted, IXCollection<T> modified, IXCollection<T> nonModified)
+		{
+			this._added = added;
+			this._changed = changed;
+			this._deleted = deleted;
+			this._modified = modified;
+			this._nonModified = nonModified;
+		}
+
 		/// <summary>
 		/// Gets the collection of objects presented in a <b>target</b> collection but not found in a <b>source</b> one.
 		/// </summary>
-		public IXCollection<T> Added { get; private set; }
+		public IXCollection<T> Added
+		{
+			get { return this._added; }
+		}
 
 		/// <summary>
 		/// Gets the collection of objects presented in both <b>source</b> and <b>target</b> collections and which are not the same.
 		/// </summary>
-		public IXCollection<T> Changed { get; private set; }
+		public IXCollection<T> Changed
+		{
+			get { return this._changed; }
+		}
 
 		/// <summary>
 		/// Gets the collection of objects presented in a <b>source</b> collection, but not found in a <b>target</b> one.
 		/// </summary>
-		public IXCollection<T> Deleted { get; private set; }
+		public IXCollection<T> Deleted
+		{
+			get { return this._deleted; }
+		}
 
 		/// <summary>
 		/// Gets the collection of objects which are <see cref="Added">added</see> or <see cref="Changed">changed</see>.
 		/// </summary>
-		public IXCollection<T> Modified { get; private set; }
+		public IXCollection<T> Modified
+		{
+			get { return this._modified; }
+		}
 
 		/// <summary>
 		/// Gets the collection of objects which are the same in both <b>source</b> and <b>target</b> collections.
 		/// </summary>
-		public IXCollection<T> NonModified { get; private set; }
-
-		internal XCollectionDifference(IXCollection<T> added, IXCollection<T> changed, IXCollection<T> deleted, IXCollection<T> modified, IXCollection<T> nonModified)
+		public IXCollection<T> NonModified
 		{
-			this.Added = added;
-			this.Changed = changed;
-			this.Deleted = deleted;
-			this.Modified = modified;
-			this.NonModified = nonModified;
+			get { return this._nonModified; }
 		}
 	}
 	#endregion

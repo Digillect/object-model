@@ -13,6 +13,9 @@ namespace Digillect.Collections
 		{
 		}
 
+#if WINDOWS_PHONE && CODE_ANALYSIS
+		[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA2140:TransparentMethodsMustNotReferenceCriticalCodeFxCopRule")]
+#endif
 		public bool ContainsKey(XKey key)
 		{
 			Contract.Requires<ArgumentNullException>(key != null, "key");
@@ -21,14 +24,9 @@ namespace Digillect.Collections
 			return false;
 		}
 
-		public T Find(XKey key)
-		{
-			Contract.Requires<ArgumentNullException>(key != null, "key");
-			//Contract.Ensures(Object.Equals(Contract.Result<T>(), default(T)) || this.Count > 0);
-
-			return default(T);
-		}
-
+#if WINDOWS_PHONE && CODE_ANALYSIS
+		[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA2140:TransparentMethodsMustNotReferenceCriticalCodeFxCopRule")]
+#endif
 		public bool Remove(XKey key)
 		{
 			Contract.Requires<ArgumentNullException>(key != null, "key");
@@ -39,6 +37,7 @@ namespace Digillect.Collections
 		public IEnumerable<XKey> GetKeys()
 		{
 			Contract.Ensures(Contract.Result<IEnumerable<XKey>>() != null);
+			Contract.Ensures(Contract.ForAll(Contract.Result<IEnumerable<XKey>>(), x => x != null));
 
 			return null;
 		}
@@ -138,6 +137,13 @@ namespace Digillect.Collections
 			remove { }
 		}
 		#endregion
+
+		[ContractInvariantMethod]
+		[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1822:MarkMembersAsStatic", Justification = "Required for code contracts.")]
+		private void ObjectInvariant()
+		{
+			Contract.Invariant(Contract.ForAll(this, x => x != null));
+		}
 	}
 #endif
 }

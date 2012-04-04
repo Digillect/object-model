@@ -33,6 +33,7 @@ namespace Digillect.Collections
 			: base(collection)
 		{
 			Contract.Requires(collection != null);
+			Contract.Requires(Contract.ForAll(collection, x => x != null));
 		}
 		#endregion
 
@@ -41,14 +42,7 @@ namespace Digillect.Collections
 		{
 			base.OnInsert(index, item);
 
-			XKey key = item.GetKey();
-
-			if ( key == null )
-			{
-				throw new ArgumentException(Resources.XObjectNullKeyException, "item");
-			}
-
-			if ( ContainsKey(key) )
+			if ( ContainsKey(item.GetKey()) )
 			{
 				throw new ArgumentException(Resources.XCollectionItemDuplicateException, "item");
 			}
@@ -59,11 +53,6 @@ namespace Digillect.Collections
 			base.OnSet(index, oldItem, newItem);
 
 			XKey key = newItem.GetKey();
-
-			if ( key == null )
-			{
-				throw new ArgumentException(Resources.XObjectNullKeyException, "newItem");
-			}
 
 			if ( !key.Equals(oldItem.GetKey()) && ContainsKey(key) )
 			{

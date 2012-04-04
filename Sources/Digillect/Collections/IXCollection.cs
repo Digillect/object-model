@@ -23,14 +23,6 @@ namespace Digillect.Collections
 		bool ContainsKey(XKey key);
 
 		/// <summary>
-		/// Gets an item with the specific key.
-		/// </summary>
-		/// <param name="key">The key of the item to find.</param>
-		/// <returns>An item with the specified key if the item exists in the <b>collection</b>; otherwise, <see langword="null"/>.</returns>
-		[Pure]
-		T Find(XKey key);
-
-		/// <summary>
 		/// Removes the first occurrence of an item with the specific key from the <b>collection</b>.
 		/// </summary>
 		/// <param name="key">The key of an item to remove from the <b>collection</b>.</param>

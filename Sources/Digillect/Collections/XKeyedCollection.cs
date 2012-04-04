@@ -40,6 +40,7 @@ namespace Digillect.Collections
 			: base(collection)
 		{
 			Contract.Requires( collection != null );
+			Contract.Requires(Contract.ForAll(collection, x => x != null));
 
 			OnDeserialization();
 		}
@@ -122,26 +123,24 @@ namespace Digillect.Collections
 		/// <summary>
 		/// Обновляет текущую коллекцию на основе другой коллекции.
 		/// </summary>
-		/// <param name="source">Источник изменений.</param>
+		/// <param name="collection">Источник изменений.</param>
 		/// <param name="options">Операции, которые надо произвести с объектами, находящимися в данной коллекции.</param>
-		/// <returns>The <see cref="CollectionUpdateResults">results</see> of the operation.</returns>
-		public override CollectionUpdateResults Update(IEnumerable<TObject> source, CollectionUpdateOptions options)
+		/// <returns>The <see cref="CollectionMergeResults">results</see> of the operation.</returns>
+		[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1062:Validate arguments of public methods", MessageId = "0", Justification = "Indeed it validated")]
+		public override CollectionMergeResults Update(IEnumerable<TObject> collection, CollectionMergeOptions options)
 		{
-			if ( source == null )
-			{
-				throw new ArgumentNullException("source");
-			}
+			ValidateCollection(collection);
 
-			Contract.Ensures(Contract.Result<CollectionUpdateResults>() != null);
+			Contract.Ensures(Contract.Result<CollectionMergeResults>() != null);
 
 			if ( this.Items.IsReadOnly )
 			{
 				throw new NotSupportedException(Resources.XCollectionReadOnlyException);
 			}
 
-			if ( options == CollectionUpdateOptions.None || !IsUpdateRequired(source, options) )
+			if ( options == CollectionMergeOptions.None || !IsUpdateRequired(collection, options) )
 			{
-				return CollectionUpdateResults.Empty;
+				return CollectionMergeResults.Empty;
 			}
 
 			int added = 0;
@@ -155,13 +154,13 @@ namespace Digillect.Collections
 				toRemove.Add(item.Id, item);
 			}
 
-			foreach ( TObject item in source )
+			foreach ( TObject item in collection )
 			{
 				if ( toRemove.ContainsKey(item.Id) )
 				{
 					TObject existing = toRemove[item.Id];
 
-					if ( (options & CollectionUpdateOptions.UpdateExisting) != CollectionUpdateOptions.None )
+					if ( (options & CollectionMergeOptions.UpdateExisting) != CollectionMergeOptions.None )
 					{
 						existing.Update(item);
 						updated++;
@@ -169,14 +168,14 @@ namespace Digillect.Collections
 
 					toRemove.Remove(existing.Id);
 				}
-				else if ( (options & CollectionUpdateOptions.AddNew) != CollectionUpdateOptions.None )
+				else if ( (options & CollectionMergeOptions.AddNew) != CollectionMergeOptions.None )
 				{
 					Add(item);
 					added++;
 				}
 			}
 
-			if ( (options & CollectionUpdateOptions.RemoveOld) != CollectionUpdateOptions.None )
+			if ( (options & CollectionMergeOptions.RemoveOld) != CollectionMergeOptions.None )
 			{
 				foreach ( TId id in toRemove.Keys )
 				{
@@ -187,7 +186,7 @@ namespace Digillect.Collections
 				}
 			}
 
-			return new CollectionUpdateResults(added, updated, removed);
+			return new CollectionMergeResults(added, updated, removed);
 		}
 		#endregion
 

@@ -9,18 +9,25 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Digillect (WP7)", "Digillec
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		CodeAnalysis|Any CPU = CodeAnalysis|Any CPU
 		Debug|Any CPU = Debug|Any CPU
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{6A0D13DA-0078-46EB-99AC-6B62C4FC136B}.CodeAnalysis|Any CPU.ActiveCfg = CodeAnalysis|Any CPU
+		{6A0D13DA-0078-46EB-99AC-6B62C4FC136B}.CodeAnalysis|Any CPU.Build.0 = CodeAnalysis|Any CPU
 		{6A0D13DA-0078-46EB-99AC-6B62C4FC136B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{6A0D13DA-0078-46EB-99AC-6B62C4FC136B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6A0D13DA-0078-46EB-99AC-6B62C4FC136B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6A0D13DA-0078-46EB-99AC-6B62C4FC136B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8CE98474-DFA3-42FA-AE2F-991F52A75977}.CodeAnalysis|Any CPU.ActiveCfg = CodeAnalysis|Any CPU
+		{8CE98474-DFA3-42FA-AE2F-991F52A75977}.CodeAnalysis|Any CPU.Build.0 = CodeAnalysis|Any CPU
 		{8CE98474-DFA3-42FA-AE2F-991F52A75977}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{8CE98474-DFA3-42FA-AE2F-991F52A75977}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8CE98474-DFA3-42FA-AE2F-991F52A75977}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8CE98474-DFA3-42FA-AE2F-991F52A75977}.Release|Any CPU.Build.0 = Release|Any CPU
+		{325D26BB-53D3-4383-9572-BC631CDC9189}.CodeAnalysis|Any CPU.ActiveCfg = CodeAnalysis|Any CPU
+		{325D26BB-53D3-4383-9572-BC631CDC9189}.CodeAnalysis|Any CPU.Build.0 = CodeAnalysis|Any CPU
 		{325D26BB-53D3-4383-9572-BC631CDC9189}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{325D26BB-53D3-4383-9572-BC631CDC9189}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{325D26BB-53D3-4383-9572-BC631CDC9189}.Release|Any CPU.ActiveCfg = Release|Any CPU

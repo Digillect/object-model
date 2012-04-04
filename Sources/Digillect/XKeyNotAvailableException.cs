@@ -3,10 +3,10 @@ using System.Runtime.Serialization;
 
 namespace Digillect
 {
-#if !SILVERLIGHT
 	/// <summary>
 	/// Exception that is thrown when <see cref="Digillect.XObject"/> can not provide valid key.
 	/// </summary>
+#if !SILVERLIGHT
 	[Serializable]
 #endif
 	public sealed class XKeyNotAvailableException : Exception

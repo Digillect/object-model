@@ -22,7 +22,7 @@ namespace Digillect.Collections
 #endif
 		where T : XObject
 	{
-		private readonly IXList<T> originalCollection;
+		private readonly IXList<T> _originalCollection;
 
 		private int count = -1;
 		private int version;
@@ -37,9 +37,9 @@ namespace Digillect.Collections
 
 			Contract.EndContractBlock();
 
-			this.originalCollection = originalCollection;
+			this._originalCollection = originalCollection;
 
-			this.originalCollection.CollectionChanged += OriginalCollection_CollectionChanged;
+			this._originalCollection.CollectionChanged += OriginalCollection_CollectionChanged;
 		}
 
 		public void Dispose()
@@ -52,7 +52,7 @@ namespace Digillect.Collections
 		{
 			if ( disposing )
 			{
-				this.originalCollection.CollectionChanged -= OriginalCollection_CollectionChanged;
+				this._originalCollection.CollectionChanged -= OriginalCollection_CollectionChanged;
 			}
 		}
 		#endregion
@@ -60,34 +60,23 @@ namespace Digillect.Collections
 		#region OriginalCollection
 		public IXList<T> OriginalCollection
 		{
-			get { return this.originalCollection; }
+			get { return this._originalCollection; }
 		}
 		#endregion
 
 		#region IXList`1 Members
-		[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Contracts", "CC1055", Justification = "Validation performed by underlying collection")]
 		public int IndexOf(XKey key)
 		{
-			return CalcFilteredIndex(this.originalCollection.IndexOf(key));
+			return CalcFilteredIndex(this._originalCollection.IndexOf(key));
 		}
 		#endregion
 
 		#region IXCollection`1 Members
 		public event NotifyCollectionChangedEventHandler CollectionChanged;
 
-		[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Contracts", "CC1055", Justification = "Validation performed in Find method")]
-		[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Contracts", "Ensures", Justification = "Ensured by Find method")]
 		public bool ContainsKey(XKey key)
 		{
-			return Find(key) != null;
-		}
-
-		[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Contracts", "CC1055", Justification = "Validation performed by underlying collection")]
-		public T Find(XKey key)
-		{
-			T obj = this.originalCollection.Find(key);
-
-			return obj == null || Filter(obj) ? obj : null;
+			return IndexOf(key) != -1;
 		}
 
 		public IEnumerable<XKey> GetKeys()
@@ -95,7 +84,6 @@ namespace Digillect.Collections
 			return this.Select(x => x.GetKey());
 		}
 
-		[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Contracts", "CC1055", Justification = "Validation not needed since argument not used")]
 		bool IXCollection<T>.Remove(XKey key)
 		{
 			throw new NotSupportedException( Resources.XCollectionReadOnlyException );
@@ -110,7 +98,7 @@ namespace Digillect.Collections
 		{
 			Contract.Ensures(Contract.Result<XFilteredCollection<T>>() != null);
 
-			IXList<T> collection = deep ? (IXList<T>) this.originalCollection.Clone(true) : this.originalCollection;
+			IXList<T> collection = deep ? (IXList<T>) this._originalCollection.Clone(true) : this._originalCollection;
 
 			return CreateInstanceOfSameType( collection );
 		}
@@ -119,8 +107,8 @@ namespace Digillect.Collections
 		#region IXUpdatable`1 Members
 		event EventHandler IXUpdatable<IXCollection<T>>.Updated
 		{
-			add { this.originalCollection.Updated += value; }
-			remove { this.originalCollection.Updated -= value; }
+			add { this._originalCollection.Updated += value; }
+			remove { this._originalCollection.Updated -= value; }
 		}
 
 		void IXUpdatable<IXCollection<T>>.BeginUpdate()
@@ -133,13 +121,11 @@ namespace Digillect.Collections
 			throw new NotSupportedException(Resources.XCollectionReadOnlyException);
 		}
 
-		[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Contracts", "CC1055", Justification = "Validation not needed since argument not used")]
 		bool IXUpdatable<IXCollection<T>>.IsUpdateRequired(IXCollection<T> source)
 		{
 			return false;
 		}
 
-		[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Contracts", "CC1055", Justification = "Validation not needed since argument not used")]
 		void IXUpdatable<IXCollection<T>>.Update(IXCollection<T> source)
 		{
 			throw new NotSupportedException(Resources.XCollectionReadOnlyException);
@@ -153,7 +139,7 @@ namespace Digillect.Collections
 			{
 				var originalIndex = CalcOriginalIndex( index );
 
-				return originalIndex >= 0 ? this.originalCollection[originalIndex] : default( T );
+				return originalIndex >= 0 ? this._originalCollection[originalIndex] : default( T );
 			}
 		}
 
@@ -167,7 +153,7 @@ namespace Digillect.Collections
 		{
 			Contract.Ensures( Contract.Result<int>() >= -1 );
 
-			return CalcFilteredIndex( this.originalCollection.IndexOf( item ) );
+			return CalcFilteredIndex( this._originalCollection.IndexOf( item ) );
 		}
 
 		void IList<T>.Insert(int index, T item)
@@ -184,15 +170,18 @@ namespace Digillect.Collections
 		#region ICollection`1 Members
 		public int Count
 		{
+#if WINDOWS_PHONE && CODE_ANALYSIS
+			[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA2140:TransparentMethodsMustNotReferenceCriticalCodeFxCopRule")]
+#endif
 			get
 			{
 				if ( this.count == -1 )
 				{
-					lock ( this.originalCollection )
+					lock ( this._originalCollection )
 					{
 						if ( this.count == -1 )
 						{
-							this.count = this.originalCollection.Count(Filter);
+							this.count = this._originalCollection.Count(Filter);
 						}
 					}
 				}
@@ -218,9 +207,12 @@ namespace Digillect.Collections
 			throw new NotSupportedException(Resources.XCollectionReadOnlyException);
 		}
 
+#if WINDOWS_PHONE && CODE_ANALYSIS
+		[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA2140:TransparentMethodsMustNotReferenceCriticalCodeFxCopRule")]
+#endif
 		public bool Contains(T item)
 		{
-			bool contains = this.originalCollection.Contains(item) && Filter(item);
+			bool contains = this._originalCollection.Contains(item) && Filter(item);
 
 			if ( contains )
 			{
@@ -255,14 +247,14 @@ namespace Digillect.Collections
 		{
 			int version = this.version;
 
-			for ( int i = 0; i < originalCollection.Count; i++ )
+			for ( int i = 0; i < _originalCollection.Count; i++ )
 			{
 				if ( this.version != version )
 				{
 					throw new InvalidOperationException(Resources.XCollectionEnumFailedVersionException);
 				}
 
-				T obj = originalCollection[i];
+				T obj = _originalCollection[i];
 
 				if ( Filter(obj) )
 				{
@@ -291,7 +283,7 @@ namespace Digillect.Collections
 			{
 				XKey key = item.GetKey();
 
-				if ( key == null || !item.Equals(other.Find(key)) )
+				if ( !item.Equals(other.FirstOrDefault(x => x.GetKey() == key)) )
 				{
 					return false;
 				}
@@ -362,7 +354,7 @@ namespace Digillect.Collections
 
 			for ( int i = 0; i <= originalIndex; i++ )
 			{
-				if ( Filter(originalCollection[i]) )
+				if ( Filter(this._originalCollection[i]) )
 				{
 					filteredIndex++;
 				}
@@ -380,9 +372,9 @@ namespace Digillect.Collections
 
 			int originalIndex = -1;
 
-			for ( int i = 0, counter = 0; i < originalCollection.Count && counter <= filteredIndex; i++ )
+			for ( int i = 0, counter = 0; i < this._originalCollection.Count && counter <= filteredIndex; i++ )
 			{
-				if ( Filter(originalCollection[i]) )
+				if ( Filter(this._originalCollection[i]) )
 				{
 					originalIndex = i;
 					counter++;
@@ -394,6 +386,9 @@ namespace Digillect.Collections
 		#endregion
 
 		#region Event Handlers
+#if WINDOWS_PHONE && CODE_ANALYSIS
+		[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA2140:TransparentMethodsMustNotReferenceCriticalCodeFxCopRule")]
+#endif
 		private void OriginalCollection_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
 		{
 			version++;
@@ -499,7 +494,7 @@ namespace Digillect.Collections
 		#endregion
 	}
 
-	#region class XFilteredCollectionContract`1
+	#region XFilteredCollection`1 contract binding
 #if DEBUG || CONTRACTS_FULL
 	[ContractClassFor(typeof(XFilteredCollection<>))]
 	abstract class XFilteredCollectionContract<T> : XFilteredCollection<T>
