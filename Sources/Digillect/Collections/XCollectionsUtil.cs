@@ -386,10 +386,6 @@ namespace Digillect.Collections
 			IXCollection<T> modified = new XCollection<T>();
 			IXCollection<T> nonModified = new XCollection<T>();
 
-#if WINDOWS_PHONE // God knows why it can't be proven by the static checker - old (from Silverlight3) Microsoft.Contracts library?
-			Contract.Assume(source != null);
-#endif
-
 			foreach ( T targetObject in target )
 			{
 				// IXCollection does not allow null items - ignore such items
@@ -754,15 +750,15 @@ namespace Digillect.Collections
 		{
 			private readonly Func<T, bool> _filter;
 
-			public FuncFilteredCollection(IXList<T> collection, Func<T, bool> filter)
-				: base(collection)
+			public FuncFilteredCollection(IXList<T> originalCollection, Func<T, bool> filter)
+				: base(originalCollection)
 			{
 				if ( filter == null )
 				{
 					throw new ArgumentNullException("filter");
 				}
 
-				Contract.Requires(collection != null);
+				Contract.Requires(originalCollection != null);
 
 				this._filter = filter;
 			}
