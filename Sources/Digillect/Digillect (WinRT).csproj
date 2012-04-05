@@ -121,7 +121,6 @@
     <Compile Include="Collections\XKeyedCollection.cs" />
     <Compile Include="Collections\XUniqueCollection.cs" />
     <Compile Include="ComponentModel\PropertyChangingEventArgs.cs" />
-    <Compile Include="ContractExtensions.cs" />
     <Compile Include="GlobalSuppressions.cs" />
     <Compile Include="IXIdentifiable.cs" />
     <Compile Include="IXUpdatable.cs" />
