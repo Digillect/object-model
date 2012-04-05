@@ -4,8 +4,6 @@ using System.ComponentModel;
 using System.Diagnostics.Contracts;
 using System.Runtime.Serialization;
 
-using Digillect.Properties;
-
 namespace Digillect
 {
 	/// <summary>
@@ -112,7 +110,7 @@ namespace Digillect
 
 				if ( this.key == null )
 				{
-					throw new XKeyNotAvailableException(Resources.XObjectNullKeyException);
+					throw new XKeyNotAvailableException(Errors.XObjectNullKeyException);
 				}
 			}
 
@@ -195,7 +193,7 @@ namespace Digillect
 			Contract.EndContractBlock();
 
 			if ( !IsObjectCompatible(source) )
-				throw new ArgumentException( Resources.XObjectSourceNotCompatibleException, "source" );
+				throw new ArgumentException(Errors.XObjectSourceNotCompatibleException, "source");
 
 			if( IsUpdateRequired( source ) )
 			{

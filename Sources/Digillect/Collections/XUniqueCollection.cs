@@ -3,8 +3,6 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics.Contracts;
 
-using Digillect.Properties;
-
 namespace Digillect.Collections
 {
 	/// <summary>
@@ -44,7 +42,7 @@ namespace Digillect.Collections
 
 			if ( ContainsKey(item.GetKey()) )
 			{
-				throw new ArgumentException(Resources.XCollectionItemDuplicateException, "item");
+				throw new ArgumentException(Errors.XCollectionItemDuplicateException, "item");
 			}
 		}
 
@@ -56,7 +54,7 @@ namespace Digillect.Collections
 
 			if ( !key.Equals(oldItem.GetKey()) && ContainsKey(key) )
 			{
-				throw new ArgumentException(Resources.XCollectionItemDuplicateException, "newItem");
+				throw new ArgumentException(Errors.XCollectionItemDuplicateException, "newItem");
 			}
 		}
 		#endregion

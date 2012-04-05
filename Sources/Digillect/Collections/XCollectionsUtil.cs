@@ -4,8 +4,6 @@ using System.Collections.Specialized;
 using System.Diagnostics.Contracts;
 using System.Linq;
 
-using Digillect.Properties;
-
 namespace Digillect.Collections
 {
 	public static class XCollectionsUtil
@@ -162,7 +160,7 @@ namespace Digillect.Collections
 
 			if ( source.IsReadOnly )
 			{
-				throw new NotSupportedException(Resources.XCollectionReadOnlyException);
+				throw new NotSupportedException(Errors.XCollectionReadOnlyException);
 			}
 
 			if ( Object.ReferenceEquals(source, collection) )
@@ -537,7 +535,7 @@ namespace Digillect.Collections
 
 			bool IXCollection<T>.Remove(XKey key)
 			{
-				throw new NotSupportedException( Resources.XCollectionReadOnlyException );
+				throw new NotSupportedException(Errors.XCollectionReadOnlyException);
 			}
 
 			IEnumerable<XKey> IXCollection<T>.GetKeys()
@@ -560,12 +558,12 @@ namespace Digillect.Collections
 
 			void IXUpdatable<IXCollection<T>>.BeginUpdate()
 			{
-				throw new NotSupportedException( Resources.XCollectionReadOnlyException );
+				throw new NotSupportedException(Errors.XCollectionReadOnlyException);
 			}
 
 			void IXUpdatable<IXCollection<T>>.EndUpdate()
 			{
-				throw new NotSupportedException( Resources.XCollectionReadOnlyException );
+				throw new NotSupportedException(Errors.XCollectionReadOnlyException);
 			}
 
 			bool IXUpdatable<IXCollection<T>>.IsUpdateRequired(IXCollection<T> source)
@@ -575,19 +573,19 @@ namespace Digillect.Collections
 
 			void IXUpdatable<IXCollection<T>>.Update(IXCollection<T> source )
 			{
-				throw new NotSupportedException( Resources.XCollectionReadOnlyException );
+				throw new NotSupportedException(Errors.XCollectionReadOnlyException);
 			}
 			#endregion
 
 			#region ICollection`1 Members
 			void ICollection<T>.Add(T item)
 			{
-				throw new NotSupportedException( Resources.XCollectionReadOnlyException );
+				throw new NotSupportedException(Errors.XCollectionReadOnlyException);
 			}
 
 			void ICollection<T>.Clear()
 			{
-				throw new NotSupportedException( Resources.XCollectionReadOnlyException );
+				throw new NotSupportedException(Errors.XCollectionReadOnlyException);
 			}
 
 			bool ICollection<T>.Contains(T item)
@@ -612,7 +610,7 @@ namespace Digillect.Collections
 
 			bool ICollection<T>.Remove(T item)
 			{
-				throw new NotSupportedException( Resources.XCollectionReadOnlyException );
+				throw new NotSupportedException(Errors.XCollectionReadOnlyException);
 			}
 			#endregion
 
@@ -715,18 +713,18 @@ namespace Digillect.Collections
 
 			void IList<T>.Insert(int index, T item)
 			{
-				throw new NotSupportedException( Resources.XCollectionReadOnlyException );
+				throw new NotSupportedException(Errors.XCollectionReadOnlyException);
 			}
 
 			void IList<T>.RemoveAt(int index)
 			{
-				throw new NotSupportedException( Resources.XCollectionReadOnlyException );
+				throw new NotSupportedException(Errors.XCollectionReadOnlyException);
 			}
 
 			T IList<T>.this[int index]
 			{
 				get { return this.collection[index]; }
-				set { throw new NotSupportedException( Resources.XCollectionReadOnlyException ); }
+				set { throw new NotSupportedException(Errors.XCollectionReadOnlyException); }
 			}
 			#endregion
 

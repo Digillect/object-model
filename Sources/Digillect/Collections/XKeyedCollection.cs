@@ -5,8 +5,6 @@ using System.ComponentModel;
 using System.Diagnostics.Contracts;
 using System.Runtime.Serialization;
 
-using Digillect.Properties;
-
 namespace Digillect.Collections
 {
 #if !(SILVERLIGHT || NETFX_CORE)
@@ -135,7 +133,7 @@ namespace Digillect.Collections
 
 			if ( this.Items.IsReadOnly )
 			{
-				throw new NotSupportedException(Resources.XCollectionReadOnlyException);
+				throw new NotSupportedException(Errors.XCollectionReadOnlyException);
 			}
 
 			if ( options == CollectionMergeOptions.None || !IsUpdateRequired(collection, options) )
