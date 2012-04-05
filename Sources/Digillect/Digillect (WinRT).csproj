@@ -136,6 +136,7 @@
     <Compile Include="Runtime\CompilerServices\XIgnoreUpdateAttribute.cs" />
     <Compile Include="Runtime\CompilerServices\XKeyAttribute.cs" />
     <Compile Include="XKey.cs" />
+    <Compile Include="XKeyNotAvailableException.cs" />
     <Compile Include="XObject.cs" />
     <Compile Include="XObject`1.cs" />
     <Compile Include="XSecureIdentifiedObject.cs" />
