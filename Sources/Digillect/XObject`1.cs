@@ -4,8 +4,6 @@ using System.Diagnostics;
 using System.Diagnostics.Contracts;
 using System.Runtime.Serialization;
 
-using Digillect.Properties;
-
 namespace Digillect
 {
 	/// <summary>
@@ -112,7 +110,7 @@ namespace Digillect
 				else
 #endif
 				{
-					throw new InvalidOperationException(Resources.XObjectIdentifierNotCloneable);
+					throw new InvalidOperationException(Errors.XObjectIdentifierNotCloneable);
 				}
 			} 
 		}

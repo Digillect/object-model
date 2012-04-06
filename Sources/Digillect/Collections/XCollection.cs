@@ -7,8 +7,6 @@ using System.ComponentModel;
 using System.Diagnostics.Contracts;
 using System.Linq;
 
-using Digillect.Properties;
-
 namespace Digillect.Collections
 {
 	/// <summary>
@@ -382,7 +380,7 @@ namespace Digillect.Collections
 		{
 			if ( this.Items.IsReadOnly )
 			{
-				throw new NotSupportedException(Resources.XCollectionReadOnlyException);
+				throw new NotSupportedException(Errors.XCollectionReadOnlyException);
 			}
 
 			++this.updateCount;
@@ -399,7 +397,7 @@ namespace Digillect.Collections
 		{
 			if ( this.Items.IsReadOnly )
 			{
-				throw new NotSupportedException( Resources.XCollectionReadOnlyException );
+				throw new NotSupportedException(Errors.XCollectionReadOnlyException);
 			}
 
 			if ( this.updateCount == 0 )
@@ -473,7 +471,7 @@ namespace Digillect.Collections
 
 			if ( this.Items.IsReadOnly )
 			{
-				throw new NotSupportedException( Resources.XCollectionReadOnlyException );
+				throw new NotSupportedException(Errors.XCollectionReadOnlyException);
 			}
 
 			if ( !IsUpdateRequired(collection, options) )
@@ -639,7 +637,7 @@ namespace Digillect.Collections
 			{
 				if ( Object.ReferenceEquals(this.Items[i], item) )
 				{
-					throw new ArgumentException("Duplicate reference.", "item");
+					throw new ArgumentException(Errors.XCollectionItemDuplicateException, "item");
 				}
 			}
 		}
@@ -666,7 +664,7 @@ namespace Digillect.Collections
 			{
 				if ( i != index && Object.ReferenceEquals(this.Items[i], newItem) )
 				{
-					throw new ArgumentException("Duplicate reference.", "newItem");
+					throw new ArgumentException(Errors.XCollectionItemDuplicateException, "newItem");
 				}
 			}
 		}

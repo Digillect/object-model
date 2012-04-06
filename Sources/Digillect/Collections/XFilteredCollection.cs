@@ -6,8 +6,6 @@ using System.Collections.Specialized;
 using System.Diagnostics.Contracts;
 using System.Linq;
 
-using Digillect.Properties;
-
 namespace Digillect.Collections
 {
 #if DEBUG || CONTRACTS_FULL
@@ -86,7 +84,7 @@ namespace Digillect.Collections
 
 		bool IXCollection<T>.Remove(XKey key)
 		{
-			throw new NotSupportedException( Resources.XCollectionReadOnlyException );
+			throw new NotSupportedException(Errors.XCollectionReadOnlyException);
 		}
 
 		IXCollection<T> IXCollection<T>.Clone( bool deep )
@@ -113,12 +111,12 @@ namespace Digillect.Collections
 
 		void IXUpdatable<IXCollection<T>>.BeginUpdate()
 		{
-			throw new NotSupportedException(Resources.XCollectionReadOnlyException);
+			throw new NotSupportedException(Errors.XCollectionReadOnlyException);
 		}
 
 		void IXUpdatable<IXCollection<T>>.EndUpdate()
 		{
-			throw new NotSupportedException(Resources.XCollectionReadOnlyException);
+			throw new NotSupportedException(Errors.XCollectionReadOnlyException);
 		}
 
 		bool IXUpdatable<IXCollection<T>>.IsUpdateRequired(IXCollection<T> source)
@@ -128,7 +126,7 @@ namespace Digillect.Collections
 
 		void IXUpdatable<IXCollection<T>>.Update(IXCollection<T> source)
 		{
-			throw new NotSupportedException(Resources.XCollectionReadOnlyException);
+			throw new NotSupportedException(Errors.XCollectionReadOnlyException);
 		}
 		#endregion
 
@@ -146,7 +144,7 @@ namespace Digillect.Collections
 		T IList<T>.this[int index]
 		{
 			get { return this[index]; }
-			set { throw new NotSupportedException(Resources.XCollectionReadOnlyException); }
+			set { throw new NotSupportedException(Errors.XCollectionReadOnlyException); }
 		}
 
 		public int IndexOf(T item)
@@ -158,12 +156,12 @@ namespace Digillect.Collections
 
 		void IList<T>.Insert(int index, T item)
 		{
-			throw new NotSupportedException(Resources.XCollectionReadOnlyException);
+			throw new NotSupportedException(Errors.XCollectionReadOnlyException);
 		}
 
 		void IList<T>.RemoveAt(int index)
 		{
-			throw new NotSupportedException(Resources.XCollectionReadOnlyException);
+			throw new NotSupportedException(Errors.XCollectionReadOnlyException);
 		}
 		#endregion
 
@@ -199,12 +197,12 @@ namespace Digillect.Collections
 
 		void ICollection<T>.Add(T item)
 		{
-			throw new NotSupportedException(Resources.XCollectionReadOnlyException);
+			throw new NotSupportedException(Errors.XCollectionReadOnlyException);
 		}
 
 		void ICollection<T>.Clear()
 		{
-			throw new NotSupportedException(Resources.XCollectionReadOnlyException);
+			throw new NotSupportedException(Errors.XCollectionReadOnlyException);
 		}
 
 #if WINDOWS_PHONE && CODE_ANALYSIS
@@ -238,7 +236,7 @@ namespace Digillect.Collections
 
 		bool ICollection<T>.Remove(T item)
 		{
-			throw new NotSupportedException(Resources.XCollectionReadOnlyException);
+			throw new NotSupportedException(Errors.XCollectionReadOnlyException);
 		}
 		#endregion
 
@@ -251,7 +249,7 @@ namespace Digillect.Collections
 			{
 				if ( this.version != version )
 				{
-					throw new InvalidOperationException(Resources.XCollectionEnumFailedVersionException);
+					throw new InvalidOperationException(Errors.XCollectionEnumFailedVersionException);
 				}
 
 				T obj = _originalCollection[i];
