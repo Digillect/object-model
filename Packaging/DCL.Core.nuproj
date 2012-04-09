@@ -5,7 +5,7 @@
 		<Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
 
 		<BuildPath>..\Build\bin\$(Configuration)</BuildPath>
-		<PackagePath>..\Build\package\$(Configuration)\DCL.Core</PackagePath>
+		<OutputPath>..\Build\package\$(Configuration)\$(MSBuildProjectName)\</OutputPath>
 	</PropertyGroup>
 
 	<!--PropertyGroup>
@@ -13,11 +13,11 @@
 	</PropertyGroup-->
 
 	<ItemGroup>
-		<LibNet40 Include="$(BuildPath)\Desktop\Digillect.*"/>
-		<LibNet45 Include="$(BuildPath)\NET45\Digillect.*"/>
-		<LibWinRT45 Include="$(BuildPath)\WinRT\Digillect.*"/>
-		<LibSL4 Include="$(BuildPath)\SL4\Digillect.*"/>
-		<LibWP71 Include="$(BuildPath)\WP7\Digillect.*"/>
+		<LibNet40 Include="$(BuildPath)\NET40\**\Digillect.*" Exclude="$(BuildPath)\**\*.xml.old"/>
+		<LibNet45 Include="$(BuildPath)\NET45\**\Digillect.*" Exclude="$(BuildPath)\**\*.xml.old"/>
+		<LibWinRT45 Include="$(BuildPath)\WinRT\**\Digillect.*" Exclude="$(BuildPath)\**\*.xml.old"/>
+		<LibSL4 Include="$(BuildPath)\SL4\**\Digillect.*" Exclude="$(BuildPath)\**\*.xml.old"/>
+		<LibWP71 Include="$(BuildPath)\WP7\**\Digillect.*" Exclude="$(BuildPath)\**\*.xml.old"/>
 	</ItemGroup>
 
 	<Import Project="NuGet.Project.Targets"/>

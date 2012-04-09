@@ -1,9 +1,9 @@
 ﻿<?xml version="1.0"?>
 
-<package >
+<package>
 	<metadata>
 		<id>DCL.Core</id>
-		<version>4.0.0</version>
+		<version>4.0.0-alpha</version>
 		<authors>Andrew Nefedkin, Gregory Nickonov</authors>
 		<owners>Andrew Nefedkin, Gregory Nickonov</owners>
 		<requireLicenseAcceptance>false</requireLicenseAcceptance>
@@ -11,5 +11,8 @@
 		<releaseNotes>Initial release.</releaseNotes>
 		<copyright>Copyright © 2002-2012 Actis Systems. All rights reserved.</copyright>
 		<tags>digillect common core</tags>
+		<references>
+			<reference file="Digillect.dll"/>
+		</references>
 	</metadata>
 </package>

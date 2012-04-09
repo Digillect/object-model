@@ -19,11 +19,11 @@
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
-    <OutputPath>..\..\Build\bin\Debug\Desktop\</OutputPath>
+    <OutputPath>..\..\Build\bin\Debug\NET40\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <DocumentationFile>..\..\Build\bin\Debug\Desktop\Digillect.xml</DocumentationFile>
+    <DocumentationFile>..\..\Build\bin\Debug\NET40\Digillect.xml</DocumentationFile>
     <NoWarn>1591,1607</NoWarn>
     <CodeAnalysisRuleSet>..\DigillectRules.ruleset</CodeAnalysisRuleSet>
     <CodeContractsEnableRuntimeChecking>True</CodeContractsEnableRuntimeChecking>
@@ -63,12 +63,12 @@
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
-    <OutputPath>..\..\Build\bin\Release\Desktop\</OutputPath>
+    <OutputPath>..\..\Build\bin\Release\NET40\</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <NoWarn>1591,1607</NoWarn>
-    <DocumentationFile>..\..\Build\bin\Release\Desktop\Digillect.xml</DocumentationFile>
+    <DocumentationFile>..\..\Build\bin\Release\NET40\Digillect.xml</DocumentationFile>
     <CodeAnalysisRuleSet>..\DigillectRules.ruleset</CodeAnalysisRuleSet>
     <CodeContractsEnableRuntimeChecking>False</CodeContractsEnableRuntimeChecking>
     <CodeContractsRuntimeOnlyPublicSurface>False</CodeContractsRuntimeOnlyPublicSurface>
