@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
+using System.ComponentModel;
 using System.Diagnostics.Contracts;
 using System.Linq;
 
@@ -379,7 +380,7 @@ namespace Digillect.Collections
 
 			IXCollection<T> added = new XCollection<T>();
 			IXCollection<T> changed = new XCollection<T>();
-			Contract.Assume(Contract.ForAll(source, x => x != null));
+			Contract.Assume(Contract.ForAll(source, CollectionMemberNotNull));
 			IXCollection<T> deleted = new XCollection<T>(source);
 			IXCollection<T> modified = new XCollection<T>();
 			IXCollection<T> nonModified = new XCollection<T>();
@@ -464,6 +465,19 @@ namespace Digillect.Collections
 
 			return FilteredList(collection, filter.ToFunction());
 		}
+		#endregion
+
+		#region CollectionMemberNotNull`1
+		/// <summary>
+		/// Helper function/predicate for code contracts.
+		/// </summary>
+		/// <param name="item">The item to check.</param>
+		/// <returns><c>true</c> if the <paramref name="item"/> is not <c>null</c>; otherwise, <c>false</c>.</returns>
+		[EditorBrowsable(EditorBrowsableState.Advanced)]
+		public static bool CollectionMemberNotNull<T>(T item)
+		{
+			return item != null;
+		} 
 		#endregion
 
 		#region Predicate<T> -> Func<T, bool>

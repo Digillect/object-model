@@ -31,7 +31,7 @@ namespace Digillect.Collections
 			: base(collection)
 		{
 			Contract.Requires(collection != null);
-			Contract.Requires(Contract.ForAll(collection, x => x != null));
+			Contract.Requires(Contract.ForAll(collection, XCollectionsUtil.CollectionMemberNotNull));
 		}
 		#endregion
 

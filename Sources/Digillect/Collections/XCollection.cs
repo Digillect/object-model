@@ -115,7 +115,7 @@ namespace Digillect.Collections
 		public void AddRange(IEnumerable<T> collection)
 		{
 			Contract.Requires( collection != null );
-			Contract.Requires(Contract.ForAll(collection, x => x != null));
+			Contract.Requires(Contract.ForAll(collection, XCollectionsUtil.CollectionMemberNotNull));
 
 			InsertRange(this.Count, collection);
 		}
@@ -144,8 +144,6 @@ namespace Digillect.Collections
 			Contract.Ensures(Contract.Result<XCollection<T>>() != null);
 
 			var derived = CreateInstanceOfSameType();
-
-			Contract.Assume(this.Items != null);
 
 			derived.AddRange(this.Items.Where(predicate));
 
@@ -201,8 +199,6 @@ namespace Digillect.Collections
 #endif
 		public IEnumerable<XKey> GetKeys()
 		{
-			Contract.Assume(this.Items != null);
-
 			return this.Items.Select(x => x.GetKey());
 		}
 
@@ -447,7 +443,7 @@ namespace Digillect.Collections
 		public CollectionMergeResults Update(IEnumerable<T> collection)
 		{
 			Contract.Requires(collection != null);
-			Contract.Requires(Contract.ForAll(collection, x => x != null));
+			Contract.Requires(Contract.ForAll(collection, XCollectionsUtil.CollectionMemberNotNull));
 			Contract.Ensures(Contract.Result<CollectionMergeResults>() != null);
 
 			return Update(collection, CollectionMergeOptions.Full);
@@ -479,9 +475,7 @@ namespace Digillect.Collections
 				return CollectionMergeResults.Empty;
 			}
 
-			Contract.Assume(this.Items != null);
-
-			var results = this.Items.Merge(collection, options);
+			var results = this.Items.Merge(collection.Distinct(ReferenceEqualityComparer.Default), options);
 
 			if ( !results.IsEmpty )
 			{
@@ -633,12 +627,9 @@ namespace Digillect.Collections
 		/// <exclude/>
 		protected virtual void OnInsert(int index, T item)
 		{
-			for ( int i = 0; i < this.Items.Count; i++ )
+			if ( this.Items.Contains(item, ReferenceEqualityComparer.Default) )
 			{
-				if ( Object.ReferenceEquals(this.Items[i], item) )
-				{
-					throw new ArgumentException(Errors.XCollectionItemDuplicateException, "item");
-				}
+				throw new ArgumentException(Errors.XCollectionItemDuplicateException, "item");
 			}
 		}
 
@@ -660,12 +651,9 @@ namespace Digillect.Collections
 		/// <exclude/>
 		protected virtual void OnSet(int index, T oldItem, T newItem)
 		{
-			for ( int i = 0; i < this.Items.Count; i++ )
+			if ( this.Items.Contains(newItem, ReferenceEqualityComparer.Default) )
 			{
-				if ( i != index && Object.ReferenceEquals(this.Items[i], newItem) )
-				{
-					throw new ArgumentException(Errors.XCollectionItemDuplicateException, "newItem");
-				}
+				throw new ArgumentException(Errors.XCollectionItemDuplicateException, "newItem");
 			}
 		}
 
@@ -735,12 +723,44 @@ namespace Digillect.Collections
 				throw new ArgumentNullException("collection");
 			}
 
-			if ( !collection.All(x => x != null) )
+			if ( !collection.All(XCollectionsUtil.CollectionMemberNotNull) )
 			{
 				throw new ArgumentException("Null element found.", "collection");
 			}
 
 			Contract.EndContractBlock();
 		}
+
+		#region ObjectInvariant
+		[ContractInvariantMethod]
+		[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1822:MarkMembersAsStatic", Justification = "Required for code contracts.")]
+		private void ObjectInvariant()
+		{
+			Contract.Invariant(this.Items != null);
+		}
+		#endregion
+
+		#region class ReferenceEqualityComparer
+		protected sealed class ReferenceEqualityComparer : IEqualityComparer<T>
+		{
+			[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1000:DoNotDeclareStaticMembersOnGenericTypes")]
+			[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA2104:DoNotDeclareReadOnlyMutableReferenceTypes")]
+			public static readonly IEqualityComparer<T> Default = new ReferenceEqualityComparer();
+
+			private ReferenceEqualityComparer()
+			{
+			}
+
+			public bool Equals(T x, T y)
+			{
+				return Object.ReferenceEquals(x, y);
+			}
+
+			public int GetHashCode(T obj)
+			{
+				return Object.ReferenceEquals(obj, null) ? 0 : obj.GetHashCode();
+			}
+		}
+		#endregion
 	}
 }
