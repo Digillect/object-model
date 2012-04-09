@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Diagnostics.Contracts;
 using System.Runtime.Serialization;
 
@@ -263,12 +264,13 @@ namespace Digillect
 		#endregion
 
 		#region class RootKey
+		[DebuggerDisplay("Type = {_type}")]
 #if !(SILVERLIGHT || NETFX_CORE)
 		[Serializable]
 #endif
 		private sealed class RootKey : XKey, IComparable<RootKey>, IEquatable<RootKey>
 		{
-			private Type _type;
+			private readonly Type _type;
 
 			public RootKey(Type type)
 			{
@@ -309,7 +311,7 @@ namespace Digillect
 					return false;
 				}
 
-				return this._type == other._type;
+				return Object.ReferenceEquals(this, other) || this._type == other._type;
 			}
 
 			public override bool Equals(XKey other)

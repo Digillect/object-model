@@ -153,7 +153,7 @@ namespace Digillect
 		#endregion
 
 		#region class SimpleKey`1
-		[DebuggerDisplay("Key = {m_key}")]
+		[DebuggerDisplay("Key = {_key}")]
 #if !(SILVERLIGHT || NETFX_CORE)
 		[Serializable]
 #endif
@@ -202,7 +202,7 @@ namespace Digillect
 					return false;
 				}
 
-				return EqualityComparer<T>.Default.Equals(this._key, other._key) && this._parentKey == other._parentKey;
+				return Object.ReferenceEquals(this, other) || (EqualityComparer<T>.Default.Equals(this._key, other._key) && this._parentKey == other._parentKey);
 			}
 
 			public override bool Equals(XKey other)
