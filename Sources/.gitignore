@@ -1,7 +1,4 @@
-packages/
 obj/
-obj.SL4/
-obj.WP7/
 *.suo
 *.user
 *.vsdoc

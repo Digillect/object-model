@@ -1,9 +1,9 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 11
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Digillect (NET45)", "Digillect\Digillect (NET45).csproj", "{6A0D13DA-0078-46EB-99AC-6B62C4FC136B}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Digillect (NET45)", "Sources\Digillect\Digillect (NET45).csproj", "{6A0D13DA-0078-46EB-99AC-6B62C4FC136B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Digillect (WinRT)", "Digillect\Digillect (WinRT).csproj", "{F213AEB9-82D4-43CB-BAB1-C929DB11E717}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Digillect (WinRT)", "Sources\Digillect\Digillect (WinRT).csproj", "{F213AEB9-82D4-43CB-BAB1-C929DB11E717}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
