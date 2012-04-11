@@ -237,7 +237,7 @@ namespace Digillect
 		{
 			Contract.Ensures( Contract.Result<XObject>() != null );
 
-			return (XObject) Activator.CreateInstance( GetType() );
+			return (XObject) Activator.CreateInstance(GetType(), true);
 		}
 		#endregion
 
