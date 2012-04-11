@@ -173,13 +173,13 @@
     <Compile Include="Collections\XCollection.cs" />
     <Compile Include="Collections\XCollectionsUtil.cs" />
     <Compile Include="Collections\XFilteredCollection.cs" />
-    <Compile Include="Collections\XKeyedCollection.cs" />
+    <Compile Include="Collections\XIdentifiedCollection.cs" />
     <Compile Include="Collections\XUniqueCollection.cs" />
     <Compile Include="ComponentModel\PropertyChangingEventArgs.cs" />
     <Compile Include="Runtime\CompilerServices\AutoNotifyAdditionalPropertiesAttribute.cs" />
     <Compile Include="Runtime\CompilerServices\GenerateEqualsAndGetHashCodeAttribute.cs" />
     <Compile Include="GlobalSuppressions.cs" />
-    <Compile Include="IXIdentifiable.cs" />
+    <Compile Include="IXIdentified.cs" />
     <Compile Include="IXUpdatable.cs" />
     <Compile Include="ObservableObject.cs" />
     <Compile Include="Reflection\ReflectionHelpers.cs" />

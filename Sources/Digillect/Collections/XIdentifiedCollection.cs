@@ -1,8 +1,10 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Diagnostics.Contracts;
+using System.Linq;
 using System.Runtime.Serialization;
 
 namespace Digillect.Collections
@@ -10,12 +12,11 @@ namespace Digillect.Collections
 #if !(SILVERLIGHT || NETFX_CORE)
 	[Serializable]
 #endif
-	public class XKeyedCollection<TId, TObject> : XUniqueCollection<TObject>
+	public class XIdentifiedCollection<TId, TObject> : XUniqueCollection<TObject>
 #if !(SILVERLIGHT || NETFX_CORE)
 		, IDeserializationCallback
 #endif
-		where TId : IEquatable<TId>
-		where TObject : XObject, IXIdentifiable<TId>
+		where TObject : XObject, IXIdentified<TId>
 	{
 #if !(SILVERLIGHT || NETFX_CORE)
 		[NonSerialized]
@@ -24,17 +25,17 @@ namespace Digillect.Collections
 
 		#region Constructor
 		/// <summary>
-		/// Initializes new instance of the <see cref="XKeyedCollection&lt;TId,TObject&gt;"/> class.
+		/// Initializes new instance of the <see cref="XIdentifiedCollection&lt;TId,TObject&gt;"/> class.
 		/// </summary>
-		public XKeyedCollection()
+		public XIdentifiedCollection()
 		{
 		}
 
 		/// <summary>
-		/// Initializes new instance of the <see cref="XKeyedCollection&lt;TId,TObject&gt;"/> class using elements of the provided enumeration as the source for this list.
+		/// Initializes new instance of the <see cref="XIdentifiedCollection&lt;TId,TObject&gt;"/> class using elements of the provided enumeration as the source for this list.
 		/// </summary>
 		/// <param name="collection">The enumeration which elements are used to construct a new list to use as the parameter for the <see cref="Collection&lt;T&gt;(IList&lt;T&gt;)"/> constructor.</param>
-		public XKeyedCollection(IEnumerable<TObject> collection)
+		public XIdentifiedCollection(IEnumerable<TObject> collection)
 			: base(collection)
 		{
 			Contract.Requires( collection != null );
@@ -59,6 +60,7 @@ namespace Digillect.Collections
 		#endregion
 
 		#region Protected Properties
+		[EditorBrowsable(EditorBrowsableState.Advanced)]
 		protected IDictionary<TId, TObject> Dictionary
 		{
 			get { return m_dictionary; }
@@ -68,21 +70,19 @@ namespace Digillect.Collections
 		#region Public Methods
 		public bool Contains(TId id)
 		{
+			Contract.Ensures(!Contract.Result<bool>() || this.Count > 0);
+
 			return m_dictionary.ContainsKey(id);
-		}
-
-		public new bool Contains(TObject item)
-		{
-			if ( item == null )
-				throw new ArgumentNullException("item");
-
-			return Contains(item.Id);
 		}
 
 		public int IndexOf(TId id)
 		{
+			Contract.Ensures(Contract.Result<int>() >= -1);
+
 			if ( m_dictionary.ContainsKey(id) )
+			{
 				return IndexOf(m_dictionary[id]);
+			}
 
 			return -1;
 		}
@@ -93,12 +93,14 @@ namespace Digillect.Collections
 			/*
 			if ( this.Items.IsReadOnly )
 			{
-				throw new NotSupportedException(Properties.Resources.XListReadOnlyException);
+				throw new NotSupportedException(Errors.XCollectionReadOnlyException);
 			}
 			*/
 
 			if ( m_dictionary.ContainsKey(id) )
+			{
 				return Remove(m_dictionary[id]);
+			}
 
 			return false;
 		}
@@ -124,7 +126,6 @@ namespace Digillect.Collections
 		/// <param name="collection">Источник изменений.</param>
 		/// <param name="options">Операции, которые надо произвести с объектами, находящимися в данной коллекции.</param>
 		/// <returns>The <see cref="CollectionMergeResults">results</see> of the operation.</returns>
-		[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1062:Validate arguments of public methods", MessageId = "0", Justification = "Indeed it validated")]
 		public override CollectionMergeResults Update(IEnumerable<TObject> collection, CollectionMergeOptions options)
 		{
 			ValidateCollection(collection);
@@ -136,55 +137,28 @@ namespace Digillect.Collections
 				throw new NotSupportedException(Errors.XCollectionReadOnlyException);
 			}
 
-			if ( options == CollectionMergeOptions.None || !IsUpdateRequired(collection, options) )
+			if ( !IsUpdateRequired(collection, options) )
 			{
 				return CollectionMergeResults.Empty;
 			}
 
-			int added = 0;
-			int updated = 0;
-			int removed = 0;
+			var results = this.Items.Merge(collection.Distinct(ReferenceEqualityComparer.Default), options);
 
-			IDictionary<TId, TObject> toRemove = new Dictionary<TId, TObject>();
-
-			foreach ( TObject item in this.Items )
+			if ( !results.IsEmpty )
 			{
-				toRemove.Add(item.Id, item);
+				OnDeserialization();
+				OnUpdated(EventArgs.Empty);
+
+				if ( results.Added != 0 || results.Removed != 0 )
+				{
+					OnPropertyChanged("Count");
+				}
+
+				OnPropertyChanged("Item[]");
+				OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset));
 			}
 
-			foreach ( TObject item in collection )
-			{
-				if ( toRemove.ContainsKey(item.Id) )
-				{
-					TObject existing = toRemove[item.Id];
-
-					if ( (options & CollectionMergeOptions.UpdateExisting) != CollectionMergeOptions.None )
-					{
-						existing.Update(item);
-						updated++;
-					}
-
-					toRemove.Remove(existing.Id);
-				}
-				else if ( (options & CollectionMergeOptions.AddNew) != CollectionMergeOptions.None )
-				{
-					Add(item);
-					added++;
-				}
-			}
-
-			if ( (options & CollectionMergeOptions.RemoveOld) != CollectionMergeOptions.None )
-			{
-				foreach ( TId id in toRemove.Keys )
-				{
-					if ( Remove(id) )
-					{
-						removed++;
-					}
-				}
-			}
-
-			return new CollectionMergeResults(added, updated, removed);
+			return results;
 		}
 		#endregion
 
@@ -210,10 +184,7 @@ namespace Digillect.Collections
 
 			foreach ( TObject item in this.Items )
 			{
-				if ( item != null )
-				{
-					m_dictionary.Add(item.Id, item);
-				}
+				m_dictionary.Add(item.Id, item);
 			}
 		}
 		#endregion
@@ -242,6 +213,15 @@ namespace Digillect.Collections
 			base.OnSetComplete(index, oldItem, newItem);
 			m_dictionary.Remove(oldItem.Id);
 			m_dictionary.Add(newItem.Id, newItem);
+		}
+		#endregion
+
+		#region ObjectInvariant
+		[ContractInvariantMethod]
+		[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1822:MarkMembersAsStatic", Justification = "Required for code contracts.")]
+		private void ObjectInvariant()
+		{
+			Contract.Invariant(m_dictionary.Count == this.Count);
 		}
 		#endregion
 	}

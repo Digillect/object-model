@@ -18,7 +18,7 @@ namespace Digillect
 #if !(SILVERLIGHT || NETFX_CORE)
 	[Serializable]
 #endif
-	public abstract class XSecureIdentifiedObject<TId> : XObject, IXIdentifiable<TId>
+	public abstract class XSecureIdentifiedObject<TId> : XObject, IXIdentified<TId>
 		where TId : IComparable<TId>, IEquatable<TId>
 	{
 		private TId id;

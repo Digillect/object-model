@@ -6,7 +6,7 @@ namespace Digillect
 	/// Specifies that class can be identified by <c>Id</c>.
 	/// </summary>
 	/// <typeparam name="TId">The type of the id.</typeparam>
-	public interface IXIdentifiable<TId>
+	public interface IXIdentified<TId>
 	{
 		/// <summary>
 		/// Gets the id.
