@@ -90,6 +90,38 @@
 
 		<Message Text="Package version stamped, output package set to $(OutputPackage)."/>
 	</Target>
+	<Target Name="PrepareVersion" Condition=" '$(VersionAssembly)' == '' ">
+		<XmlRead
+			Namespace="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd"
+			XmlFileName="$(OutputPath)\$(NuSpecFileName)"
+			XPath="/package/metadata/version">
+			<Output TaskParameter="Value" PropertyName="OriginalPackageVersion"/>
+		</XmlRead>
+
+		<PropertyGroup Condition=" '$(BuildNumber)' == '' ">
+			<PackageVersion>$(OriginalPackageVersion)</PackageVersion>
+		</PropertyGroup>
+		<PropertyGroup Condition=" '$(BuildNumber)' != '' ">
+			<!-- According to SemanticVersioning build number MUST be delimited by plus sign
+			     (+), but current implementation of NuGet doesn't recognize it -->
+			<PackageVersion>$(OriginalPackageVersion)-$(BuildNumber)</PackageVersion>
+		</PropertyGroup>
+
+		<Message Text="Package version set to $(PackageVersion) from $(OriginalPackageVersion)."/>
+
+		<XmlUpdate
+			Namespace="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd"
+			XmlFileName="$(OutputPath)\$(NuSpecFileName)"
+			XPath="/package/metadata/version"
+			Value="$(PackageVersion)"
+			Condition=" '$(PackageVersion)' != '$(OriginalPackageVersion)' "/>
+
+		<PropertyGroup>
+			<OutputPackage>$(OutputPath)\$([System.IO.Path]::GetFileNameWithoutExtension( '$(NuSpecFileName)' )).$(PackageVersion).nupkg</OutputPackage>
+		</PropertyGroup>
+
+		<Message Text="Package version stamped, output package set to $(OutputPackage)."/>
+	</Target>
 	<Target Name="ProcessPrepare" DependsOnTargets="PrepareVersion"/>
 
 	<Target Name="Prepare" DependsOnTargets="BeforePrepare;ProcessPrepare;AfterPrepare"/>
