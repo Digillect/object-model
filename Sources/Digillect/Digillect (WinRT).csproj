@@ -109,6 +109,9 @@
   </PropertyGroup>
   <ItemGroup>
     <!-- A reference to the entire .Net Framework and Windows SDK are automatically included -->
+    <Compile Include="..\AssemblySharedInfo.cs">
+      <Link>Properties\AssemblySharedInfo.cs</Link>
+    </Compile>
     <Compile Include="Collections\CollectionMergeOptions.cs" />
     <Compile Include="Collections\CollectionMergeResults.cs" />
     <Compile Include="Collections\IXCollection.cs" />

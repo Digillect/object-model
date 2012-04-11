@@ -175,6 +175,9 @@
     <Reference Include="System.Core" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="..\AssemblySharedInfo.cs">
+      <Link>Properties\AssemblySharedInfo.cs</Link>
+    </Compile>
     <Compile Include="Collections\CollectionMergeOptions.cs" />
     <Compile Include="Collections\CollectionMergeResults.cs" />
     <Compile Include="Collections\IXCollection.cs" />
