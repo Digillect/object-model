@@ -10,11 +10,41 @@ namespace Digillect.Collections
 	public static class XCollectionsUtil
 	{
 		#region IsNullOrEmpty`1
+		/// <summary>
+		/// Indicates whether the specified array is <c>null</c> has no elements.
+		/// </summary>
+		/// <typeparam name="T"><see cref="Type"/> of array members.</typeparam>
+		/// <param name="value">The array to test.</param>
+		/// <returns>
+		/// <c>true</c> if the <paramref name="value"/> is null or has no elements; otherwise, <c>false</c>.
+		/// </returns>
+		/// <remarks>
+		/// <c>IsNullOrEmpty</c> is a convenience method that enables you to simultaneously test whether an array is <c>null</c> or has no elements.
+		/// It is equivalent to the following code:
+		/// <code>
+		/// result = a == null || a.Length == 0;
+		/// </code>
+		/// </remarks>
 		public static bool IsNullOrEmpty<T>(T[] value)
 		{
 			return value == null || value.Length == 0;
 		}
 
+		/// <summary>
+		/// Indicates whether the specified collection is <c>null</c> has no items.
+		/// </summary>
+		/// <typeparam name="T"><see cref="Type"/> of collection members.</typeparam>
+		/// <param name="value">The collection to test.</param>
+		/// <returns>
+		/// <c>true</c> if the <paramref name="value"/> is null or has no items; otherwise, <c>false</c>.
+		/// </returns>
+		/// <remarks>
+		/// <c>IsNullOrEmpty</c> is a convenience method that enables you to simultaneously test whether a collection is <c>null</c> or has no items.
+		/// It is equivalent to the following code:
+		/// <code>
+		/// result = c == null || c.Count == 0;
+		/// </code>
+		/// </remarks>
 		public static bool IsNullOrEmpty<T>(ICollection<T> value)
 		{
 			return value == null || value.Count == 0;
@@ -73,7 +103,7 @@ namespace Digillect.Collections
 			return modified;
 		}
 
-		public static bool RemoveAll<T>(this IXCollection<T> source, Func<T, bool> predicate)
+		public static bool RemoveAll<T>(this ICollection<T> source, Func<T, bool> predicate)
 			where T : XObject
 		{
 			Contract.Requires(source != null);
@@ -82,7 +112,7 @@ namespace Digillect.Collections
 			return source.RemoveAll(source.Where(predicate).ToArray());
 		}
 
-		public static bool RemoveAll<T>(this IXCollection<T> source, Predicate<T> predicate)
+		public static bool RemoveAll<T>(this ICollection<T> source, Predicate<T> predicate)
 			where T : XObject
 		{
 			Contract.Requires(source != null);
@@ -233,38 +263,41 @@ namespace Digillect.Collections
 						existing0.Item.Update(item);
 						updated++;
 
-						Contract.Assert(index <= existing0.Index);
-						Contract.Assume(existing0.Index < source.Count);
-
-						// Move the updated item to the current (source) position
-						// HACK: instead of remove-then-insert we will change indexes of all affected items
-
-						// Move range [index..existing0.Index) one element up
-						for ( int i = existing0.Index; i > index; i-- )
+						if ( (options & CollectionMergeOptions.PreserveSourceOrder) == CollectionMergeOptions.PreserveSourceOrder )
 						{
-							source[i] = source[i - 1];
-						}
+							Contract.Assert(index <= existing0.Index);
+							Contract.Assume(existing0.Index < source.Count);
 
-						// Set updated item at the corect (source) position
-						source[index] = existing0.Item;
+							// Move the updated item to the current (source) position
+							// HACK: instead of remove-then-insert we will change indexes of all affected items
 
-						// Recalculate original indexes upon moving
-						foreach ( var items in updateCandidates.Values )
-						{
-#if !NETFX_CORE // List<T>.ForEach is not supported in NETFX_CORE (WinRT)
-							items.ForEach(x =>
-#else
-							foreach ( var x in items )
-#endif
+							// Move range [index..existing0.Index) one element up
+							for ( int i = existing0.Index; i > index; i-- )
 							{
-								if ( index <= x.Index && x.Index < existing0.Index )
-								{
-									x.Index++;
-								}
+								source[i] = source[i - 1];
 							}
-#if !NETFX_CORE
-							);
+
+							// Set updated item at the corect (source) position
+							source[index] = existing0.Item;
+
+							// Recalculate original indexes upon moving
+							foreach ( var items in updateCandidates.Values )
+							{
+#if !NETFX_CORE // List<T>.ForEach is not supported in NETFX_CORE (WinRT)
+								items.ForEach(x =>
+#else
+								foreach ( var x in items )
 #endif
+								{
+									if ( index <= x.Index && x.Index < existing0.Index )
+									{
+										x.Index++;
+									}
+								}
+#if !NETFX_CORE
+								);
+#endif
+							}
 						}
 					}
 
@@ -279,27 +312,35 @@ namespace Digillect.Collections
 				}
 				else if ( (options & CollectionMergeOptions.AddNew) == CollectionMergeOptions.AddNew )
 				{
-					source.Insert(index, item);
-					added++;
-
-					// Recalculate original indexes upon insertion
-					foreach ( var items in updateCandidates.Values )
+					if ( (options & CollectionMergeOptions.PreserveSourceOrder) == CollectionMergeOptions.PreserveSourceOrder )
 					{
-#if !NETFX_CORE // List<T>.ForEach is not supported in NETFX_CORE (WinRT)
-						items.ForEach(x =>
-#else
-						foreach ( var x in items )
-#endif
+						source.Insert(index, item);
+
+						// Recalculate original indexes upon insertion
+						foreach ( var items in updateCandidates.Values )
 						{
-							if ( x.Index >= index )
-							{
-								x.Index++;
-							}
-						}
-#if !NETFX_CORE
-						);
+#if !NETFX_CORE // List<T>.ForEach is not supported in NETFX_CORE (WinRT)
+							items.ForEach(x =>
+#else
+							foreach ( var x in items )
 #endif
+							{
+								if ( x.Index >= index )
+								{
+									x.Index++;
+								}
+							}
+#if !NETFX_CORE
+							);
+#endif
+						}
 					}
+					else
+					{
+						source.Add(item);
+					}
+
+					added++;
 				}
 
 				index++;
@@ -307,28 +348,18 @@ namespace Digillect.Collections
 
 			if ( (options & CollectionMergeOptions.RemoveOld) == CollectionMergeOptions.RemoveOld )
 			{
-				foreach ( var items in updateCandidates.Values )
-				{
-					// Тут нужна сортировка по индексу в порядке убывания, чтобы не вылететь за границы коллекции
-					// Т.к. items в дальнейшем нам больше не нужен, можем смело его "испортить"
-					// Изначально гарантировано, что его элементы идут в правильном порядке, т.е. по возрастанию индексов оригинальной коллекции
-					items.Reverse();
+				// Тут нужна сортировка по индексу в порядке убывания, чтобы не вылететь за границы коллекции
+				var indexes = from mi in updateCandidates.Values.SelectMany(list => list)
+						orderby mi.Index descending
+						select mi.Index;
 
-#if !NETFX_CORE // List<T>.ForEach is not supported in NETFX_CORE (WinRT)
-					items.ForEach(x =>
-#else
-					foreach ( var x in items )
-#endif
-					{
-						// И еще один safeguard, для порядку
-						//Contract.Assert(x.Index < this.Items.Count);
-						Contract.Assume(x.Index >= 0);
-						source.RemoveAt(x.Index);
-						removed++;
-					}
-#if !NETFX_CORE
-					);
-#endif
+				foreach ( var idx in indexes )
+				{
+					// И еще один safeguard, для порядку
+					//Contract.Assert(idx < this.Items.Count);
+					Contract.Assume(idx >= 0);
+					source.RemoveAt(idx);
+					removed++;
 				}
 			}
 
@@ -344,17 +375,17 @@ namespace Digillect.Collections
 		/// <code>
 		/// var result = source.Difference(target);
 		/// 
-		/// foreach ( T o in result.Added )
+		/// foreach ( var o in result.Added )
 		/// {
 		///		// Process added object
 		///	}
 		///	
-		///	foreach ( T o in result.Changed )
+		///	foreach ( var o in result.Changed )
 		///	{
 		///		// Process changed object
 		///	}
 		///	
-		///	foreach ( T o in result.Deleted )
+		///	foreach ( var o in result.Deleted )
 		///	{
 		///		// Process deleted object
 		///	}
@@ -420,6 +451,14 @@ namespace Digillect.Collections
 		#endregion
 
 		#region Unmodifiable Wrappers
+		/// <summary>
+		/// Returns an unmodifiable wrapper around the specified collection.
+		/// </summary>
+		/// <typeparam name="T"><see cref="Type"/> of the collection members.</typeparam>
+		/// <param name="collection">The collection to wrap.</param>
+		/// <returns>
+		/// Unmodifiable (<see cref="ICollection&lt;T&gt;.IsReadOnly"/> == <c>true</c>) wrapper around the original collection.
+		/// </returns>
 		public static IXCollection<T> UnmodifiableCollection<T>(IXCollection<T> collection)
 		{
 			Contract.Requires( collection != null );
@@ -427,6 +466,14 @@ namespace Digillect.Collections
 			return new ReadOnlyXCollection<T>(collection);
 		}
 
+		/// <summary>
+		/// Returns an unmodifiable wrapper around the specified collection.
+		/// </summary>
+		/// <typeparam name="T"><see cref="Type"/> of the collection members.</typeparam>
+		/// <param name="collection">The collection to wrap.</param>
+		/// <returns>
+		/// Unmodifiable (<see cref="ICollection&lt;T&gt;.IsReadOnly"/> == <c>true</c>) wrapper around the original collection.
+		/// </returns>
 		public static IXList<T> UnmodifiableList<T>(IXList<T> collection)
 		{
 			Contract.Requires(collection != null);

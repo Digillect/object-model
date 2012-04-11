@@ -30,8 +30,13 @@ namespace Digillect.Collections
 		UpdateExisting = 4,
 
 		/// <summary>
-		/// Perform all possible update operations.
+		/// Preserve order of objects in target collection as found in source one.
 		/// </summary>
-		Full = AddNew | RemoveOld | UpdateExisting
+		PreserveSourceOrder = 8,
+
+		/// <summary>
+		/// Perform all possible merge operations.
+		/// </summary>
+		Full = AddNew | RemoveOld | UpdateExisting | PreserveSourceOrder
 	}
 }
