@@ -194,7 +194,7 @@ namespace Digillect.Collections
 				throw new NotSupportedException(Errors.XCollectionReadOnlyException);
 			}
 
-			if ( Object.ReferenceEquals(source, collection) )
+			if ( Object.ReferenceEquals(source, collection) || options == CollectionMergeOptions.None )
 			{
 				return CollectionMergeResults.Empty;
 			}
@@ -203,43 +203,38 @@ namespace Digillect.Collections
 			int updated = 0;
 			int removed = 0;
 
+			var updateCandidates = new Dictionary<XKey, List<MergeItem<T>>>();
+
 			int index = 0;
 
 			while ( index < source.Count )
 			{
-				if ( source[index] == null )
+				T item = source[index];
+
+				if ( item == null && (options & CollectionMergeOptions.RemoveOld) == CollectionMergeOptions.RemoveOld )
 				{
 					source.RemoveAt(index);
 					removed++;
 				}
 				else
 				{
+					XKey key = item == null ? NullMergeItemKey.Instance : item.GetKey();
+					List<MergeItem<T>> items;
+
+					if ( updateCandidates.ContainsKey(key) )
+					{
+						items = updateCandidates[key];
+					}
+					else
+					{
+						items = new List<MergeItem<T>>();
+						updateCandidates.Add(key, items);
+					}
+
+					items.Add(new MergeItem<T>() { Item = item, Index = index });
+
 					index++;
 				}
-			}
-
-			IDictionary<XKey, List<XMergeItem<T>>> updateCandidates = new Dictionary<XKey, List<XMergeItem<T>>>();
-
-			for ( int i = 0; i < source.Count; i++ )
-			{
-				T item = source[i];
-
-				Contract.Assume(item != null); // Since we've removed all nulls in the previous step.
-
-				XKey key = item.GetKey();
-				List<XMergeItem<T>> items;
-
-				if ( updateCandidates.ContainsKey(key) )
-				{
-					items = updateCandidates[key];
-				}
-				else
-				{
-					items = new List<XMergeItem<T>>();
-					updateCandidates.Add(key, items);
-				}
-
-				items.Add(new XMergeItem<T>() { Item = item, Index = i });
 			}
 
 			index = 0;
@@ -283,20 +278,15 @@ namespace Digillect.Collections
 							// Recalculate original indexes upon moving
 							foreach ( var items in updateCandidates.Values )
 							{
-#if !NETFX_CORE // List<T>.ForEach is not supported in NETFX_CORE (WinRT)
-								items.ForEach(x =>
-#else
-								foreach ( var x in items )
-#endif
+								for ( int i = 0; i < items.Count; i++ )
 								{
+									var x = items[i];
+
 									if ( index <= x.Index && x.Index < existing0.Index )
 									{
 										x.Index++;
 									}
 								}
-#if !NETFX_CORE
-								);
-#endif
 							}
 						}
 					}
@@ -319,20 +309,15 @@ namespace Digillect.Collections
 						// Recalculate original indexes upon insertion
 						foreach ( var items in updateCandidates.Values )
 						{
-#if !NETFX_CORE // List<T>.ForEach is not supported in NETFX_CORE (WinRT)
-							items.ForEach(x =>
-#else
-							foreach ( var x in items )
-#endif
+							for ( int i = 0; i < items.Count; i++ )
 							{
+								var x = items[i];
+
 								if ( x.Index >= index )
 								{
 									x.Index++;
 								}
 							}
-#if !NETFX_CORE
-							);
-#endif
 						}
 					}
 					else
@@ -350,15 +335,15 @@ namespace Digillect.Collections
 			{
 				// Тут нужна сортировка по индексу в порядке убывания, чтобы не вылететь за границы коллекции
 				var indexes = from mi in updateCandidates.Values.SelectMany(list => list)
-						orderby mi.Index descending
-						select mi.Index;
+							  orderby mi.Index descending
+							  select mi.Index;
 
-				foreach ( var idx in indexes )
+				foreach ( var i in indexes )
 				{
 					// И еще один safeguard, для порядку
 					//Contract.Assert(idx < this.Items.Count);
-					Contract.Assume(idx >= 0);
-					source.RemoveAt(idx);
+					Contract.Assume(i >= 0);
+					source.RemoveAt(i);
 					removed++;
 				}
 			}
@@ -844,12 +829,42 @@ namespace Digillect.Collections
 		} 
 		#endregion
 
-		#region class XMergeItem`1
-		private sealed class XMergeItem<T>
-			where T : XObject
+		#region class MergeItem`1
+		private sealed class MergeItem<T>
 		{
 			public T Item;
 			public int Index;
+		}
+		#endregion
+
+		#region class NullMergeItemKey
+		private sealed class NullMergeItemKey : XKey
+		{
+			public static readonly XKey Instance = new NullMergeItemKey();
+
+			private NullMergeItemKey()
+			{
+			}
+
+			public override int CompareTo(XKey other)
+			{
+				throw new NotImplementedException("Not intended to be compared with.");
+			}
+
+			public override bool Equals(XKey other)
+			{
+				return Object.ReferenceEquals(this, other);
+			}
+
+			public override int GetHashCode()
+			{
+				return 0;
+			}
+
+			public override string ToString()
+			{
+				return "Null";
+			}
 		}
 		#endregion
 	}
