@@ -105,11 +105,11 @@ namespace Digillect
 			Contract.Ensures(Contract.Result<XKey>() != null);
 			Contract.EnsuresOnThrow<XKeyNotAvailableException>(this.key == null);
 
-			if ( this.key == null )
+			if ( Object.ReferenceEquals(this.key, null) )
 			{
 				this.key = CreateKey();
 
-				if ( this.key == null )
+				if ( Object.ReferenceEquals(this.key, null) )
 				{
 					throw new XKeyNotAvailableException(Errors.XObjectNullKeyException);
 				}
@@ -268,7 +268,7 @@ namespace Digillect
 #if !(SILVERLIGHT || NETFX_CORE)
 		[Serializable]
 #endif
-		private sealed class RootKey : XKey, IComparable<RootKey>, IEquatable<RootKey>
+		private sealed class RootKey : XKey, IEquatable<RootKey>
 		{
 			private readonly Type _type;
 
@@ -279,34 +279,31 @@ namespace Digillect
 				this._type = type;
 			}
 
-			public int CompareTo(RootKey other)
+			public override int CompareTo(XKey other)
 			{
-				if ( other == null )
+				if ( Object.ReferenceEquals(other, null) )
 				{
 					return 1;
 				}
 
-				if ( this._type == other._type )
+				RootKey otherKey = other as RootKey;
+
+				if ( otherKey == null )
+				{
+					throw new ArgumentException("Invalid key.", "other");
+				}
+
+				if ( this._type == otherKey._type )
 				{
 					return 0;
 				}
 
-				return String.CompareOrdinal(this._type.AssemblyQualifiedName, other._type.AssemblyQualifiedName);
-			}
-
-			public override int CompareTo(XKey other)
-			{
-				if ( other == null )
-				{
-					return 1;
-				}
-
-				return CompareTo(other as RootKey);
+				return String.Compare(this._type.AssemblyQualifiedName, otherKey._type.AssemblyQualifiedName, StringComparison.OrdinalIgnoreCase);
 			}
 
 			public bool Equals(RootKey other)
 			{
-				if ( other == null )
+				if ( Object.ReferenceEquals(other, null) )
 				{
 					return false;
 				}
@@ -322,6 +319,11 @@ namespace Digillect
 			public override int GetHashCode()
 			{
 				return this._type.GetHashCode();
+			}
+
+			public override string ToString()
+			{
+				return _type.ToString();
 			}
 		}
 		#endregion

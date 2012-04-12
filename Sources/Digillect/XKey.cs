@@ -111,27 +111,49 @@ namespace Digillect
 		/// <summary>
 		/// Implements the operator ==.
 		/// </summary>
-		/// <param name="key1">The key1.</param>
-		/// <param name="key2">The key2.</param>
+		/// <param name="key1">The first key to compare.</param>
+		/// <param name="key2">The second key to compare.</param>
 		/// <returns>
 		/// The result of the operator.
 		/// </returns>
 		public static bool operator ==(XKey key1, XKey key2)
 		{
-			return EqualityComparer<XKey>.Default.Equals(key1, key2);
+			if ( Object.ReferenceEquals(key1, key2) )
+			{
+				return true;
+			}
+
+			if ( Object.ReferenceEquals(key1, null) )
+			{
+				// key2 != null since previous comparison
+				return false;
+			}
+
+			return key1.Equals(key2);
 		}
 
 		/// <summary>
 		/// Implements the operator !=.
 		/// </summary>
-		/// <param name="key1">The key1.</param>
-		/// <param name="key2">The key2.</param>
+		/// <param name="key1">The first key to compare.</param>
+		/// <param name="key2">The second key to compare.</param>
 		/// <returns>
 		/// The result of the operator.
 		/// </returns>
 		public static bool operator !=(XKey key1, XKey key2)
 		{
-			return !EqualityComparer<XKey>.Default.Equals(key1, key2);
+			if ( Object.ReferenceEquals(key1, key2) )
+			{
+				return false;
+			}
+
+			if ( Object.ReferenceEquals(key1, null) )
+			{
+				// key2 != null since previous comparison
+				return true;
+			}
+
+			return !key1.Equals(key2);
 		}
 		#endregion
 
@@ -153,36 +175,19 @@ namespace Digillect
 		#endregion
 
 		#region class SimpleKey`1
-		[DebuggerDisplay("Key = {_key}")]
+		[DebuggerDisplay("Key Value = {_value}")]
 #if !(SILVERLIGHT || NETFX_CORE)
 		[Serializable]
 #endif
-		private sealed class SimpleKey<T> : XKey, IComparable<SimpleKey<T>>, IEquatable<SimpleKey<T>>
+		private sealed class SimpleKey<T> : XKey, IEquatable<SimpleKey<T>>
 			where T: IComparable<T>, IEquatable<T>
 		{
-			private T _key;
+			private T _value;
 
-			public SimpleKey(T key, XKey parentKey)
+			public SimpleKey(T value, XKey parentKey)
 				: base(parentKey)
 			{
-				this._key = key;
-			}
-
-			public int CompareTo(SimpleKey<T> other)
-			{
-				if ( other == null )
-				{
-					return 1;
-				}
-
-				int result = Comparer<XKey>.Default.Compare(this._parentKey, other._parentKey);
-
-				if ( result == 0 )
-				{
-					result = Comparer<T>.Default.Compare(this._key, other._key);
-				}
-
-				return result;
+				this._value = value;
 			}
 
 			public override int CompareTo(XKey other)
@@ -192,17 +197,31 @@ namespace Digillect
 					return 1;
 				}
 
-				return CompareTo(other as SimpleKey<T>);
+				SimpleKey<T> otherKey = other as SimpleKey<T>;
+
+				if ( otherKey == null )
+				{
+					throw new ArgumentException("Invalid key.", "other");
+				}
+
+				int result = Comparer<XKey>.Default.Compare(this._parentKey, other._parentKey);
+
+				if ( result == 0 )
+				{
+					result = Comparer<T>.Default.Compare(this._value, otherKey._value);
+				}
+
+				return result;
 			}
 
 			public bool Equals(SimpleKey<T> other)
 			{
-				if ( other == null )
+				if ( Object.ReferenceEquals(other, null) )
 				{
 					return false;
 				}
 
-				return Object.ReferenceEquals(this, other) || (EqualityComparer<T>.Default.Equals(this._key, other._key) && this._parentKey == other._parentKey);
+				return Object.ReferenceEquals(this, other) || (EqualityComparer<T>.Default.Equals(this._value, other._value) && this._parentKey == other._parentKey);
 			}
 
 			public override bool Equals(XKey other)
@@ -212,18 +231,22 @@ namespace Digillect
 
 			public override int GetHashCode()
 			{
-				if ( this._parentKey != null )
-					return this._parentKey.GetHashCode() ^ this._key.GetHashCode();
+				if ( !Object.ReferenceEquals(this._parentKey, null) )
+				{
+					return this._parentKey.GetHashCode() ^ this._value.GetHashCode();
+				}
 
-				return this._key.GetHashCode();
+				return this._value.GetHashCode();
 			}
 
 			public override string ToString()
 			{
-				if ( this._parentKey != null )
-					return this._parentKey.ToString() + "+" + this._key.ToString();
+				if ( !Object.ReferenceEquals(this._parentKey, null) )
+				{
+					return this._parentKey.ToString() + "+" + this._value.ToString();
+				}
 
-				return this._key.ToString();
+				return this._value.ToString();
 			}
 		}
 		#endregion
