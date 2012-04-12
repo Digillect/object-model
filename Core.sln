@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Digillect (SL4)", "Sources\
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Digillect (WP7)", "Sources\Digillect\Digillect (WP7).csproj", "{325D26BB-53D3-4383-9572-BC631CDC9189}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Digillect.Tests", "Sources\Digillect.Tests\Digillect.Tests.csproj", "{ABDC1825-8F24-4A80-87F3-F30A59F76BAF}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		CodeAnalysis|Any CPU = CodeAnalysis|Any CPU
@@ -32,6 +34,11 @@ Global
 		{325D26BB-53D3-4383-9572-BC631CDC9189}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{325D26BB-53D3-4383-9572-BC631CDC9189}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{325D26BB-53D3-4383-9572-BC631CDC9189}.Release|Any CPU.Build.0 = Release|Any CPU
+		{ABDC1825-8F24-4A80-87F3-F30A59F76BAF}.CodeAnalysis|Any CPU.ActiveCfg = Debug|Any CPU
+		{ABDC1825-8F24-4A80-87F3-F30A59F76BAF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{ABDC1825-8F24-4A80-87F3-F30A59F76BAF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{ABDC1825-8F24-4A80-87F3-F30A59F76BAF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{ABDC1825-8F24-4A80-87F3-F30A59F76BAF}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
