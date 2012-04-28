@@ -86,10 +86,9 @@
     </Compile>
     <Compile Include="Collections\IXCollectionContract.cs" />
     <Compile Include="Collections\IXListContract.cs" />
+    <Compile Include="ContractExtensions.cs" />
     <Compile Include="IXUpdatableContract.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Runtime\CompilerServices\AutoNotifyPropertyChangesAttribute.cs" />
-    <Compile Include="Runtime\CompilerServices\AutoNotifyPropertyChangesMethodsAttribute.cs" />
     <Compile Include="Collections\CollectionMergeOptions.cs" />
     <Compile Include="Collections\CollectionMergeResults.cs" />
     <Compile Include="Collections\IXCollection.cs" />
@@ -100,17 +99,13 @@
     <Compile Include="Collections\XIdentifiedCollection.cs" />
     <Compile Include="Collections\XUniqueCollection.cs" />
     <Compile Include="ComponentModel\PropertyChangingEventArgs.cs" />
-    <Compile Include="Runtime\CompilerServices\AutoNotifyAdditionalPropertiesAttribute.cs" />
-    <Compile Include="Runtime\CompilerServices\GenerateEqualsAndGetHashCodeAttribute.cs" />
     <Compile Include="Errors.cs" />
     <Compile Include="GlobalSuppressions.cs" />
     <Compile Include="IXIdentified.cs" />
     <Compile Include="IXUpdatable.cs" />
     <Compile Include="ObservableObject.cs" />
     <Compile Include="Reflection\ReflectionHelpers.cs" />
-    <Compile Include="Runtime\CompilerServices\XIgnoreUpdateAttribute.cs" />
     <Compile Include="XKey.cs" />
-    <Compile Include="Runtime\CompilerServices\XKeyAttribute.cs" />
     <Compile Include="XKeyNotAvailableException.cs" />
     <Compile Include="XObject.cs" />
     <Compile Include="XObject`1.cs" />
@@ -120,6 +115,9 @@
     <CodeAnalysisDictionary Include="..\CustomDictionary.xml">
       <Link>Properties\CustomDictionary.xml</Link>
     </CodeAnalysisDictionary>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Runtime\CompilerServices\" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
