@@ -3,41 +3,37 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Xunit;
 
 using Digillect.Collections;
 
 namespace Digillect.Tests
 {
-	[TestClass]
 	public class XCollectionTest
 	{
-		[TestMethod]
-		[ExpectedException(typeof(ArgumentException))]
+		[Fact]
 		public void CtorNullMemberTest()
 		{
-			new XCollection<XObject>(new XIntegerObject[] { null });
+			Assert.Throws<ArgumentException>(() => new XCollection<XObject>(new XIntegerObject[] { null }));
 		}
 
-		[TestMethod]
-		[ExpectedException(typeof(ArgumentNullException))]
+		[Fact]
 		public void AddNullItemTest()
 		{
-			new XCollection<XObject>().Add(null);
+			Assert.Throws<ArgumentNullException>(() => new XCollection<XObject>().Add(null));
 		}
 
-		[TestMethod]
-		[ExpectedException(typeof(ArgumentException))]
+		[Fact]
 		public void AddDupsByReferenceTest()
 		{
 			var coll = new XCollection<XObject>();
 			var obj = XIntegerObject.Create();
 
 			coll.Add(obj);
-			coll.Add(obj);
+			Assert.Throws<ArgumentException>(() => coll.Add(obj));
 		}
 
-		[TestMethod]
+		[Fact]
 		public void AddDupsByKeyTest()
 		{
 			var coll = new XCollection<XObject>();
@@ -46,17 +42,17 @@ namespace Digillect.Tests
 			coll.Add(obj);
 			coll.Add(obj.Clone());
 
-			Assert.IsTrue(coll.Count == 2);
+			Assert.True(coll.Count == 2);
 		}
 
-		[TestMethod]
+		[Fact]
 		public void CloneTest()
 		{
 			var coll = new XCollection<XObject>();
 
 			coll.AddRange(XIntegerObject.CreateSeries(3));
 
-			Assert.AreEqual(coll, coll.Clone(true));
+			Assert.Equal(coll, coll.Clone(true));
 		}
 	}
 }

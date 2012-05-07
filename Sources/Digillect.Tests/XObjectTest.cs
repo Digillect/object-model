@@ -3,47 +3,46 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Xunit;
 
 namespace Digillect.Tests
 {
-	[TestClass]
 	public class XObjectTest
 	{
-		[TestMethod]
+		[Fact]
 		public void IdTest()
 		{
 			var id = XIntegerObject.NewId();
 			var obj = XIntegerObject.Create();
 
-			Assert.AreNotEqual(obj.Id, id);
+			Assert.NotEqual(obj.Id, id);
 
 			obj.Id = id;
 
-			Assert.AreEqual(obj.Id, id);
+			Assert.Equal(obj.Id, id);
 		}
 
-		[TestMethod]
+		[Fact]
 		public void CloneTest()
 		{
 			var obj = XIntegerObject.Create();
 			var actual = obj.Clone();
 
-			Assert.AreEqual(obj, actual);
-			Assert.AreEqual(obj.GetKey(), actual.GetKey());
+			Assert.Equal(obj, actual);
+			Assert.Equal(obj.GetKey(), actual.GetKey());
 		}
 
-		[TestMethod]
+		[Fact]
 		public void UpdateTest()
 		{
 			var obj = XIntegerObject.Create();
 			var actual = XIntegerObject.Create();
 
-			Assert.AreNotEqual(obj, actual);
+			Assert.NotEqual(obj, actual);
 
 			actual.Update(obj);
 
-			Assert.AreEqual(obj, actual);
+			Assert.Equal(obj, actual);
 		}
 	}
 }

@@ -1,2 +1,4 @@
 [Bb]uild/
 TestResults/
+packages/
+*.vsdoc
