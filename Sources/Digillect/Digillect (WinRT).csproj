@@ -124,7 +124,6 @@
     <Compile Include="Collections\XIdentifiedCollection.cs" />
     <Compile Include="Collections\XUniqueCollection.cs" />
     <Compile Include="ComponentModel\PropertyChangingEventArgs.cs" />
-    <Compile Include="ContractExtensions.cs" />
     <Compile Include="Errors.cs" />
     <Compile Include="GlobalSuppressions.cs" />
     <Compile Include="IXIdentified.cs" />
@@ -137,9 +136,6 @@
     <Compile Include="XObject.cs" />
     <Compile Include="XObject`1.cs" />
     <Compile Include="XSecureIdentifiedObject.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Runtime\CompilerServices\" />
   </ItemGroup>
   <PropertyGroup Condition=" '$(VisualStudioVersion)' == '' ">
     <VisualStudioVersion>11.0</VisualStudioVersion>
