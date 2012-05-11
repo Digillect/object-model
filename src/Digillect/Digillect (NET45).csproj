@@ -25,7 +25,7 @@
     <DefineConstants>TRACE;DEBUG;NET45</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <DocumentationFile>..\..\Build\bin\Debug\NET45\Digillect.xml</DocumentationFile>
+    <DocumentationFile>..\..\build\bin\Debug\NET45\Digillect.xml</DocumentationFile>
     <NoWarn>1591,1607</NoWarn>
     <CodeAnalysisRuleSet>..\DigillectRules.ruleset</CodeAnalysisRuleSet>
     <CodeContractsEnableRuntimeChecking>True</CodeContractsEnableRuntimeChecking>
@@ -67,7 +67,7 @@
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
-    <OutputPath>..\..\Build\bin\Release\NET45\</OutputPath>
+    <OutputPath>..\..\build\bin\Release\NET45\</OutputPath>
     <DefineConstants>TRACE;NET45</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>

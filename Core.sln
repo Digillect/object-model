@@ -1,13 +1,13 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 11.00
 # Visual Studio 2010
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Digillect", "Sources\Digillect\Digillect.csproj", "{6A0D13DA-0078-46EB-99AC-6B62C4FC136B}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Digillect", "src\Digillect\Digillect.csproj", "{6A0D13DA-0078-46EB-99AC-6B62C4FC136B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Digillect (SL4)", "Sources\Digillect\Digillect (SL4).csproj", "{8CE98474-DFA3-42FA-AE2F-991F52A75977}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Digillect (SL4)", "src\Digillect\Digillect (SL4).csproj", "{8CE98474-DFA3-42FA-AE2F-991F52A75977}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Digillect (WP7)", "Sources\Digillect\Digillect (WP7).csproj", "{325D26BB-53D3-4383-9572-BC631CDC9189}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Digillect (WP7)", "src\Digillect\Digillect (WP7).csproj", "{325D26BB-53D3-4383-9572-BC631CDC9189}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Digillect.Tests", "Sources\Digillect.Tests\Digillect.Tests.csproj", "{ABDC1825-8F24-4A80-87F3-F30A59F76BAF}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Digillect.Tests", "src\Digillect.Tests\Digillect.Tests.csproj", "{ABDC1825-8F24-4A80-87F3-F30A59F76BAF}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

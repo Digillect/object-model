@@ -4,13 +4,9 @@
 	<PropertyGroup>
 		<Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
 
-		<BuildPath>..\Build\bin\$(Configuration)</BuildPath>
-		<OutputPath>..\Build\package\$(Configuration)\$(MSBuildProjectName)\</OutputPath>
+		<BuildPath>..\..\build\bin\$(Configuration)</BuildPath>
+		<OutputPath>..\..\build\package\$(Configuration)\$(MSBuildProjectName)\</OutputPath>
 	</PropertyGroup>
-
-	<!--PropertyGroup>
-		<VersionAssembly>$(BuildPath)\Desktop\Digillect.dll</VersionAssembly>
-	</PropertyGroup-->
 
 	<ItemGroup>
 		<LibNet40 Include="$(BuildPath)\NET40\**\Digillect.*" Exclude="$(BuildPath)\**\*.xml.old"/>
@@ -20,5 +16,5 @@
 		<LibWP71 Include="$(BuildPath)\WP7\**\Digillect.*" Exclude="$(BuildPath)\**\*.xml.old"/>
 	</ItemGroup>
 
-	<Import Project="NuGet.Project.Targets"/>
+	<Import Project="..\..\packages\Digillect.NuGet.Packaging.1.0.0\content\NuGet.Project.Targets"/>
 </Project>

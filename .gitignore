@@ -1,4 +1,2 @@
-[Bb]uild/
-TestResults/
-packages/
-*.vsdoc
+/[Bb]uild/
+/packages/
