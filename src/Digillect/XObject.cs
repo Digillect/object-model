@@ -237,7 +237,11 @@ namespace Digillect
 		{
 			Contract.Ensures( Contract.Result<XObject>() != null );
 
+#if NETFX_CORE
+			return (XObject) Activator.CreateInstance(GetType());
+#else
 			return (XObject) Activator.CreateInstance(GetType(), true);
+#endif
 		}
 		#endregion
 
