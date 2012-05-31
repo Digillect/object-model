@@ -16,5 +16,5 @@
 		<LibWP71 Include="$(BuildPath)\WP7\**\Digillect.*" Exclude="$(BuildPath)\**\*.xml.old"/>
 	</ItemGroup>
 
-	<Import Project="..\..\packages\Digillect.NuGet.Packaging.1.0.0\content\NuGet.Project.Targets"/>
+	<Import Project="..\..\packages\Digillect.NuGet.Packaging.1.0.1\content\NuGet.Project.Targets"/>
 </Project>
