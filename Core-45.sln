@@ -7,42 +7,18 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Digillect (WinRT)", "src\Di
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
-		Debug|ARM = Debug|ARM
 		Debug|Any CPU = Debug|Any CPU
-		Debug|x64 = Debug|x64
-		Debug|x86 = Debug|x86
-		Release|ARM = Release|ARM
 		Release|Any CPU = Release|Any CPU
-		Release|x64 = Release|x64
-		Release|x86 = Release|x86
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{6A0D13DA-0078-46EB-99AC-6B62C4FC136B}.Debug|ARM.ActiveCfg = Debug|Any CPU
 		{6A0D13DA-0078-46EB-99AC-6B62C4FC136B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{6A0D13DA-0078-46EB-99AC-6B62C4FC136B}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{6A0D13DA-0078-46EB-99AC-6B62C4FC136B}.Debug|x64.ActiveCfg = Debug|Any CPU
-		{6A0D13DA-0078-46EB-99AC-6B62C4FC136B}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{6A0D13DA-0078-46EB-99AC-6B62C4FC136B}.Release|ARM.ActiveCfg = Release|Any CPU
 		{6A0D13DA-0078-46EB-99AC-6B62C4FC136B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6A0D13DA-0078-46EB-99AC-6B62C4FC136B}.Release|Any CPU.Build.0 = Release|Any CPU
-		{6A0D13DA-0078-46EB-99AC-6B62C4FC136B}.Release|x64.ActiveCfg = Release|Any CPU
-		{6A0D13DA-0078-46EB-99AC-6B62C4FC136B}.Release|x86.ActiveCfg = Release|Any CPU
-		{F213AEB9-82D4-43CB-BAB1-C929DB11E717}.Debug|ARM.ActiveCfg = Debug|ARM
-		{F213AEB9-82D4-43CB-BAB1-C929DB11E717}.Debug|ARM.Build.0 = Debug|ARM
 		{F213AEB9-82D4-43CB-BAB1-C929DB11E717}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{F213AEB9-82D4-43CB-BAB1-C929DB11E717}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{F213AEB9-82D4-43CB-BAB1-C929DB11E717}.Debug|x64.ActiveCfg = Debug|x64
-		{F213AEB9-82D4-43CB-BAB1-C929DB11E717}.Debug|x64.Build.0 = Debug|x64
-		{F213AEB9-82D4-43CB-BAB1-C929DB11E717}.Debug|x86.ActiveCfg = Debug|x86
-		{F213AEB9-82D4-43CB-BAB1-C929DB11E717}.Debug|x86.Build.0 = Debug|x86
-		{F213AEB9-82D4-43CB-BAB1-C929DB11E717}.Release|ARM.ActiveCfg = Release|ARM
-		{F213AEB9-82D4-43CB-BAB1-C929DB11E717}.Release|ARM.Build.0 = Release|ARM
 		{F213AEB9-82D4-43CB-BAB1-C929DB11E717}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F213AEB9-82D4-43CB-BAB1-C929DB11E717}.Release|Any CPU.Build.0 = Release|Any CPU
-		{F213AEB9-82D4-43CB-BAB1-C929DB11E717}.Release|x64.ActiveCfg = Release|x64
-		{F213AEB9-82D4-43CB-BAB1-C929DB11E717}.Release|x64.Build.0 = Release|x64
-		{F213AEB9-82D4-43CB-BAB1-C929DB11E717}.Release|x86.ActiveCfg = Release|x86
-		{F213AEB9-82D4-43CB-BAB1-C929DB11E717}.Release|x86.Build.0 = Release|x86
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
