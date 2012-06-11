@@ -1,2 +1,3 @@
 /[Bb]uild/
 /packages/
+*.suo

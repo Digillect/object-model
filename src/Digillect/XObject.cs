@@ -217,6 +217,80 @@ namespace Digillect
 		}
 
 		/// <summary>
+		/// Performs complex clone/update procedure for XObject-derived property.
+		/// </summary>
+		/// <typeparam name="T">Type of the property.</typeparam>
+		/// <param name="thisField">Reference to the local field.</param>
+		/// <param name="otherField">Same field in other instance.</param>
+		/// <param name="cloning"><c>true</c> if cloning source, otherwise <c>false</c>.</param>
+		/// <param name="deepCloning"><c>true</c> if performing deep cloning, otherwise <c>false</c>.</param>
+		protected void ProcessCopyProperty<T>( ref T thisField, T otherField, bool cloning, bool deepCloning ) where T : XObject
+		{
+			if( cloning )
+			{
+				thisField = otherField == null ? null : (T) otherField.Clone( deepCloning );
+			}
+			else
+			{
+				if( thisField != null )
+				{
+					if( otherField != null )
+					{
+						thisField.Update( otherField );
+					}
+					else
+					{
+						thisField = null;
+					}
+				}
+				else
+				{
+					if( otherField != null )
+					{
+						thisField = (T) otherField.Clone( false );
+					}
+				}
+			}
+		}
+
+		/// <summary>
+		/// Performs complex clone/update procedure for XCollection-derived property.
+		/// </summary>
+		/// <typeparam name="T">Type of the property.</typeparam>
+		/// <param name="thisField">Reference to the local field.</param>
+		/// <param name="otherField">Same field in other instance.</param>
+		/// <param name="cloning"><c>true</c> if cloning source, otherwise <c>false</c>.</param>
+		/// <param name="deepCloning"><c>true</c> if performing deep cloning, otherwise <c>false</c>.</param>
+		protected void ProcessCopyProperty<T>( ref Collections.XCollection<T> thisField, Collections.XCollection<T> otherField, bool cloning, bool deepCloning ) where T : XObject
+		{
+			if( cloning )
+			{
+				thisField = otherField == null ? null : (Collections.XCollection<T>) otherField.Clone( deepCloning );
+			}
+			else
+			{
+				if( thisField != null )
+				{
+					if( otherField != null )
+					{
+						thisField.Update( otherField );
+					}
+					else
+					{
+						thisField = null;
+					}
+				}
+				else
+				{
+					if( otherField != null )
+					{
+						thisField = (Collections.XCollection<T>) otherField.Clone( false );
+					}
+				}
+			}
+		}
+
+		/// <summary>
 		/// Checks whether specified object is compatible with this instance and can be used in update operation.
 		/// </summary>
 		/// <param name="obj">The obj.</param>
