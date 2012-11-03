@@ -545,11 +545,11 @@ namespace Digillect.Collections
 		#endregion
 
 		#region class ReadOnlyXCollection`1
-#if !(SILVERLIGHT || NETFX_CORE)
+#if !(SILVERLIGHT || WINDOWS8)
 		[Serializable]
 #endif
 		private class ReadOnlyXCollection<T> : IXCollection<T>
-#if !(SILVERLIGHT || NETFX_CORE)
+#if !(SILVERLIGHT || WINDOWS8)
 			, ICloneable
 #endif
 		{
@@ -685,7 +685,7 @@ namespace Digillect.Collections
 			}
 			#endregion
 
-#if !(SILVERLIGHT || NETFX_CORE)
+#if !(SILVERLIGHT || WINDOWS8)
 			#region ICloneable Members
 			object ICloneable.Clone()
 			{
@@ -723,7 +723,7 @@ namespace Digillect.Collections
 		#endregion
 
 		#region class ReadOnlyXList`1
-#if !(SILVERLIGHT || NETFX_CORE)
+#if !(SILVERLIGHT || WINDOWS8)
 		[Serializable]
 #endif
 		private class ReadOnlyXList<T> : ReadOnlyXCollection<T>, IXList<T>
@@ -812,7 +812,7 @@ namespace Digillect.Collections
 #endif
 			protected override XFilteredCollection<T> CreateInstanceOfSameType(IXList<T> originalCollection)
 			{
-#if !(SILVERLIGHT || NETFX_CORE)
+#if !(SILVERLIGHT || WINDOWS8)
 				Func<T, bool> filter = (Func<T, bool>) this._filter.Clone();
 #else
 				Contract.Assume(this._filter != null);

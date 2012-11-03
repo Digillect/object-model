@@ -13,16 +13,16 @@ namespace Digillect.Collections
 	/// A collection of "X"-objects with support for cloning, updating and event notification.
 	/// </summary>
 	/// <typeparam name="T">Type of the collection's members.</typeparam>
-#if !(SILVERLIGHT || NETFX_CORE)
+#if !(SILVERLIGHT || WINDOWS8)
 	[Serializable]
 #endif
 	public class XCollection<T> : Collection<T>, IXList<T>, INotifyPropertyChanged
-#if !(SILVERLIGHT || NETFX_CORE)
+#if !(SILVERLIGHT || WINDOWS8)
 		, ICloneable
 #endif
 		where T : XObject
 	{
-#if !(SILVERLIGHT || NETFX_CORE)
+#if !(SILVERLIGHT || WINDOWS8)
 		[NonSerialized]
 #endif
 		private ushort updateCount;
@@ -303,7 +303,7 @@ namespace Digillect.Collections
 		}
 		#endregion
 
-#if !(SILVERLIGHT || NETFX_CORE)
+#if !(SILVERLIGHT || WINDOWS8)
 		#region ICloneable Members
 		object ICloneable.Clone()
 		{
@@ -354,7 +354,7 @@ namespace Digillect.Collections
 
 		[EditorBrowsable( EditorBrowsableState.Advanced )]
 		[Pure]
-#if false // !(SILVERLIGHT || NETFX_CORE)
+#if false // !(SILVERLIGHT || WINDOWS8)
 		[System.Security.Permissions.ReflectionPermission(System.Security.Permissions.SecurityAction.Demand, RestrictedMemberAccess = true)]
 #endif
 		protected virtual XCollection<T> CreateInstanceOfSameType()

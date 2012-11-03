@@ -9,7 +9,7 @@ namespace Digillect
 	/// <summary>
 	/// Key that is used for unique object identification.
 	/// </summary>
-#if !(SILVERLIGHT || NETFX_CORE)
+#if !(SILVERLIGHT || WINDOWS8)
 	[Serializable]
 #endif
 	public abstract class XKey : IComparable<XKey>, IEquatable<XKey>
@@ -176,7 +176,7 @@ namespace Digillect
 
 		#region class SimpleKey`1
 		[DebuggerDisplay("Key Value = {_value}")]
-#if !(SILVERLIGHT || NETFX_CORE)
+#if !(SILVERLIGHT || WINDOWS8)
 		[Serializable]
 #endif
 		private sealed class SimpleKey<T> : XKey, IEquatable<SimpleKey<T>>

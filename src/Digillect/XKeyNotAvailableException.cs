@@ -6,7 +6,7 @@ namespace Digillect
 	/// <summary>
 	/// Exception that is thrown when <see cref="Digillect.XObject"/> can not provide valid key.
 	/// </summary>
-#if !SILVERLIGHT && !NETFX_CORE
+#if !(SILVERLIGHT || WINDOWS8)
 	[Serializable]
 #endif
 	public sealed class XKeyNotAvailableException : Exception
@@ -38,7 +38,7 @@ namespace Digillect
 		{
 		}
 
-#if !SILVERLIGHT && !NETFX_CORE
+#if !(SILVERLIGHT || WINDOWS8)
 		private XKeyNotAvailableException(SerializationInfo info, StreamingContext context)
 			: base(info, context)
 		{

@@ -1,3 +1,5 @@
-/[Bb]uild/
-/packages/
+packages/
+target/
+[Tt]est[Rr]esults/
+
 *.suo
