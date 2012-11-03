@@ -17,6 +17,7 @@
 		<ProjectReference Include="src\Digillect\Digillect (win8).csproj"/>
 		<ProjectReference Include="src\Digillect\Digillect (wp71).csproj"/>
 		<ProjectReference Include="src\Digillect\Digillect (wp80).csproj"/>
+		<ProjectReference Include="src\Digillect.Tests\Digillect.Tests.csproj"/>
 	</ItemGroup>
 
 	<ItemGroup>
