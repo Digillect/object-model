@@ -5,12 +5,10 @@ set PATH=%~dp0\tools;%PATH%
 set BuildTargets=%~dp0\packages\Digillect.Build.Tasks\1.0.0\tools\Build.targets
 set EnableNuGetPackageRestore=true
 
-if exist %BuildTargets% goto :build
+if not exist "%BuildTargets%" (
+	nuget install -o packages .\packages.config
+)
 
-@nuget install -o packages .\packages.config
-if %ERRORLEVEL% NEQ 0 goto :done
-
-:build
-@msbuild build.proj %*
-
-:done
+if not errorlevel 1 (
+	msbuild build.proj %*
+)
