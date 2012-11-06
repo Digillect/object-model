@@ -6,7 +6,7 @@ namespace Digillect.Collections
 	/// Contains results of the collection merge operation.
 	/// </summary>
 	/// <seealso cref="XCollectionsUtil.Merge"/>
-#if !(SILVERLIGHT || NETFX_CORE)
+#if !(SILVERLIGHT || WINDOWS8)
 	[Serializable]
 #endif
 	public sealed class CollectionMergeResults

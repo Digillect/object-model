@@ -11,11 +11,11 @@ namespace Digillect.Collections
 #if DEBUG || CONTRACTS_FULL
 	[ContractClass(typeof(XFilteredCollectionContract<>))]
 #endif
-#if !(SILVERLIGHT || NETFX_CORE)
+#if !(SILVERLIGHT || WINDOWS8)
 	[Serializable]
 #endif
 	public abstract class XFilteredCollection<T> : IXList<T>, IDisposable
-#if !(SILVERLIGHT || NETFX_CORE)
+#if !(SILVERLIGHT || WINDOWS8)
 		, ICloneable
 #endif
 		where T : XObject
@@ -313,7 +313,7 @@ namespace Digillect.Collections
 		}
 		#endregion
 
-#if !(SILVERLIGHT || NETFX_CORE)
+#if !(SILVERLIGHT || WINDOWS8)
 		#region ICloneable Members
 		object ICloneable.Clone()
 		{

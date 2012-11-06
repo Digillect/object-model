@@ -9,7 +9,7 @@ namespace Digillect.Collections
 	/// A collection of unique non-null objects.
 	/// </summary>
 	/// <typeparam name="T">Type of the collection's members.</typeparam>
-#if !(SILVERLIGHT || NETFX_CORE)
+#if !(SILVERLIGHT || WINDOWS8)
 	[Serializable]
 #endif
 	public class XUniqueCollection<T> : XCollection<T>

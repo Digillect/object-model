@@ -4,17 +4,19 @@
 	<PropertyGroup>
 		<Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
 
-		<BuildPath>..\..\build\bin\$(Configuration)</BuildPath>
-		<OutputPath>..\..\build\package\$(Configuration)\$(MSBuildProjectName)\</OutputPath>
+		<BuildPath>..\..\target\$(Configuration)</BuildPath>
+		<OutputPath>..\..\target\$(Configuration)\$(MSBuildProjectName)</OutputPath>
+		<VersionAssembly>$(BuildPath)\net45\Digillect.dll</VersionAssembly>
 	</PropertyGroup>
 
 	<ItemGroup>
-		<LibNet40 Include="$(BuildPath)\NET40\**\Digillect.*" Exclude="$(BuildPath)\**\*.xml.old"/>
-		<LibNet45 Include="$(BuildPath)\NET45\**\Digillect.*" Exclude="$(BuildPath)\**\*.xml.old"/>
-		<LibWinRT45 Include="$(BuildPath)\WinRT\**\Digillect.*" Exclude="$(BuildPath)\**\*.xml.old"/>
-		<LibSL4 Include="$(BuildPath)\SL4\**\Digillect.*" Exclude="$(BuildPath)\**\*.xml.old"/>
-		<LibWP71 Include="$(BuildPath)\WP7\**\Digillect.*" Exclude="$(BuildPath)\**\*.xml.old"/>
+		<LibNet40 Include="$(BuildPath)\net40\**\Digillect.*" Exclude="$(BuildPath)\**\*.xml.*"/>
+		<LibNet45 Include="$(BuildPath)\net45\**\Digillect.*" Exclude="$(BuildPath)\**\*.xml.*"/>
+		<LibWin8 Include="$(BuildPath)\win8\**\Digillect.*" Exclude="$(BuildPath)\**\*.xml.*"/>
+		<LibSL4 Include="$(BuildPath)\sl4\**\Digillect.*" Exclude="$(BuildPath)\**\*.xml.*"/>
+		<LibWP71 Include="$(BuildPath)\wp71\**\Digillect.*" Exclude="$(BuildPath)\**\*.xml.*"/>
+		<LibWP80 Include="$(BuildPath)\wp80\**\Digillect.*" Exclude="$(BuildPath)\**\*.xml.*"/>
 	</ItemGroup>
 
-	<Import Project="..\..\packages\Digillect.NuGet.Packaging.1.0.1\content\NuGet.Project.Targets"/>
+	<Import Project="..\..\packages\Digillect.Build.Tools.1.0.0\tools\NuGet.Packaging.targets"/>
 </Project>

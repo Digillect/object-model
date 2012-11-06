@@ -3,7 +3,7 @@
 <package>
 	<metadata>
 		<id>DCL.Core</id>
-		<version>4.0.0-alpha</version>
+		<version>4.0.0.0</version>
 		<authors>Andrew Nefedkin, Gregory Nickonov</authors>
 		<owners>Andrew Nefedkin, Gregory Nickonov</owners>
 		<requireLicenseAcceptance>false</requireLicenseAcceptance>

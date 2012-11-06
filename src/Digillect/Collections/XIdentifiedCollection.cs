@@ -9,16 +9,16 @@ using System.Runtime.Serialization;
 
 namespace Digillect.Collections
 {
-#if !(SILVERLIGHT || NETFX_CORE)
+#if !(SILVERLIGHT || WINDOWS8)
 	[Serializable]
 #endif
 	public class XIdentifiedCollection<TId, TObject> : XUniqueCollection<TObject>
-#if !(SILVERLIGHT || NETFX_CORE)
+#if !(SILVERLIGHT || WINDOWS8)
 		, IDeserializationCallback
 #endif
 		where TObject : XObject, IXIdentified<TId>
 	{
-#if !(SILVERLIGHT || NETFX_CORE)
+#if !(SILVERLIGHT || WINDOWS8)
 		[NonSerialized]
 #endif
 		private IDictionary<TId, TObject> m_dictionary = new Dictionary<TId, TObject>();
@@ -163,7 +163,7 @@ namespace Digillect.Collections
 		#endregion
 
 		#region IDeserializationCallback Members
-#if !(SILVERLIGHT || NETFX_CORE)
+#if !(SILVERLIGHT || WINDOWS8)
 		void IDeserializationCallback.OnDeserialization(object sender)
 		{
 			OnDeserialization();

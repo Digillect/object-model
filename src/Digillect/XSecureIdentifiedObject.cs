@@ -15,7 +15,7 @@ namespace Digillect
 #endif
 	[DataContract]
 	[DebuggerDisplay("Id = {id}")]
-#if !(SILVERLIGHT || NETFX_CORE)
+#if !(SILVERLIGHT || WINDOWS8)
 	[Serializable]
 #endif
 	public abstract class XSecureIdentifiedObject<TId> : XObject, IXIdentified<TId>
@@ -155,7 +155,7 @@ namespace Digillect
 				}
 				else
 				{
-#if !(SILVERLIGHT || NETFX_CORE)
+#if !(SILVERLIGHT || WINDOWS8)
 					ICloneable icl = obj.id as ICloneable;
 
 					if ( icl != null )

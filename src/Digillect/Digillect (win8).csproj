@@ -14,31 +14,34 @@
     <DefaultLanguage>en-US</DefaultLanguage>
     <FileAlignment>512</FileAlignment>
     <ProjectTypeGuids>{BC8A1FFA-BEE3-4634-8014-F334798102B3};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
-    <BaseIntermediateOutputPath Condition=" '$(BaseIntermediateOutputPath)' == '' ">obj\WinRT\</BaseIntermediateOutputPath>
+    <BaseIntermediateOutputPath Condition=" '$(BaseIntermediateOutputPath)' == '' ">obj\win8\</BaseIntermediateOutputPath>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
-    <OutputPath>..\..\build\bin\Debug\WinRT\</OutputPath>
-    <DefineConstants>TRACE;DEBUG;NET45;NETFX_CORE</DefineConstants>
+    <OutputPath>..\..\target\Debug\win8\</OutputPath>
+    <DefineConstants>TRACE;DEBUG;WINDOWS8</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <DocumentationFile>..\..\Build\bin\Debug\WinRT\Digillect.xml</DocumentationFile>
+    <DocumentationFile>..\..\target\Debug\win8\Digillect.xml</DocumentationFile>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
-    <OutputPath>..\..\build\bin\Release\WinRT\</OutputPath>
-    <DefineConstants>TRACE;NET45;NETFX_CORE</DefineConstants>
+    <OutputPath>..\..\target\Release\win8\</OutputPath>
+    <DefineConstants>TRACE;WINDOWS8</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <DocumentationFile>..\..\Build\bin\Release\WinRT\Digillect.xml</DocumentationFile>
+    <DocumentationFile>..\..\target\Release\win8\Digillect.xml</DocumentationFile>
   </PropertyGroup>
   <ItemGroup>
     <!-- A reference to the entire .Net Framework and Windows SDK are automatically included -->
     <Compile Include="..\AssemblySharedInfo.cs">
       <Link>Properties\AssemblySharedInfo.cs</Link>
+    </Compile>
+    <Compile Include="..\AssemblyVersionInfo.cs">
+      <Link>Properties\AssemblyVersionInfo.cs</Link>
     </Compile>
     <Compile Include="Collections\CollectionMergeOptions.cs" />
     <Compile Include="Collections\CollectionMergeResults.cs" />

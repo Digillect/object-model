@@ -11,20 +11,20 @@ namespace Digillect
 	/// Abstract base class that supports updating. Exposes <see cref="XKey"/> as an identifier.
 	/// </summary>
 	[DataContract]
-#if !(SILVERLIGHT || NETFX_CORE)
+#if !(SILVERLIGHT || WINDOWS8)
 	[Serializable]
 #endif
 	public class XObject : ObservableObject, IXUpdatable<XObject>
-#if !(SILVERLIGHT || NETFX_CORE)
+#if !(SILVERLIGHT || WINDOWS8)
 		, ICloneable
 #endif
 	{
-#if !(SILVERLIGHT || NETFX_CORE)
+#if !(SILVERLIGHT || WINDOWS8)
 		[NonSerialized]
 #endif
 		private ushort updateCount;
 
-#if !(SILVERLIGHT || NETFX_CORE)
+#if !(SILVERLIGHT || WINDOWS8)
 		[NonSerialized]
 #endif
 		private XKey key;
@@ -138,7 +138,7 @@ namespace Digillect
 		}
 		#endregion
 
-#if !(SILVERLIGHT || NETFX_CORE)
+#if !(SILVERLIGHT || WINDOWS8)
 		#region ICloneable Members
 		object ICloneable.Clone()
 		{
@@ -304,14 +304,14 @@ namespace Digillect
 
 		[EditorBrowsable( EditorBrowsableState.Advanced )]
 		[Pure]
-#if false // !(SILVERLIGHT || NETFX_CORE)
+#if false // !(SILVERLIGHT || WINDOWS8)
 		[System.Security.Permissions.ReflectionPermission(System.Security.Permissions.SecurityAction.Demand, RestrictedMemberAccess = true)]
 #endif
 		protected virtual XObject CreateInstanceOfSameType()
 		{
 			Contract.Ensures( Contract.Result<XObject>() != null );
 
-#if NETFX_CORE
+#if WINDOWS8
 			return (XObject) Activator.CreateInstance(GetType());
 #else
 			return (XObject) Activator.CreateInstance(GetType(), true);
@@ -343,7 +343,7 @@ namespace Digillect
 
 		#region class RootKey
 		[DebuggerDisplay("Type = {_type}")]
-#if !(SILVERLIGHT || NETFX_CORE)
+#if !(SILVERLIGHT || WINDOWS8)
 		[Serializable]
 #endif
 		private sealed class RootKey : XKey, IEquatable<RootKey>

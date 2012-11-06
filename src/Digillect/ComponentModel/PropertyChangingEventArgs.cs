@@ -2,7 +2,7 @@ using System;
 
 namespace Digillect.ComponentModel
 {
-#if !(SILVERLIGHT || NETFX_CORE)
+#if !(SILVERLIGHT || WINDOWS8)
 	/// <summary>
 	/// Provides data for the <see cref="ObservableObject.PropertyChanging"/> event.
 	/// </summary>
@@ -16,7 +16,7 @@ namespace Digillect.ComponentModel
 	/// </summary>
 #endif
 	public class PropertyChangingEventArgs
-#if !(SILVERLIGHT || NETFX_CORE) || WINDOWS_PHONE
+#if !(SILVERLIGHT || WINDOWS8) || WINDOWS_PHONE
 		: System.ComponentModel.PropertyChangingEventArgs
 #else
 		: EventArgs
@@ -50,7 +50,7 @@ namespace Digillect.ComponentModel
 		/// <param name="currentValue">Current property value.</param>
 		/// <param name="proposedValue">Proposed property value.</param>
 		public PropertyChangingEventArgs(string propertyName, object currentValue, object proposedValue)
-#if !(SILVERLIGHT || NETFX_CORE) || WINDOWS_PHONE
+#if !(SILVERLIGHT || WINDOWS8) || WINDOWS_PHONE
 			: base(propertyName)
 #endif
 		{

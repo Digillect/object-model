@@ -12,7 +12,7 @@ namespace Digillect
 	/// <typeparam name="TId">The type of the identifier.</typeparam>
 	[DataContract]
 	[DebuggerDisplay("Id = {id}")]
-#if !(SILVERLIGHT || NETFX_CORE)
+#if !(SILVERLIGHT || WINDOWS8)
 	[Serializable]
 #endif
 	public class XObject<TId> : XObject, IXIdentified<TId>
@@ -100,7 +100,7 @@ namespace Digillect
 			}
 			else if ( cloning )
 			{
-#if !(SILVERLIGHT || NETFX_CORE)
+#if !(SILVERLIGHT || WINDOWS8)
 				ICloneable icl = obj.id as ICloneable;
 
 				if ( icl != null )

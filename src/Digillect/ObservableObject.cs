@@ -9,11 +9,11 @@ namespace Digillect
 	/// Base object with change notification support.
 	/// </summary>
 	[DataContract]
-#if !(SILVERLIGHT || NETFX_CORE)
+#if !(SILVERLIGHT || WINDOWS8)
 	[Serializable]
 #endif
 	public class ObservableObject
-#if !(SILVERLIGHT || NETFX_CORE) || WINDOWS_PHONE
+#if !(SILVERLIGHT || WINDOWS8) || WINDOWS_PHONE
 		: INotifyPropertyChanging, INotifyPropertyChanged
 #else
 		: INotifyPropertyChanged
@@ -29,7 +29,7 @@ namespace Digillect
 		#endregion
 
 		#region Events and Event Raisers
-#if !(SILVERLIGHT || NETFX_CORE) || WINDOWS_PHONE
+#if !(SILVERLIGHT || WINDOWS8) || WINDOWS_PHONE
 		/// <summary>
 		/// Occurs when a property value is changing. Not guaranteed to be raised.
 		/// </summary>
@@ -57,7 +57,7 @@ namespace Digillect
 		/// <param name="e">The <see cref="Digillect.ComponentModel.PropertyChangingEventArgs"/> instance containing the event data.</param>
 		protected virtual void OnPropertyChanging( Digillect.ComponentModel.PropertyChangingEventArgs e )
 		{
-#if !(SILVERLIGHT || NETFX_CORE) || WINDOWS_PHONE
+#if !(SILVERLIGHT || WINDOWS8) || WINDOWS_PHONE
 			if( PropertyChanging != null )
 			{
 				PropertyChanging( this, e );
