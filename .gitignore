@@ -1,5 +1,5 @@
-packages/
-target/
-[Tt]est[Rr]esults/
+/packages/
+/target/
+/[Tt]est[Rr]esults/
 
 *.suo
