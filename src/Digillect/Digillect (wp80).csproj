@@ -11,7 +11,6 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>Digillect</RootNamespace>
     <AssemblyName>Digillect</AssemblyName>
-    <KeyContainerName>Digillect.Key</KeyContainerName>
     <TargetFrameworkVersion>v8.0</TargetFrameworkVersion>
     <SilverlightVersion>
     </SilverlightVersion>
@@ -21,6 +20,8 @@
     <SilverlightApplication>false</SilverlightApplication>
     <ValidateXaml>true</ValidateXaml>
     <ThrowErrorsInValidation>true</ThrowErrorsInValidation>
+    <SignAssembly>true</SignAssembly>
+    <AssemblyOriginatorKeyFile>..\Digillect.snk</AssemblyOriginatorKeyFile>
     <BaseIntermediateOutputPath Condition=" '$(BaseIntermediateOutputPath)' == '' ">obj\wp80\</BaseIntermediateOutputPath>
     <CodeContractsAssemblyMode>0</CodeContractsAssemblyMode>
     <MinimumVisualStudioVersion>11.0</MinimumVisualStudioVersion>
