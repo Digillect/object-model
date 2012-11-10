@@ -105,7 +105,7 @@ namespace Digillect
 		/// <b>.NET 4.5.</b> <paramref name="propertyName"/> is optional and can be provided automatically
 		/// when invoked from compilers that support <c>CallerMemberName</c>.
 		/// </remarks>
-#if NET45
+#if NET45 || WINDOWS8 || WINDOWS_PHONE_8
 		protected bool SetProperty<T>( ref T storage, T value, [CallerMemberName] String propertyName = null )
 #else
 		protected bool SetProperty<T>(ref T storage, T value, string propertyName)
