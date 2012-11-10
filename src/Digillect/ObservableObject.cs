@@ -69,7 +69,7 @@ namespace Digillect
 		/// Raises the <see cref="E:PropertyChanged"/> event.
 		/// </summary>
 		/// <param name="propertyName">Name of the property.</param>
-#if NET45
+#if NET45 || WINDOWS8 || WINDOWS_PHONE_8
 		protected void OnPropertyChanged( [CallerMemberName] string propertyName = null )
 		{
 			OnPropertyChanged( new PropertyChangedEventArgs( propertyName ) );
