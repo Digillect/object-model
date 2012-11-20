@@ -144,17 +144,17 @@ namespace Digillect.Tests
 			var data = XIntegerObject.CreateSeries(3);
 			var source = new List<XObject>(data);
 
-			Assert.False(XCollectionsUtil.RemoveAll(source, new Func<XObject, bool>(x => false)));
+			Assert.False(XCollectionsUtil.RemoveAll(source, x => false));
 			Assert.Equal(data, source);
 
 			var toRemove = new[] { source[0], source[2] };
 
-			Assert.True(XCollectionsUtil.RemoveAll(source, new Func<XObject, bool>(x => toRemove.Select(y => y.GetKey()).Contains(x.GetKey()))));
+			Assert.True(XCollectionsUtil.RemoveAll(source, x => toRemove.Select(y => y.GetKey()).Contains(x.GetKey())));
 			Assert.True(source.Count < data.Length);
 			CollectionAssert.NotSubsetOf(toRemove, source);
 
 			Assert.True(source.Count != 0);
-			Assert.True(XCollectionsUtil.RemoveAll(source, new Func<XObject, bool>(x => true)));
+			Assert.True(XCollectionsUtil.RemoveAll(source, x => true));
 			Assert.True(source.Count == 0);
 		}
 

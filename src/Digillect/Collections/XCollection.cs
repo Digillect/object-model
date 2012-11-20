@@ -150,15 +150,6 @@ namespace Digillect.Collections
 			return derived;
 		}
 
-		[Pure]
-		public XCollection<T> Derive(Predicate<T> predicate)
-		{
-			Contract.Requires(predicate != null);
-			Contract.Ensures(Contract.Result<XCollection<T>>() != null);
-
-			return Derive(predicate.ToFunction());
-		}
-
 #if false
 		/// <summary>
 		/// Gets an item with the specific key.

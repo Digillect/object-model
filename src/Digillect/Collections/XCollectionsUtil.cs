@@ -111,15 +111,6 @@ namespace Digillect.Collections
 
 			return source.RemoveAll(source.Where(predicate).ToArray());
 		}
-
-		public static bool RemoveAll<T>(this ICollection<T> source, Predicate<T> predicate)
-			where T : XObject
-		{
-			Contract.Requires(source != null);
-			Contract.Requires(predicate != null);
-
-			return source.RemoveAll(predicate.ToFunction());
-		}
 		#endregion
 
 		#region RetainAll`1 Extension
@@ -334,7 +325,7 @@ namespace Digillect.Collections
 			if ( (options & CollectionMergeOptions.RemoveOld) == CollectionMergeOptions.RemoveOld )
 			{
 				// Тут нужна сортировка по индексу в порядке убывания, чтобы не вылететь за границы коллекции
-				var indexes = from mi in updateCandidates.Values.SelectMany(list => list)
+				var indexes = from mi in updateCandidates.SelectMany(x => x.Value)
 							  orderby mi.Index descending
 							  select mi.Index;
 
@@ -488,15 +479,6 @@ namespace Digillect.Collections
 
 			return new FuncFilteredCollection<T>(collection, filter);
 		}
-
-		public static XFilteredCollection<T> FilteredList<T>(IXList<T> collection, Predicate<T> filter)
-			where T : XObject
-		{
-			Contract.Requires(collection != null);
-			Contract.Requires(filter != null);
-
-			return FilteredList(collection, filter.ToFunction());
-		}
 		#endregion
 
 		#region CollectionMemberNotNull`1
@@ -510,38 +492,6 @@ namespace Digillect.Collections
 		{
 			return item != null;
 		} 
-		#endregion
-
-		#region Predicate<T> -> Func<T, bool>
-		internal static Func<T, bool> ToFunction<T>(this Predicate<T> predicate)
-		{
-			Contract.Requires(predicate != null);
-			Contract.Ensures(Contract.Result<Func<T, bool>>() != null);
-
-			return new Func<T, bool>(new PredicateToFunctionConverter<T>(predicate).Function);
-		}
-
-		private sealed class PredicateToFunctionConverter<T>
-		{
-			private readonly Predicate<T> predicate;
-
-			public PredicateToFunctionConverter(Predicate<T> predicate)
-			{
-				if ( predicate == null )
-				{
-					throw new ArgumentNullException("predicate");
-				}
-
-				Contract.EndContractBlock();
-
-				this.predicate = predicate;
-			}
-
-			public bool Function(T arg)
-			{
-				return this.predicate(arg);
-			}
-		}
 		#endregion
 
 		#region class ReadOnlyXCollection`1
