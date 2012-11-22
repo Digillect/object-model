@@ -1,7 +1,6 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.Diagnostics.Contracts;
 using System.Linq;
@@ -14,10 +13,7 @@ namespace Digillect.Collections
 #if !(SILVERLIGHT || WINDOWS8)
 	[Serializable]
 #endif
-	public abstract class XFilteredCollection<T> : IXList<T>, IDisposable
-#if !(SILVERLIGHT || WINDOWS8)
-		, ICloneable
-#endif
+	public abstract class XFilteredCollection<T> : XBasedCollection<T>
 		where T : XObject
 	{
 		private readonly IXList<T> _originalCollection;
@@ -38,20 +34,18 @@ namespace Digillect.Collections
 			this._originalCollection = originalCollection;
 
 			this._originalCollection.CollectionChanged += OriginalCollection_CollectionChanged;
+			_originalCollection.Updated += OriginalCollection_Updated;
 		}
 
-		public void Dispose()
-		{
-			Dispose(true);
-			GC.SuppressFinalize(this);
-		}
-
-		protected virtual void Dispose(bool disposing)
+		protected override void Dispose(bool disposing)
 		{
 			if ( disposing )
 			{
 				this._originalCollection.CollectionChanged -= OriginalCollection_CollectionChanged;
+				_originalCollection.Updated -= OriginalCollection_Updated;
 			}
+
+			base.Dispose(disposing);
 		}
 		#endregion
 
@@ -63,38 +57,28 @@ namespace Digillect.Collections
 		#endregion
 
 		#region IXList`1 Members
-		public int IndexOf(XKey key)
+		public override int IndexOf(XKey key)
 		{
 			return CalcFilteredIndex(this._originalCollection.IndexOf(key));
 		}
 		#endregion
 
 		#region IXCollection`1 Members
-		public event NotifyCollectionChangedEventHandler CollectionChanged;
+		public override event NotifyCollectionChangedEventHandler CollectionChanged;
 
-		public bool ContainsKey(XKey key)
+		public override bool ContainsKey(XKey key)
 		{
 			return IndexOf(key) != -1;
 		}
 
-		public IEnumerable<XKey> GetKeys()
+		public override IEnumerable<XKey> GetKeys()
 		{
 			return this.Select(x => x.GetKey());
 		}
 
-		bool IXCollection<T>.Remove(XKey key)
+		public override XBasedCollection<T> Clone(bool deep)
 		{
-			throw new NotSupportedException(Errors.XCollectionReadOnlyException);
-		}
-
-		IXCollection<T> IXCollection<T>.Clone( bool deep )
-		{
-			return Clone( deep );
-		}
-
-		public virtual XFilteredCollection<T> Clone( bool deep )
-		{
-			Contract.Ensures(Contract.Result<XFilteredCollection<T>>() != null);
+			Contract.Ensures(Contract.Result<IXCollection<T>>() != null);
 
 			IXList<T> collection = deep ? (IXList<T>) this._originalCollection.Clone(true) : this._originalCollection;
 
@@ -103,35 +87,21 @@ namespace Digillect.Collections
 		#endregion
 
 		#region IXUpdatable`1 Members
-		event EventHandler IXUpdatable<IXCollection<T>>.Updated
+		public override event EventHandler Updated;
+
+		public override void BeginUpdate()
 		{
-			add { this._originalCollection.Updated += value; }
-			remove { this._originalCollection.Updated -= value; }
+			_originalCollection.BeginUpdate();
 		}
 
-		void IXUpdatable<IXCollection<T>>.BeginUpdate()
+		public override void EndUpdate()
 		{
-			throw new NotSupportedException(Errors.XCollectionReadOnlyException);
-		}
-
-		void IXUpdatable<IXCollection<T>>.EndUpdate()
-		{
-			throw new NotSupportedException(Errors.XCollectionReadOnlyException);
-		}
-
-		bool IXUpdatable<IXCollection<T>>.IsUpdateRequired(IXCollection<T> source)
-		{
-			return false;
-		}
-
-		void IXUpdatable<IXCollection<T>>.Update(IXCollection<T> source)
-		{
-			throw new NotSupportedException(Errors.XCollectionReadOnlyException);
+			_originalCollection.EndUpdate();
 		}
 		#endregion
 
 		#region IList`1 Members
-		public T this[int index]
+		public override T this[int index]
 		{
 			get
 			{
@@ -141,32 +111,16 @@ namespace Digillect.Collections
 			}
 		}
 
-		T IList<T>.this[int index]
-		{
-			get { return this[index]; }
-			set { throw new NotSupportedException(Errors.XCollectionReadOnlyException); }
-		}
-
-		public int IndexOf(T item)
+		public override int IndexOf(T item)
 		{
 			Contract.Ensures( Contract.Result<int>() >= -1 );
 
 			return CalcFilteredIndex( this._originalCollection.IndexOf( item ) );
 		}
-
-		void IList<T>.Insert(int index, T item)
-		{
-			throw new NotSupportedException(Errors.XCollectionReadOnlyException);
-		}
-
-		void IList<T>.RemoveAt(int index)
-		{
-			throw new NotSupportedException(Errors.XCollectionReadOnlyException);
-		}
 		#endregion
 
 		#region ICollection`1 Members
-		public int Count
+		public override int Count
 		{
 #if WINDOWS_PHONE && CODE_ANALYSIS
 			[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA2140:TransparentMethodsMustNotReferenceCriticalCodeFxCopRule")]
@@ -190,25 +144,10 @@ namespace Digillect.Collections
 			}
 		}
 
-		bool ICollection<T>.IsReadOnly
-		{
-			get { return true; }
-		}
-
-		void ICollection<T>.Add(T item)
-		{
-			throw new NotSupportedException(Errors.XCollectionReadOnlyException);
-		}
-
-		void ICollection<T>.Clear()
-		{
-			throw new NotSupportedException(Errors.XCollectionReadOnlyException);
-		}
-
 #if WINDOWS_PHONE && CODE_ANALYSIS
 		[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA2140:TransparentMethodsMustNotReferenceCriticalCodeFxCopRule")]
 #endif
-		public bool Contains(T item)
+		public override bool Contains(T item)
 		{
 			bool contains = this._originalCollection.Contains(item) && Filter(item);
 
@@ -221,7 +160,7 @@ namespace Digillect.Collections
 			//return this.originalCollection.Contains(item) && Filter(item, this.originalCollection.IndexOf(item));
 		}
 
-		void ICollection<T>.CopyTo(T[] array, int arrayIndex)
+		public override void CopyTo(T[] array, int arrayIndex)
 		{
 			if ( array == null )
 			{
@@ -233,15 +172,10 @@ namespace Digillect.Collections
 				array[arrayIndex++] = obj;
 			}
 		}
-
-		bool ICollection<T>.Remove(T item)
-		{
-			throw new NotSupportedException(Errors.XCollectionReadOnlyException);
-		}
 		#endregion
 
 		#region IEnumerable`1 Members
-		public IEnumerator<T> GetEnumerator()
+		public override IEnumerator<T> GetEnumerator()
 		{
 			int version = this.version;
 
@@ -261,66 +195,6 @@ namespace Digillect.Collections
 			}
 		}
 		#endregion
-
-		#region IEnumerable Members
-		IEnumerator IEnumerable.GetEnumerator()
-		{
-			return GetEnumerator();
-		}
-		#endregion
-
-		#region IEquatable`1 Members
-		public virtual bool Equals(IXCollection<T> other)
-		{
-			if ( other == null || this.Count != other.Count )
-			{
-				return false;
-			}
-
-			foreach ( T item in this )
-			{
-				XKey key = item.GetKey();
-
-				if ( !item.Equals(other.FirstOrDefault(x => x.GetKey() == key)) )
-				{
-					return false;
-				}
-			}
-
-			return true;
-		}
-
-		public virtual bool Equals(IXList<T> other)
-		{
-			if ( other == null || this.Count != other.Count )
-			{
-				return false;
-			}
-
-#if true
-			return this.SequenceEqual(other);
-#else
-			for ( int i = 0; i < this.Count; i++ )
-			{
-				if ( !Object.Equals(this[i], other[i]) )
-				{
-					return false;
-				}
-			}
-
-			return true;
-#endif		
-		}
-		#endregion
-
-#if !(SILVERLIGHT || WINDOWS8)
-		#region ICloneable Members
-		object ICloneable.Clone()
-		{
-			return Clone( true );
-		}
-		#endregion
-#endif
 
 		#region Protected Methods
 		/// <summary>
@@ -487,6 +361,17 @@ namespace Digillect.Collections
 				}
 
 				CollectionChanged(this, args);
+			}
+		}
+
+		private void OriginalCollection_Updated(object sender, EventArgs e)
+		{
+			version++;
+			count = -1;
+
+			if ( Updated != null )
+			{
+				Updated(this, EventArgs.Empty);
 			}
 		}
 		#endregion

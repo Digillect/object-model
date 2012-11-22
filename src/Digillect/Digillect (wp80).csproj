@@ -124,7 +124,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'CodeAnalysis|AnyCPU'">
     <DebugSymbols>true</DebugSymbols>
     <OutputPath>obj\wp80\CodeAnalysis\</OutputPath>
-    <DefineConstants>TRACE;DEBUG;CODE_ANALYSIS;SILVERLIGHT;WINDOWS_PHONE;WINDOWS_PHONE_80</DefineConstants>
+    <DefineConstants>TRACE;DEBUG;SILVERLIGHT;WINDOWS_PHONE;WINDOWS_PHONE_80</DefineConstants>
     <DocumentationFile>
     </DocumentationFile>
     <NoWarn>1591,1607</NoWarn>
@@ -181,8 +181,10 @@
     <Compile Include="Collections\IXCollectionContract.cs" />
     <Compile Include="Collections\IXList.cs" />
     <Compile Include="Collections\IXListContract.cs" />
+    <Compile Include="Collections\XBasedCollection.cs" />
     <Compile Include="Collections\XCollection.cs" />
     <Compile Include="Collections\XCollectionsUtil.cs" />
+    <Compile Include="Collections\XCombinedCollection.cs" />
     <Compile Include="Collections\XFilteredCollection.cs" />
     <Compile Include="Collections\XIdentifiedCollection.cs" />
     <Compile Include="Collections\XUniqueCollection.cs" />

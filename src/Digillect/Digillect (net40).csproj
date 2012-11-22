@@ -166,6 +166,8 @@
     <Compile Include="Collections\CollectionMergeResults.cs" />
     <Compile Include="Collections\IXListContract.cs" />
     <Compile Include="Collections\IXCollectionContract.cs" />
+    <Compile Include="Collections\XBasedCollection.cs" />
+    <Compile Include="Collections\XCombinedCollection.cs" />
     <Compile Include="ContractExtensions.cs" />
     <Compile Include="Errors.cs" />
     <Compile Include="IXUpdatableContract.cs" />
