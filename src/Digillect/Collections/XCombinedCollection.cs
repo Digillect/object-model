@@ -121,12 +121,18 @@ namespace Digillect.Collections
 
 		public override void BeginUpdate()
 		{
-			Array.ForEach(_collections, x => x.BeginUpdate());
+			foreach ( var c in _collections )
+			{
+				c.BeginUpdate();
+			}
 		}
 
 		public override void EndUpdate()
 		{
-			Array.ForEach(_collections, x => x.EndUpdate());
+			foreach ( var c in _collections )
+			{
+				c.EndUpdate();
+			}
 		}
 		#endregion
 
@@ -193,10 +199,12 @@ namespace Digillect.Collections
 
 		public override void CopyTo(T[] array, int arrayIndex)
 		{
-			Array.ForEach(_collections, x => {
-				x.CopyTo(array, arrayIndex);
-				arrayIndex += x.Count;
-			});
+			foreach ( var c in _collections )
+			{
+				c.CopyTo(array, arrayIndex);
+
+				arrayIndex += c.Count;
+			}
 		}
 		#endregion
 
