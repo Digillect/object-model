@@ -230,7 +230,7 @@ namespace Digillect.Collections
 		#endregion
 
 		#region Protected Methods
-		protected int CalcCombinedIndex(IXList<T> collection, int index)
+		protected int CalculateCombinedIndex(IXList<T> collection, int index)
 		{
 			Contract.Requires(collection != null);
 			Contract.Requires(index >= 0);
@@ -276,30 +276,30 @@ namespace Digillect.Collections
 #if SILVERLIGHT
 					case NotifyCollectionChangedAction.Add:
 						Contract.Assume(e.NewItems.Count > 0);
-						args = new NotifyCollectionChangedEventArgs(e.Action, e.NewItems[0], CalcCombinedIndex(collection, e.NewStartingIndex));
+						args = new NotifyCollectionChangedEventArgs(e.Action, e.NewItems[0], CalculateCombinedIndex(collection, e.NewStartingIndex));
 						break;
 					case NotifyCollectionChangedAction.Remove:
 						Contract.Assume(e.OldItems.Count > 0);
-						args = new NotifyCollectionChangedEventArgs(e.Action, e.OldItems[0], CalcCombinedIndex(collection, e.OldStartingIndex));
+						args = new NotifyCollectionChangedEventArgs(e.Action, e.OldItems[0], CalculateCombinedIndex(collection, e.OldStartingIndex));
 						break;
 					case NotifyCollectionChangedAction.Replace:
 						// e.NewStartingIndex == e.OldStartingIndex
 						Contract.Assume(e.NewItems.Count > 0);
 						Contract.Assume(e.OldItems.Count > 0);
-						args = new NotifyCollectionChangedEventArgs(e.Action, e.NewItems[0], e.OldItems[0], CalcCombinedIndex(collection, e.NewStartingIndex));
+						args = new NotifyCollectionChangedEventArgs(e.Action, e.NewItems[0], e.OldItems[0], CalculateCombinedIndex(collection, e.NewStartingIndex));
 						break;
 #else
 					case NotifyCollectionChangedAction.Add:
 						Contract.Assume(e.NewItems != null);
 
-						args = new NotifyCollectionChangedEventArgs(e.Action, e.NewItems, CalcCombinedIndex(collection, e.NewStartingIndex));
+						args = new NotifyCollectionChangedEventArgs(e.Action, e.NewItems, CalculateCombinedIndex(collection, e.NewStartingIndex));
 
 						break;
 
 					case NotifyCollectionChangedAction.Remove:
 						Contract.Assume(e.OldItems != null);
 
-						args = new NotifyCollectionChangedEventArgs(e.Action, e.OldItems, CalcCombinedIndex(collection, e.OldStartingIndex));
+						args = new NotifyCollectionChangedEventArgs(e.Action, e.OldItems, CalculateCombinedIndex(collection, e.OldStartingIndex));
 
 						break;
 
@@ -307,7 +307,7 @@ namespace Digillect.Collections
 						// e.NewItems and e.OldItems have the same content
 						Contract.Assume(e.NewItems != null);
 
-						args = new NotifyCollectionChangedEventArgs(e.Action, e.NewItems, CalcCombinedIndex(collection, e.NewStartingIndex), CalcCombinedIndex(collection, e.OldStartingIndex));
+						args = new NotifyCollectionChangedEventArgs(e.Action, e.NewItems, CalculateCombinedIndex(collection, e.NewStartingIndex), CalculateCombinedIndex(collection, e.OldStartingIndex));
 
 						break;
 
@@ -316,7 +316,7 @@ namespace Digillect.Collections
 						Contract.Assume(e.NewItems != null);
 						Contract.Assume(e.OldItems != null);
 
-						args = new NotifyCollectionChangedEventArgs(e.Action, e.NewItems, e.OldItems, CalcCombinedIndex(collection, e.NewStartingIndex));
+						args = new NotifyCollectionChangedEventArgs(e.Action, e.NewItems, e.OldItems, CalculateCombinedIndex(collection, e.NewStartingIndex));
 
 						break;
 #endif
