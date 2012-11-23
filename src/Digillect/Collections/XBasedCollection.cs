@@ -5,6 +5,9 @@ using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Diagnostics.Contracts;
 using System.Linq;
+#if WINDOWS8
+using System.Reflection;
+#endif
 
 namespace Digillect.Collections
 {
@@ -14,7 +17,7 @@ namespace Digillect.Collections
 #if !(SILVERLIGHT || WINDOWS8)
 	[Serializable]
 #endif
-	public abstract class XBasedCollection<T> : IXList<T>, IDisposable
+	public abstract class XBasedCollection<T> : IXList<T>, IList, IDisposable
 #if !(SILVERLIGHT || WINDOWS8)
 		, ICloneable
 #endif
@@ -137,6 +140,144 @@ namespace Digillect.Collections
 
 		#region IEnumerable`1 Members
 		public abstract IEnumerator<T> GetEnumerator();
+		#endregion
+
+		#region IList Members
+		object IList.this[int index]
+		{
+			get { return this[index]; }
+			set { throw new NotSupportedException(Errors.XCollectionReadOnlyException); }
+		}
+
+		bool IList.IsFixedSize
+		{
+			get { return false; }
+		}
+
+		bool IList.IsReadOnly
+		{
+			get { return true; }
+		}
+
+		int IList.Add(object value)
+		{
+			throw new NotSupportedException(Errors.XCollectionReadOnlyException);
+		}
+
+		void IList.Clear()
+		{
+			throw new NotSupportedException(Errors.XCollectionReadOnlyException);
+		}
+
+		bool IList.Contains(object value)
+		{
+			return IsCompatibleObject(value) && Contains((T) value);
+		}
+
+		int IList.IndexOf(object value)
+		{
+			return IsCompatibleObject(value) ? IndexOf((T) value) : -1;
+		}
+
+		void IList.Insert(int index, object value)
+		{
+			throw new NotSupportedException(Errors.XCollectionReadOnlyException);
+		}
+
+		void IList.Remove(object value)
+		{
+			throw new NotSupportedException(Errors.XCollectionReadOnlyException);
+		}
+
+		void IList.RemoveAt(int index)
+		{
+			throw new NotSupportedException(Errors.XCollectionReadOnlyException);
+		}
+
+		private static bool IsCompatibleObject(object value)
+		{
+			return value is T || value == null && default(T) == null;
+		}
+		#endregion
+
+		#region ICollection Members
+		bool ICollection.IsSynchronized
+		{
+			get { return false; }
+		}
+
+		object ICollection.SyncRoot
+		{
+			get { return this; }
+		}
+
+		void ICollection.CopyTo(Array array, int index)
+		{
+			if ( array == null )
+			{
+				throw new ArgumentNullException("array");
+			}
+
+			if ( array.Rank != 1 || array.GetLowerBound(0) != 0 )
+			{
+				throw new ArgumentException("Incompatible array.", "array");
+			}
+
+			if ( index < 0 )
+			{
+				throw new ArgumentOutOfRangeException("index", "index < 0");
+			}
+
+			if ( array.Length - index < this.Count )
+			{
+				throw new ArgumentException("ArrayPlusOffTooSmall");
+			}
+
+			Contract.EndContractBlock();
+
+			T[] localArray = array as T[];
+
+			if ( localArray != null )
+			{
+				CopyTo(localArray, index);
+			}
+			else
+			{
+#if WINDOWS8
+				TypeInfo elementType = array.GetType().GetElementType().GetTypeInfo();
+				TypeInfo c = typeof(T).GetTypeInfo();
+#else
+				Type elementType = array.GetType().GetElementType();
+				Type c = typeof(T);
+#endif
+
+				if ( !elementType.IsAssignableFrom(c) && !c.IsAssignableFrom(elementType) )
+				{
+					throw new ArgumentException("InvalidArrayType");
+				}
+
+				object[] objArray = array as object[];
+
+				if ( objArray == null )
+				{
+					throw new ArgumentException("InvalidArrayType");
+				}
+
+				int count = this.Count;
+
+				try
+				{
+					for ( int i = 0; i < count; i++ )
+					{
+						objArray[index++] = this[i];
+					}
+				}
+				catch ( ArrayTypeMismatchException )
+				{
+					throw new ArgumentException("InvalidArrayType");
+				}
+			}
+		}
 		#endregion
 
 		#region IEnumerable Members
