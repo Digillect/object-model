@@ -17,9 +17,6 @@ namespace Digillect
 		public abstract void BeginUpdate();
 		public abstract void EndUpdate();
 
-#if WINDOWS_PHONE && CODE_ANALYSIS
-		[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA2140:TransparentMethodsMustNotReferenceCriticalCodeFxCopRule")]
-#endif
 		public bool IsUpdateRequired(T source)
 		{
 			Contract.Requires<ArgumentNullException>(source != null, "source");
@@ -27,9 +24,6 @@ namespace Digillect
 			return false;
 		}
 
-#if WINDOWS_PHONE && CODE_ANALYSIS
-		[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA2140:TransparentMethodsMustNotReferenceCriticalCodeFxCopRule")]
-#endif
 		public void Update(T source)
 		{
 			Contract.Requires<ArgumentNullException>(source != null, "source");

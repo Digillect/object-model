@@ -42,7 +42,7 @@ namespace Digillect.Collections
 		public XCollection(IEnumerable<T> collection)
 			: base(new List<T>(collection))
 		{
-			ValidateCollection(collection);
+			XCollectionsUtil.ValidateCollection(collection);
 		}
 
 #if false
@@ -131,9 +131,6 @@ namespace Digillect.Collections
 		}
 
 		[Pure]
-#if WINDOWS_PHONE && CODE_ANALYSIS
-		[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA2140:TransparentMethodsMustNotReferenceCriticalCodeFxCopRule")]
-#endif
 		public XCollection<T> Derive(Func<T, bool> predicate)
 		{
 			if ( predicate == null )
@@ -156,9 +153,6 @@ namespace Digillect.Collections
 		/// </summary>
 		/// <param name="key">The key of the item to find.</param>
 		/// <returns>An item with the specified key if the item exists in the <b>collection</b>; otherwise, <see langword="null"/>.</returns>
-#if WINDOWS_PHONE && CODE_ANALYSIS
-		[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA2140:TransparentMethodsMustNotReferenceCriticalCodeFxCopRule")]
-#endif
 		[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Contracts", "CC1055", Justification = "Validation performed in IndexOf method")]
 		public T Find(XKey key)
 		{
@@ -185,9 +179,6 @@ namespace Digillect.Collections
 			}
 		}
 
-#if WINDOWS_PHONE && CODE_ANALYSIS
-		[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA2140:TransparentMethodsMustNotReferenceCriticalCodeFxCopRule")]
-#endif
 		public IEnumerable<XKey> GetKeys()
 		{
 			return this.Items.Select(x => x.GetKey());
@@ -198,9 +189,6 @@ namespace Digillect.Collections
 		/// </summary>
 		/// <param name="key">The key of an item to locate in the <b>collection</b>.</param>
 		/// <returns>The index of item if found in the list; otherwise, -1.</returns>
-#if WINDOWS_PHONE && CODE_ANALYSIS
-		[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA2140:TransparentMethodsMustNotReferenceCriticalCodeFxCopRule")]
-#endif
 		public int IndexOf(XKey key)
 		{
 			if ( key == null )
@@ -223,10 +211,6 @@ namespace Digillect.Collections
 			return -1;
 		}
 
-#if WINDOWS_PHONE && CODE_ANALYSIS
-		[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA2140:TransparentMethodsMustNotReferenceCriticalCodeFxCopRule")]
-#endif
-		[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1062:Validate arguments of public methods", MessageId = "1", Justification = "Indeed validated")]
 		public void InsertRange(int index, IEnumerable<T> collection)
 		{
 			if ( index < 0 || index > this.Count )
@@ -234,7 +218,7 @@ namespace Digillect.Collections
 				throw new ArgumentOutOfRangeException("index");
 			}
 
-			ValidateCollection(collection);
+			XCollectionsUtil.ValidateCollection(collection);
 
 			Contract.EndContractBlock();
 
@@ -345,9 +329,6 @@ namespace Digillect.Collections
 
 		[EditorBrowsable( EditorBrowsableState.Advanced )]
 		[Pure]
-#if false // !(SILVERLIGHT || WINDOWS8)
-		[System.Security.Permissions.ReflectionPermission(System.Security.Permissions.SecurityAction.Demand, RestrictedMemberAccess = true)]
-#endif
 		protected virtual XCollection<T> CreateInstanceOfSameType()
 		{
 			Contract.Ensures( Contract.Result<XCollection<T>>() != null );
@@ -447,12 +428,9 @@ namespace Digillect.Collections
 		/// <param name="options">Операции, которые надо произвести с объектами, находящимися в данной коллекции.</param>
 		/// <returns>The <see cref="CollectionMergeResults">results</see> of the operation.</returns>
 		/// <seealso cref="XCollectionsUtil.Merge"/>
-#if WINDOWS_PHONE && CODE_ANALYSIS
-		[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA2140:TransparentMethodsMustNotReferenceCriticalCodeFxCopRule")]
-#endif
 		public virtual CollectionMergeResults Update(IEnumerable<T> collection, CollectionMergeOptions options)
 		{
-			ValidateCollection(collection);
+			XCollectionsUtil.ValidateCollection(collection);
 
 			Contract.Ensures(Contract.Result<CollectionMergeResults>() != null);
 
@@ -705,22 +683,6 @@ namespace Digillect.Collections
 			return hashCode;
 		}
 		#endregion
-
-		[ContractArgumentValidator]
-		protected static void ValidateCollection(IEnumerable<T> collection)
-		{
-			if ( collection == null )
-			{
-				throw new ArgumentNullException("collection");
-			}
-
-			if ( !collection.All(XCollectionsUtil.CollectionMemberNotNull) )
-			{
-				throw new ArgumentException("Null element found.", "collection");
-			}
-
-			Contract.EndContractBlock();
-		}
 
 		#region ObjectInvariant
 		[ContractInvariantMethod]

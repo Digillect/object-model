@@ -70,16 +70,14 @@ namespace Digillect
 		/// </summary>
 		/// <param name="propertyName">Name of the property.</param>
 #if NET45 || WINDOWS8 || WINDOWS_PHONE_8
+		[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1026:DefaultParametersShouldNotBeUsed", Justification = "Required for the CallerMemberName attribute.")]
 		protected void OnPropertyChanged( [CallerMemberName] string propertyName = null )
-		{
-			OnPropertyChanged( new PropertyChangedEventArgs( propertyName ) );
-		}
 #else
 		protected void OnPropertyChanged( string propertyName )
+#endif
 		{
 			OnPropertyChanged( new PropertyChangedEventArgs( propertyName ) );
 		}
-#endif
 
 		/// <summary>
 		/// Raises the <see cref="E:PropertyChanged"/> event.
@@ -105,7 +103,9 @@ namespace Digillect
 		/// <b>.NET 4.5.</b> <paramref name="propertyName"/> is optional and can be provided automatically
 		/// when invoked from compilers that support <c>CallerMemberName</c>.
 		/// </remarks>
+		[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1045:DoNotPassTypesByReference", MessageId = "0#")]
 #if NET45 || WINDOWS8 || WINDOWS_PHONE_8
+		[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1026:DefaultParametersShouldNotBeUsed", Justification = "Required for the CallerMemberName attribute.")]
 		protected bool SetProperty<T>( ref T storage, T value, [CallerMemberName] String propertyName = null )
 #else
 		protected bool SetProperty<T>(ref T storage, T value, string propertyName)

@@ -30,7 +30,7 @@ namespace Digillect
 		[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2214:DoNotCallOverridableMethodsInConstructors")]
 		protected XSecureIdentifiedObject()
 		{
-			this.id = CreateDefaultId();
+			this.id = CheckId(CreateDefaultId());
 		}
 
 		/// <summary>
@@ -40,14 +40,21 @@ namespace Digillect
 		[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2214:DoNotCallOverridableMethodsInConstructors")]
 		protected XSecureIdentifiedObject(TId id)
 		{
-			if ( id == null )
+			//if ( id == null )
+			//{
+			//	throw new ArgumentNullException("id");
+			//}
+
+			//Contract.EndContractBlock();
+
+			if ( EqualityComparer<TId>.Default.Equals(id, default(TId)) )
 			{
-				throw new ArgumentNullException("id");
+				id = CheckId(CreateDefaultId());
 			}
 
-			Contract.EndContractBlock();
+			Contract.Assume(id != null);
 
-			this.id = EqualityComparer<TId>.Default.Equals(id, default(TId)) ? CreateDefaultId() : id;
+			this.id = id;
 		}
 		#endregion
 
@@ -104,13 +111,24 @@ namespace Digillect
 		{
 			XSecureIdentifiedObject<TId> copy = (XSecureIdentifiedObject<TId>) Clone( deepCloning );
 
-			copy.id = EqualityComparer<TId>.Default.Equals(newId, default(TId)) ? CreateDefaultId() : newId;
+			if ( EqualityComparer<TId>.Default.Equals(newId, default(TId)) )
+			{
+				newId = CheckId(CreateDefaultId());
+			}
+
+			copy.id = newId;
 
 			return copy;
 		}
 		#endregion
 
 		#region Protected Methods
+		/// <summary>
+		/// Creates the default id.
+		/// </summary>
+		/// <returns>Default identifier.</returns>
+		protected abstract TId CreateDefaultId();
+
 		/// <summary>
 		/// Creates the key.
 		/// </summary>
@@ -121,12 +139,6 @@ namespace Digillect
 		{
 			return XKey.From( this.id, base.CreateKey() );
 		}
-
-		/// <summary>
-		/// Creates the default id.
-		/// </summary>
-		/// <returns>Default identifier.</returns>
-		protected abstract TId CreateDefaultId();
 
 		/// <summary>
 		/// Performs update/clone operation. Override to clone or update properties of your class.
@@ -161,6 +173,8 @@ namespace Digillect
 					if ( icl != null )
 					{
 						this.id = (TId) icl.Clone();
+
+						Contract.Assume(this.id != null);
 					}
 					else
 #endif
@@ -220,6 +234,18 @@ namespace Digillect
 			return this.id == null ? 0 : this.id.GetHashCode();
 		}
 		#endregion
+
+		private static TId CheckId(TId id)
+		{
+			Contract.Ensures(Contract.Result<TId>() != null);
+
+			if ( id == null )
+			{
+				throw new ArgumentNullException("id");
+			}
+
+			return id;
+		}
 
 		#region ObjectInvariant
 		[ContractInvariantMethod]

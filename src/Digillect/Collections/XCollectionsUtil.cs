@@ -25,6 +25,7 @@ namespace Digillect.Collections
 		/// result = a == null || a.Length == 0;
 		/// </code>
 		/// </remarks>
+		[Pure]
 		public static bool IsNullOrEmpty<T>(T[] value)
 		{
 			return value == null || value.Length == 0;
@@ -45,6 +46,7 @@ namespace Digillect.Collections
 		/// result = c == null || c.Count == 0;
 		/// </code>
 		/// </remarks>
+		[Pure]
 		public static bool IsNullOrEmpty<T>(ICollection<T> value)
 		{
 			return value == null || value.Count == 0;
@@ -161,10 +163,7 @@ namespace Digillect.Collections
 		/// Be careful to not use this method on objects implementing the <see cref="INotifyCollectionChanged"/> interface unless you don't care about events being raised.
 		/// Specifically, in cases of <see cref="IXCollection&lt;T&gt;"/> or <see cref="XCollection&lt;T&gt;"/> use theirs <b>Update</b> methods.
 		/// </remarks>
-		[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Maintainability", "CA1502:AvoidExcessiveComplexity")]
-#if WINDOWS_PHONE && CODE_ANALYSIS
-		[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA2140:TransparentMethodsMustNotReferenceCriticalCodeFxCopRule")]
-#endif
+		[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Maintainability", "CA1502:AvoidExcessiveComplexity", Justification = "God knows how to make is simplier.")]
 		public static CollectionMergeResults Merge<T>(this IList<T> source, IEnumerable<T> collection, CollectionMergeOptions options)
 			where T : XObject
 		{
@@ -367,9 +366,6 @@ namespace Digillect.Collections
 		///	}
 		/// </code>
 		/// </example>
-#if WINDOWS_PHONE && CODE_ANALYSIS
-		[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA2140:TransparentMethodsMustNotReferenceCriticalCodeFxCopRule")]
-#endif
 		public static XCollectionDifference<T> Difference<T>(this IXCollection<T> source, IEnumerable<T> target)
 			where T : XObject
 		{
@@ -480,6 +476,22 @@ namespace Digillect.Collections
 			return new FuncFilteredCollection<T>(collection, filter);
 		}
 		#endregion
+
+		[ContractArgumentValidator]
+		internal static void ValidateCollection<T>([ValidatedNotNull] IEnumerable<T> collection)
+		{
+			if ( collection == null )
+			{
+				throw new ArgumentNullException("collection");
+			}
+
+			if ( !Contract.ForAll(collection, CollectionMemberNotNull) )
+			{
+				throw new ArgumentException("Null element found.", "collection");
+			}
+
+			Contract.EndContractBlock();
+		}
 
 		#region CollectionMemberNotNull`1
 		/// <summary>
@@ -757,9 +769,6 @@ namespace Digillect.Collections
 				this._filter = filter;
 			}
 
-#if WINDOWS_PHONE && CODE_ANALYSIS
-			[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA2140:TransparentMethodsMustNotReferenceCriticalCodeFxCopRule")]
-#endif
 			protected override XFilteredCollection<T> CreateInstanceOfSameType(IXList<T> originalCollection)
 			{
 #if !(SILVERLIGHT || WINDOWS8)
@@ -882,4 +891,9 @@ namespace Digillect.Collections
 		}
 	}
 	#endregion
+
+	[AttributeUsage(AttributeTargets.Parameter, AllowMultiple = false, Inherited = false)]
+	internal sealed class ValidatedNotNullAttribute : Attribute
+	{
+	}
 }

@@ -224,7 +224,8 @@ namespace Digillect
 		/// <param name="otherField">Same field in other instance.</param>
 		/// <param name="cloning"><c>true</c> if cloning source, otherwise <c>false</c>.</param>
 		/// <param name="deepCloning"><c>true</c> if performing deep cloning, otherwise <c>false</c>.</param>
-		protected void ProcessCopyProperty<T>( ref T thisField, T otherField, bool cloning, bool deepCloning ) where T : XObject
+		[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1045:DoNotPassTypesByReference", MessageId = "0#")]
+		protected static void ProcessCopyProperty<T>(ref T thisField, T otherField, bool cloning, bool deepCloning) where T : XObject
 		{
 			if( cloning )
 			{
@@ -261,11 +262,12 @@ namespace Digillect
 		/// <param name="otherField">Same field in other instance.</param>
 		/// <param name="cloning"><c>true</c> if cloning source, otherwise <c>false</c>.</param>
 		/// <param name="deepCloning"><c>true</c> if performing deep cloning, otherwise <c>false</c>.</param>
-		protected void ProcessCopyProperty<T>( ref Collections.XCollection<T> thisField, Collections.XCollection<T> otherField, bool cloning, bool deepCloning ) where T : XObject
+		[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1045:DoNotPassTypesByReference", MessageId = "0#")]
+		protected static void ProcessCopyProperty<T>(ref Collections.XCollection<T> thisField, Collections.XCollection<T> otherField, bool cloning, bool deepCloning) where T : XObject
 		{
 			if( cloning )
 			{
-				thisField = otherField == null ? null : (Collections.XCollection<T>) otherField.Clone( deepCloning );
+				thisField = otherField == null ? null : otherField.Clone(deepCloning);
 			}
 			else
 			{
@@ -284,7 +286,7 @@ namespace Digillect
 				{
 					if( otherField != null )
 					{
-						thisField = (Collections.XCollection<T>) otherField.Clone( false );
+						thisField = otherField.Clone(false);
 					}
 				}
 			}

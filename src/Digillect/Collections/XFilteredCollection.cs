@@ -59,7 +59,7 @@ namespace Digillect.Collections
 		#region IXList`1 Members
 		public override int IndexOf(XKey key)
 		{
-			return CalcFilteredIndex(this._originalCollection.IndexOf(key));
+			return CalculateFilteredIndex(this._originalCollection.IndexOf(key));
 		}
 		#endregion
 
@@ -105,7 +105,7 @@ namespace Digillect.Collections
 		{
 			get
 			{
-				var originalIndex = CalcOriginalIndex( index );
+				var originalIndex = CalculateOriginalIndex( index );
 
 				return originalIndex >= 0 ? this._originalCollection[originalIndex] : default( T );
 			}
@@ -115,16 +115,13 @@ namespace Digillect.Collections
 		{
 			Contract.Ensures( Contract.Result<int>() >= -1 );
 
-			return CalcFilteredIndex( this._originalCollection.IndexOf( item ) );
+			return CalculateFilteredIndex( this._originalCollection.IndexOf( item ) );
 		}
 		#endregion
 
 		#region ICollection`1 Members
 		public override int Count
 		{
-#if WINDOWS_PHONE && CODE_ANALYSIS
-			[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA2140:TransparentMethodsMustNotReferenceCriticalCodeFxCopRule")]
-#endif
 			get
 			{
 				if ( this.count == -1 )
@@ -144,9 +141,6 @@ namespace Digillect.Collections
 			}
 		}
 
-#if WINDOWS_PHONE && CODE_ANALYSIS
-		[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA2140:TransparentMethodsMustNotReferenceCriticalCodeFxCopRule")]
-#endif
 		public override bool Contains(T item)
 		{
 			bool contains = this._originalCollection.Contains(item) && Filter(item);
@@ -213,7 +207,7 @@ namespace Digillect.Collections
 		[Pure]
 		protected abstract bool Filter(T obj);
 
-		protected int CalcFilteredIndex(int originalIndex)
+		protected int CalculateFilteredIndex(int originalIndex)
 		{
 			Contract.Ensures(Contract.Result<int>() >= -1);
 
@@ -235,7 +229,7 @@ namespace Digillect.Collections
 			return filteredIndex;
 		}
 
-		protected int CalcOriginalIndex(int filteredIndex)
+		protected int CalculateOriginalIndex(int filteredIndex)
 		{
 			if ( filteredIndex < 0 )
 			{
@@ -258,9 +252,6 @@ namespace Digillect.Collections
 		#endregion
 
 		#region Event Handlers
-#if WINDOWS_PHONE && CODE_ANALYSIS
-		[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA2140:TransparentMethodsMustNotReferenceCriticalCodeFxCopRule")]
-#endif
 		private void OriginalCollection_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
 		{
 			version++;
@@ -283,7 +274,7 @@ namespace Digillect.Collections
 						{
 							return;
 						}
-						args = new NotifyCollectionChangedEventArgs(e.Action, e.NewItems[0], CalcFilteredIndex(e.NewStartingIndex));
+						args = new NotifyCollectionChangedEventArgs(e.Action, e.NewItems[0], CalculateFilteredIndex(e.NewStartingIndex));
 						break;
 					case NotifyCollectionChangedAction.Remove:
 						Contract.Assume(e.OldItems.Count > 0);
@@ -291,7 +282,7 @@ namespace Digillect.Collections
 						{
 							return;
 						}
-						args = new NotifyCollectionChangedEventArgs(e.Action, e.OldItems[0], CalcFilteredIndex(e.OldStartingIndex));
+						args = new NotifyCollectionChangedEventArgs(e.Action, e.OldItems[0], CalculateFilteredIndex(e.OldStartingIndex));
 						break;
 					case NotifyCollectionChangedAction.Replace:
 						// e.NewStartingIndex == e.OldStartingIndex
@@ -301,7 +292,7 @@ namespace Digillect.Collections
 						{
 							return;
 						}
-						args = new NotifyCollectionChangedEventArgs(e.Action, e.NewItems[0], e.OldItems[0], CalcFilteredIndex(e.NewStartingIndex));
+						args = new NotifyCollectionChangedEventArgs(e.Action, e.NewItems[0], e.OldItems[0], CalculateFilteredIndex(e.NewStartingIndex));
 						break;
 #else
 					case NotifyCollectionChangedAction.Add:
@@ -312,7 +303,7 @@ namespace Digillect.Collections
 						if( newItems.Length == 0 )
 							return;
 
-						args = new NotifyCollectionChangedEventArgs( e.Action, newItems, CalcFilteredIndex( e.NewStartingIndex ) );
+						args = new NotifyCollectionChangedEventArgs( e.Action, newItems, CalculateFilteredIndex( e.NewStartingIndex ) );
 
 						break;
 
@@ -324,7 +315,7 @@ namespace Digillect.Collections
 						if( oldItems.Length == 0 )
 							return;
 
-						args = new NotifyCollectionChangedEventArgs( e.Action, oldItems, CalcFilteredIndex( e.OldStartingIndex ) );
+						args = new NotifyCollectionChangedEventArgs( e.Action, oldItems, CalculateFilteredIndex( e.OldStartingIndex ) );
 						break;
 
 					case NotifyCollectionChangedAction.Move:
@@ -336,7 +327,7 @@ namespace Digillect.Collections
 						if( newItems.Length == 0 )
 							return;
 
-						args = new NotifyCollectionChangedEventArgs( e.Action, newItems, CalcFilteredIndex( e.NewStartingIndex ), CalcFilteredIndex( e.OldStartingIndex ) );
+						args = new NotifyCollectionChangedEventArgs( e.Action, newItems, CalculateFilteredIndex( e.NewStartingIndex ), CalculateFilteredIndex( e.OldStartingIndex ) );
 						break;
 
 					case NotifyCollectionChangedAction.Replace:
@@ -350,7 +341,7 @@ namespace Digillect.Collections
 						if( newItems.Length == 0 && oldItems.Length == 0 )
 							return;
 
-						args = new NotifyCollectionChangedEventArgs( e.Action, newItems, oldItems, CalcFilteredIndex( e.NewStartingIndex ) );
+						args = new NotifyCollectionChangedEventArgs( e.Action, newItems, oldItems, CalculateFilteredIndex( e.NewStartingIndex ) );
 						break;
 #endif
 					case NotifyCollectionChangedAction.Reset:

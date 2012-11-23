@@ -128,7 +128,7 @@ namespace Digillect.Collections
 		/// <returns>The <see cref="CollectionMergeResults">results</see> of the operation.</returns>
 		public override CollectionMergeResults Update(IEnumerable<TObject> collection, CollectionMergeOptions options)
 		{
-			ValidateCollection(collection);
+			XCollectionsUtil.ValidateCollection(collection);
 
 			Contract.Ensures(Contract.Result<CollectionMergeResults>() != null);
 
