@@ -78,7 +78,7 @@
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>..\..\target\Release\wp80\</OutputPath>
-    <DefineConstants>TRACE;SILVERLIGHT;WINDOWS_PHONE;WINDOWS_PHONE_80</DefineConstants>
+    <DefineConstants>TRACE;SILVERLIGHT;WINDOWS_PHONE;WINDOWS_PHONE_8;WINDOWS_PHONE_80</DefineConstants>
     <NoStdLib>true</NoStdLib>
     <NoConfig>true</NoConfig>
     <ErrorReport>prompt</ErrorReport>
@@ -124,7 +124,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'CodeAnalysis|AnyCPU'">
     <DebugSymbols>true</DebugSymbols>
     <OutputPath>obj\wp80\CodeAnalysis\</OutputPath>
-    <DefineConstants>TRACE;DEBUG;SILVERLIGHT;WINDOWS_PHONE;WINDOWS_PHONE_80</DefineConstants>
+    <DefineConstants>TRACE;DEBUG;CODE_ANALYSIS;SILVERLIGHT;WINDOWS_PHONE;WINDOWS_PHONE_8;WINDOWS_PHONE_80</DefineConstants>
     <DocumentationFile>
     </DocumentationFile>
     <NoWarn>1591,1607</NoWarn>
