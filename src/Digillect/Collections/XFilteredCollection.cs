@@ -66,20 +66,8 @@ namespace Digillect.Collections
 		#region IXCollection`1 Members
 		public override event NotifyCollectionChangedEventHandler CollectionChanged;
 
-		public override bool ContainsKey(XKey key)
-		{
-			return IndexOf(key) != -1;
-		}
-
-		public override IEnumerable<XKey> GetKeys()
-		{
-			return this.Select(x => x.GetKey());
-		}
-
 		public override XBasedCollection<T> Clone(bool deep)
 		{
-			Contract.Ensures(Contract.Result<IXCollection<T>>() != null);
-
 			IXList<T> collection = deep ? (IXList<T>) this._originalCollection.Clone(true) : this._originalCollection;
 
 			return CreateInstanceOfSameType( collection );
@@ -157,20 +145,6 @@ namespace Digillect.Collections
 			}
 
 			return contains;
-			//return this.originalCollection.Contains(item) && Filter(item, this.originalCollection.IndexOf(item));
-		}
-
-		public override void CopyTo(T[] array, int arrayIndex)
-		{
-			if ( array == null )
-			{
-				throw new ArgumentNullException("array");
-			}
-
-			foreach ( T obj in this )
-			{
-				array[arrayIndex++] = obj;
-			}
 		}
 		#endregion
 

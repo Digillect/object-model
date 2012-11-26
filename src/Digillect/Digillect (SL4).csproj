@@ -70,7 +70,7 @@
     <CodeContractsExtraAnalysisOptions />
     <CodeContractsBaseLineFile />
     <CodeContractsCacheAnalysisResults>True</CodeContractsCacheAnalysisResults>
-    <CodeContractsRuntimeCheckingLevel>Pre and Post</CodeContractsRuntimeCheckingLevel>
+    <CodeContractsRuntimeCheckingLevel>Full</CodeContractsRuntimeCheckingLevel>
     <CodeContractsReferenceAssembly>Build</CodeContractsReferenceAssembly>
     <CodeContractsAnalysisWarningLevel>0</CodeContractsAnalysisWarningLevel>
   </PropertyGroup>
@@ -196,6 +196,7 @@
     <Compile Include="Collections\XCombinedCollection.cs" />
     <Compile Include="Collections\XFilteredCollection.cs" />
     <Compile Include="Collections\XIdentifiedCollection.cs" />
+    <Compile Include="Collections\XSubRangeCollection.cs" />
     <Compile Include="Collections\XUniqueCollection.cs" />
     <Compile Include="ComponentModel\PropertyChangingEventArgs.cs" />
     <Compile Include="ContractExtensions.cs" />

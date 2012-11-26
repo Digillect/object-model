@@ -231,7 +231,7 @@ namespace Digillect.Collections
 		{
 			if ( index < 0 || index > this.Count )
 			{
-				throw new ArgumentOutOfRangeException("index");
+				throw new ArgumentOutOfRangeException("index", Errors.ArgumentOutOfRange_Index);
 			}
 
 			ValidateCollection(collection);

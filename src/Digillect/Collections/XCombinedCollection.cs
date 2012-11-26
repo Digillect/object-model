@@ -153,7 +153,7 @@ namespace Digillect.Collections
 					}
 				}
 
-				throw new ArgumentOutOfRangeException("index", "Index exceeds count.");
+				throw new ArgumentOutOfRangeException("index", Errors.ArgumentOutOfRange_Index);
 			}
 		}
 
@@ -275,56 +275,34 @@ namespace Digillect.Collections
 				{
 #if SILVERLIGHT
 					case NotifyCollectionChangedAction.Add:
-						Contract.Assume(e.NewItems.Count > 0);
 						args = new NotifyCollectionChangedEventArgs(e.Action, e.NewItems[0], CalculateCombinedIndex(collection, e.NewStartingIndex));
 						break;
 					case NotifyCollectionChangedAction.Remove:
-						Contract.Assume(e.OldItems.Count > 0);
 						args = new NotifyCollectionChangedEventArgs(e.Action, e.OldItems[0], CalculateCombinedIndex(collection, e.OldStartingIndex));
 						break;
 					case NotifyCollectionChangedAction.Replace:
 						// e.NewStartingIndex == e.OldStartingIndex
-						Contract.Assume(e.NewItems.Count > 0);
-						Contract.Assume(e.OldItems.Count > 0);
 						args = new NotifyCollectionChangedEventArgs(e.Action, e.NewItems[0], e.OldItems[0], CalculateCombinedIndex(collection, e.NewStartingIndex));
 						break;
 #else
 					case NotifyCollectionChangedAction.Add:
-						Contract.Assume(e.NewItems != null);
-
 						args = new NotifyCollectionChangedEventArgs(e.Action, e.NewItems, CalculateCombinedIndex(collection, e.NewStartingIndex));
-
 						break;
-
 					case NotifyCollectionChangedAction.Remove:
-						Contract.Assume(e.OldItems != null);
-
 						args = new NotifyCollectionChangedEventArgs(e.Action, e.OldItems, CalculateCombinedIndex(collection, e.OldStartingIndex));
-
 						break;
-
 					case NotifyCollectionChangedAction.Move:
 						// e.NewItems and e.OldItems have the same content
-						Contract.Assume(e.NewItems != null);
-
 						args = new NotifyCollectionChangedEventArgs(e.Action, e.NewItems, CalculateCombinedIndex(collection, e.NewStartingIndex), CalculateCombinedIndex(collection, e.OldStartingIndex));
-
 						break;
-
 					case NotifyCollectionChangedAction.Replace:
 						// e.NewStartingIndex == e.OldStartingIndex
-						Contract.Assume(e.NewItems != null);
-						Contract.Assume(e.OldItems != null);
-
 						args = new NotifyCollectionChangedEventArgs(e.Action, e.NewItems, e.OldItems, CalculateCombinedIndex(collection, e.NewStartingIndex));
-
 						break;
 #endif
 					case NotifyCollectionChangedAction.Reset:
 						args = new NotifyCollectionChangedEventArgs(e.Action);
-
 						break;
-
 					default:
 						throw new ArgumentException(e.Action.ToString(), "e");
 				}

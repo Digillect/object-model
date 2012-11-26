@@ -44,14 +44,20 @@ namespace Digillect.Collections
 		#endregion
 
 		#region IXCollection`1 Members
-		public abstract bool ContainsKey(XKey key);
+		public virtual bool ContainsKey(XKey key)
+		{
+			return IndexOf(key) != -1;
+		}
 
 		bool IXCollection<T>.Remove(XKey key)
 		{
 			throw new NotSupportedException(Errors.XCollectionReadOnlyException);
 		}
 
-		public abstract IEnumerable<XKey> GetKeys();
+		public virtual IEnumerable<XKey> GetKeys()
+		{
+			return this.Select(x => x.GetKey());
+		}
 
 		IXCollection<T> IXCollection<T>.Clone(bool deep)
 		{
@@ -127,10 +133,33 @@ namespace Digillect.Collections
 
 		public virtual bool Contains(T item)
 		{
-			return IndexOf(item) >= 0;
+			return IndexOf(item) != -1;
 		}
 
-		public abstract void CopyTo(T[] array, int arrayIndex);
+		public virtual void CopyTo(T[] array, int arrayIndex)
+		{
+			if ( array == null )
+			{
+				throw new ArgumentNullException("array");
+			}
+
+			if ( arrayIndex < 0 )
+			{
+				throw new ArgumentOutOfRangeException("arrayIndex", Errors.ArgumentOutOfRange_NeedNonNegNum);
+			}
+
+			if ( array.Length - arrayIndex < this.Count )
+			{
+				throw new ArgumentException(Errors.Arg_ArrayPlusOffTooSmall);
+			}
+
+			Contract.EndContractBlock();
+
+			foreach ( T item in this )
+			{
+				array[arrayIndex++] = item;
+			}
+		}
 
 		bool ICollection<T>.Remove(T item)
 		{
@@ -225,7 +254,7 @@ namespace Digillect.Collections
 
 			if ( index < 0 )
 			{
-				throw new ArgumentOutOfRangeException("index", "index < 0");
+				throw new ArgumentOutOfRangeException("index", Errors.ArgumentOutOfRange_NeedNonNegNum);
 			}
 
 			if ( array.Length - index < this.Count )
@@ -348,6 +377,13 @@ namespace Digillect.Collections
 
 				return null;
 			}
+		}
+
+		public override XBasedCollection<T> Clone(bool deep)
+		{
+			Contract.Ensures(Contract.Result<XBasedCollection<T>>() != null);
+
+			return null;
 		}
 	}
 #endif

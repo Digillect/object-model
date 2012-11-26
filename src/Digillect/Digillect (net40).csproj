@@ -58,7 +58,7 @@
     <CodeContractsExtraAnalysisOptions />
     <CodeContractsBaseLineFile />
     <CodeContractsCacheAnalysisResults>True</CodeContractsCacheAnalysisResults>
-    <CodeContractsRuntimeCheckingLevel>Pre and Post</CodeContractsRuntimeCheckingLevel>
+    <CodeContractsRuntimeCheckingLevel>Full</CodeContractsRuntimeCheckingLevel>
     <CodeContractsReferenceAssembly>Build</CodeContractsReferenceAssembly>
     <CodeContractsAnalysisWarningLevel>0</CodeContractsAnalysisWarningLevel>
   </PropertyGroup>
@@ -168,6 +168,7 @@
     <Compile Include="Collections\IXCollectionContract.cs" />
     <Compile Include="Collections\XBasedCollection.cs" />
     <Compile Include="Collections\XCombinedCollection.cs" />
+    <Compile Include="Collections\XSubRangeCollection.cs" />
     <Compile Include="ContractExtensions.cs" />
     <Compile Include="Errors.cs" />
     <Compile Include="IXUpdatableContract.cs" />
