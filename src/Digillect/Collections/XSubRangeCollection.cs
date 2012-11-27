@@ -194,7 +194,7 @@ namespace Digillect.Collections
 							goto case NotifyCollectionChangedAction.Reset;
 						}
 
-						args = new NotifyCollectionChangedEventArgs(e.Action, e.NewItems[0], e.NewStartingIndex - _startIndex);
+						args = new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Add, e.NewItems[0], e.NewStartingIndex - _startIndex);
 
 						break;
 
@@ -210,7 +210,7 @@ namespace Digillect.Collections
 							goto case NotifyCollectionChangedAction.Reset;
 						}
 
-						args = new NotifyCollectionChangedEventArgs(e.Action, e.OldItems[0], e.OldStartingIndex - _startIndex);
+						args = new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Remove, e.OldItems[0], e.OldStartingIndex - _startIndex);
 
 						break;
 
@@ -222,7 +222,7 @@ namespace Digillect.Collections
 							return;
 						}
 
-						args = new NotifyCollectionChangedEventArgs(e.Action, e.NewItems[0], e.OldItems[0], e.NewStartingIndex - _startIndex);
+						args = new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Replace, e.NewItems[0], e.OldItems[0], e.NewStartingIndex - _startIndex);
 
 						break;
 #else
@@ -249,7 +249,7 @@ namespace Digillect.Collections
 							newItems = e.NewItems.Cast<T>().Take(count).ToList();
 						}
 
-						args = new NotifyCollectionChangedEventArgs(e.Action, newItems, e.NewStartingIndex - _startIndex);
+						args = new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Add, newItems, e.NewStartingIndex - _startIndex);
 
 						break;
 
@@ -276,7 +276,7 @@ namespace Digillect.Collections
 							oldItems = e.OldItems.Cast<T>().Take(count).ToList();
 						}
 
-						args = new NotifyCollectionChangedEventArgs(e.Action, oldItems, e.OldStartingIndex - _startIndex);
+						args = new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Remove, oldItems, e.OldStartingIndex - _startIndex);
 
 						break;
 
@@ -329,12 +329,12 @@ namespace Digillect.Collections
 							newStartingIndex = 0;
 						}
 
-						args = new NotifyCollectionChangedEventArgs(e.Action, newItems, oldItems, newStartingIndex);
+						args = new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Replace, newItems, oldItems, newStartingIndex);
 
 						break;
 #endif
 					case NotifyCollectionChangedAction.Reset:
-						args = new NotifyCollectionChangedEventArgs(e.Action);
+						args = new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset);
 
 						break;
 
