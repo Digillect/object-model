@@ -92,6 +92,7 @@
     <Compile Include="XCollectionsUtilTest.cs" />
     <Compile Include="XCollectionTest.cs" />
     <Compile Include="XObjectTest.cs" />
+    <Compile Include="XSubRangeCollectionTest.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
