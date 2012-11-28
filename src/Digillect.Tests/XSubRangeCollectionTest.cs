@@ -2,7 +2,8 @@
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Linq;
-using System.Text;
+
+using Shouldly;
 
 using Xunit;
 
@@ -17,21 +18,20 @@ namespace Digillect.Tests
 
 		#region Methods Tests
 		[Fact]
-		public void CountWillReturnZeroWithTotalElementsBelowStartIndex()
+		public void CountReturnsZeroWithTotalElementsBelowStartIndex()
 		{
 			// Setup
 			const int expectedResult = 0;
 			var sut = new XSubRangeCollection<XObject>(CreateSourceCollection(Many), Many, 1);
 
 			// Exercise
-			int result = sut.Count;
 
 			// Verify
-			Assert.Equal(expectedResult, result);
+			sut.Count.ShouldBe(expectedResult);
 		}
 
 		[Fact]
-		public void CountWillReturnNonZeroBelowMaxCountWithNotEnoughElements()
+		public void CountReturnsNonZeroBelowMaxCountWithNotEnoughElements()
 		{
 			// Setup
 			const int notEnough = TooMany;
@@ -41,38 +41,36 @@ namespace Digillect.Tests
 			var sut = new XSubRangeCollection<XObject>(CreateSourceCollection(TooMany), startIndex, maxCount);
 
 			// Exercise
-			int result = sut.Count;
 
 			// Verify
-			Assert.InRange(result, 1, maxCount);
-			Assert.Equal(expectedResult, result);
+			sut.Count.ShouldBeGreaterThan(0);
+			sut.Count.ShouldBeLessThan(maxCount + 1);
+			sut.Count.ShouldBe(expectedResult);
 		}
 
 		[Fact]
-		public void CountWillReturnMaxCountWithEnoughElements()
+		public void CountReturnsMaxCountWithEnoughElements()
 		{
 			// Setup
 			const int expectedResult = Many;
 			var c = CreateSourceCollection(TooMany);
+			XSubRangeCollection<XObject> sut;
 
 			// Verify at left bound
-			var sut = new XSubRangeCollection<XObject>(c, 0, Many);
-			int result = sut.Count;
-			Assert.Equal(expectedResult, result);
+			sut = new XSubRangeCollection<XObject>(c, 0, Many);
+			sut.Count.ShouldBe(expectedResult);
 
 			// Verify inside bounds
 			sut = new XSubRangeCollection<XObject>(c, TooMany - Many - 1, Many);
-			result = sut.Count;
-			Assert.Equal(expectedResult, result);
+			sut.Count.ShouldBe(expectedResult);
 
 			// Verify at right bound
 			sut = new XSubRangeCollection<XObject>(c, TooMany - Many, Many);
-			result = sut.Count;
-			Assert.Equal(expectedResult, result);
+			sut.Count.ShouldBe(expectedResult);
 		}
 
 		[Fact]
-		public void ItemIndexerWillReturnCorrectlyAdjustedValue()
+		public void ItemIndexerReturnsProperValue()
 		{
 			// Setup
 			const int startIndex = 1;
@@ -85,11 +83,11 @@ namespace Digillect.Tests
 			XObject result = sut[testIndex];
 
 			// Verify
-			Assert.Same(expectedResult, result);
+			result.ShouldBeSameAs(expectedResult);
 		}
 
 		[Fact]
-		public void ContainsItemWillReturnTrueForInnerItem()
+		public void ContainsItemReturnsTrueForInnerItem()
 		{
 			// Setup
 			var c = CreateSourceCollection(TooMany);
@@ -97,14 +95,13 @@ namespace Digillect.Tests
 			XObject item = c[2];
 
 			// Excercise
-			bool result = sut.Contains(item);
 
 			// Verify
-			Assert.True(result);
+			sut.Contains(item).ShouldBe(true);
 		}
 
 		[Fact]
-		public void ContainsItemWillReturnFalseForBelowOuterItem()
+		public void ContainsItemReturnsFalseForBelowOuterItem()
 		{
 			// Setup
 			var c = CreateSourceCollection(TooMany);
@@ -112,14 +109,13 @@ namespace Digillect.Tests
 			XObject item = c[0];
 
 			// Excercise
-			bool result = sut.Contains(item);
 
 			// Verify
-			Assert.False(result);
+			sut.Contains(item).ShouldBe(false);
 		}
 
 		[Fact]
-		public void ContainsItemWillReturnFalseForBeyondOuterItem()
+		public void ContainsItemReturnsFalseForBeyondOuterItem()
 		{
 			// Setup
 			var c = CreateSourceCollection(TooMany);
@@ -127,14 +123,13 @@ namespace Digillect.Tests
 			XObject item = c[sut.Count];
 
 			// Excercise
-			bool result = sut.Contains(item);
 
 			// Verify
-			Assert.False(result);
+			sut.Contains(item).ShouldBe(false);
 		}
 
 		[Fact]
-		public void ContainsKeyWillReturnTrueForInnerItem()
+		public void ContainsKeyReturnsTrueForInnerItem()
 		{
 			// Setup
 			var c = CreateSourceCollection(TooMany);
@@ -142,14 +137,13 @@ namespace Digillect.Tests
 			XKey key = c[2].GetKey();
 
 			// Excercise
-			bool result = sut.ContainsKey(key);
 
 			// Verify
-			Assert.True(result);
+			sut.ContainsKey(key).ShouldBe(true);
 		}
 
 		[Fact]
-		public void ContainsKeyWillReturnFalseForBelowOuterItem()
+		public void ContainsKeyReturnsFalseForBelowOuterItem()
 		{
 			// Setup
 			var c = CreateSourceCollection(TooMany);
@@ -157,14 +151,13 @@ namespace Digillect.Tests
 			XKey key = c[0].GetKey();
 
 			// Excercise
-			bool result = sut.ContainsKey(key);
 
 			// Verify
-			Assert.False(result);
+			sut.ContainsKey(key).ShouldBe(false);
 		}
 
 		[Fact]
-		public void ContainsKeyWillReturnFalseForBeyondOuterItem()
+		public void ContainsKeyReturnsFalseForBeyondOuterItem()
 		{
 			// Setup
 			var c = CreateSourceCollection(TooMany);
@@ -172,14 +165,29 @@ namespace Digillect.Tests
 			XKey key = c[sut.Count].GetKey();
 
 			// Excercise
-			bool result = sut.ContainsKey(key);
 
 			// Verify
-			Assert.False(result);
+			sut.ContainsKey(key).ShouldBe(false);
 		}
 
 		[Fact]
-		public void IndexOfItemWillReturnCorrectValueForInnerItem()
+		public void CopyToCopiesAllElements()
+		{
+			// Setup
+			var sut = CreateRangeCollection(CreateSourceCollection(TooMany), 1, Many);
+
+			// Exercise
+			XObject[] result = new XObject[TooMany];
+			sut.CopyTo(result, 1);
+
+			// Verify
+			result[0].ShouldBe(null);
+			result[sut.Count + 1].ShouldBe(null);
+			Assert.Equal(result.Skip(1).Take(sut.Count), sut);
+		}
+
+		[Fact]
+		public void IndexOfItemReturnsProperIndexForInnerItem()
 		{
 			// Setup
 			const int expectedResult = 1;
@@ -188,14 +196,13 @@ namespace Digillect.Tests
 			XObject item = c[2];
 
 			// Excercise
-			int result = sut.IndexOf(item);
 
 			// Verify
-			Assert.Equal(expectedResult, result);
+			sut.IndexOf(item).ShouldBe(expectedResult);
 		}
 
 		[Fact]
-		public void IndexOfItemWillReturnMinusOneForBelowOuterItem()
+		public void IndexOfItemReturnsMinusOneForBelowOuterItem()
 		{
 			// Setup
 			const int expectedResult = -1;
@@ -204,14 +211,13 @@ namespace Digillect.Tests
 			XObject item = c[0];
 
 			// Excercise
-			int result = sut.IndexOf(item);
 
 			// Verify
-			Assert.Equal(expectedResult, result);
+			sut.IndexOf(item).ShouldBe(expectedResult);
 		}
 
 		[Fact]
-		public void IndexOfItemWillReturnMinusOneForBeyondOuterItem()
+		public void IndexOfItemReturnsMinusOneForBeyondOuterItem()
 		{
 			// Setup
 			const int expectedResult = -1;
@@ -220,14 +226,13 @@ namespace Digillect.Tests
 			XObject item = c[sut.Count];
 
 			// Excercise
-			int result = sut.IndexOf(item);
 
 			// Verify
-			Assert.Equal(expectedResult, result);
+			sut.IndexOf(item).ShouldBe(expectedResult);
 		}
 
 		[Fact]
-		public void IndexOfKeyWillReturnCorrectValueForInnerItem()
+		public void IndexOfKeyReturnsProperIndexForInnerItem()
 		{
 			// Setup
 			const int expectedResult = 1;
@@ -236,14 +241,13 @@ namespace Digillect.Tests
 			XKey key = c[2].GetKey();
 
 			// Excercise
-			int result = sut.IndexOf(key);
 
 			// Verify
-			Assert.Equal(expectedResult, result);
+			sut.IndexOf(key).ShouldBe(expectedResult);
 		}
 
 		[Fact]
-		public void IndexOfKeyWillReturnMinusOneForBelowOuterItem()
+		public void IndexOfKeyReturnsMinusOneForBelowOuterItem()
 		{
 			// Setup
 			const int expectedResult = -1;
@@ -252,14 +256,13 @@ namespace Digillect.Tests
 			XKey key = c[0].GetKey();
 
 			// Excercise
-			int result = sut.IndexOf(key);
 
 			// Verify
-			Assert.Equal(expectedResult, result);
+			sut.IndexOf(key).ShouldBe(expectedResult);
 		}
 
 		[Fact]
-		public void IndexOfKeyWillReturnMinusOneForBeyondOuterItem()
+		public void IndexOfKeyReturnsMinusOneForBeyondOuterItem()
 		{
 			// Setup
 			const int expectedResult = -1;
@@ -268,174 +271,228 @@ namespace Digillect.Tests
 			XKey key = c[sut.Count].GetKey();
 
 			// Excercise
-			int result = sut.IndexOf(key);
 
 			// Verify
-			Assert.Equal(expectedResult, result);
+			sut.IndexOf(key).ShouldBe(expectedResult);
 		}
 		#endregion
 
 		#region Event Handling Tests
 		[Fact]
-		public void AddItemBelowWillRaiseReset()
+		public void CollectionChangedIssuesResetWhenItemAddedBelow()
 		{
 			// Setup
-			const NotifyCollectionChangedAction expectedResult = NotifyCollectionChangedAction.Reset;
 			bool eventRaised = false;
-			NotifyCollectionChangedAction result = (NotifyCollectionChangedAction) (-1);
 			var c = CreateSourceCollection(Many);
 			var sut = CreateRangeCollection(c, 1, 1, (sender, e) => {
+				e.Action.ShouldBe(NotifyCollectionChangedAction.Reset);
 				eventRaised = true;
-				result = e.Action;
 			});
 
 			// Exercise
 			c.Insert(0, XIntegerObject.Create());
 
 			// Verify
-			Assert.True(eventRaised);
-			Assert.Equal(expectedResult, result);
+			eventRaised.ShouldBe(true);
 		}
 
 		[Fact]
-		public void AddItemBeyondWillRaiseNothing()
+		public void CollectionChangedIssuesResetWhentemAddedInsideFull()
 		{
 			// Setup
 			bool eventRaised = false;
-			var c = CreateSourceCollection(Many);
-			var sut = CreateRangeCollection(c, 1, 1, (sender, e) => {
-				eventRaised = true;
-			});
-
-			// Exercise
-			c.Add(XIntegerObject.Create());
-
-			// Verify
-			Assert.False(eventRaised);
-		}
-
-		[Fact]
-		public void AddItemInsideFullWillRaiseReset()
-		{
-			// Setup
-			const NotifyCollectionChangedAction expectedResult = NotifyCollectionChangedAction.Reset;
-			bool eventRaised = false;
-			NotifyCollectionChangedAction result = (NotifyCollectionChangedAction) (-1);
 			var c = CreateSourceCollection(TooMany);
 			var sut = CreateRangeCollection(c, 1, Many, (sender, e) => {
+				e.Action.ShouldBe(NotifyCollectionChangedAction.Reset);
 				eventRaised = true;
-				result = e.Action;
 			});
 
 			// Exercise
 			c.Insert(2, XIntegerObject.Create());
 
 			// Verify
-			Assert.True(eventRaised);
-			Assert.Equal(expectedResult, result);
+			eventRaised.ShouldBe(true);
 		}
 
 		[Fact]
-		public void AddItemInsideNonFullWillRaiseAdd()
+		public void CollectionChangedIssuesAddWhenItemAddedInsideNonFull()
 		{
-			const NotifyCollectionChangedAction expectedResult = NotifyCollectionChangedAction.Add;
 			bool eventRaised = false;
-			NotifyCollectionChangedAction result = (NotifyCollectionChangedAction) (-1);
 			var c = CreateSourceCollection(Many);
 			var sut = CreateRangeCollection(c, 1, TooMany, (sender, e) => {
+				e.Action.ShouldBe(NotifyCollectionChangedAction.Add);
+				e.NewStartingIndex.ShouldBe(Many - 1);
 				eventRaised = true;
-				result = e.Action;
 			});
+			int expectedCount = sut.Count + 1;
 
 			// Exercise
-			int oldCount = sut.Count;
 			c.Add(XIntegerObject.Create());
 
 			// Verify
-			Assert.True(eventRaised);
-			Assert.Equal(expectedResult, result);
-			Assert.Equal(1, sut.Count - oldCount);
+			eventRaised.ShouldBe(true);
+			sut.Count.ShouldBe(expectedCount);
 		}
 
 		[Fact]
-		public void RemoveItemBelowWillRaiseReset()
+		public void CollectionChangedShouldNotBeRaisedWhenItemAddedBeyond()
 		{
 			// Setup
-			const NotifyCollectionChangedAction expectedResult = NotifyCollectionChangedAction.Reset;
-			bool eventRaised = false;
-			NotifyCollectionChangedAction result = (NotifyCollectionChangedAction) (-1);
 			var c = CreateSourceCollection(Many);
 			var sut = CreateRangeCollection(c, 1, 1, (sender, e) => {
+				Assert.False(true, "CollectionChanged at " + e.NewStartingIndex);
+			});
+
+			// Exercise
+			c.Add(XIntegerObject.Create());
+
+			// Verify
+		}
+
+		[Fact]
+		public void CollectionChangedIssuesResetWhenItemRemovedBelow()
+		{
+			// Setup
+			bool eventRaised = false;
+			var c = CreateSourceCollection(Many);
+			var sut = CreateRangeCollection(c, 1, 1, (sender, e) => {
+				e.Action.ShouldBe(NotifyCollectionChangedAction.Reset);
 				eventRaised = true;
-				result = e.Action;
 			});
 
 			// Exercise
 			c.RemoveAt(0);
 
 			// Verify
-			Assert.True(eventRaised);
-			Assert.Equal(expectedResult, result);
+			eventRaised.ShouldBe(true);
 		}
 
 		[Fact]
-		public void RemoveItemBeyondWillRaiseNothing()
+		public void CollectionChangedIssuesResetWhenItemRemovedInsideFull()
 		{
 			// Setup
 			bool eventRaised = false;
-			var c = CreateSourceCollection(Many);
-			var sut = CreateRangeCollection(c, 1, 1, (sender, e) => {
-				eventRaised = true;
-			});
-
-			// Exercise
-			c.RemoveAt(c.Count - 1);
-
-			// Verify
-			Assert.False(eventRaised);
-		}
-
-		[Fact]
-		public void RemoveItemInsideFullWillRaiseReset()
-		{
-			// Setup
-			const NotifyCollectionChangedAction expectedResult = NotifyCollectionChangedAction.Reset;
-			bool eventRaised = false;
-			NotifyCollectionChangedAction result = (NotifyCollectionChangedAction) (-1);
 			var c = CreateSourceCollection(TooMany);
 			var sut = CreateRangeCollection(c, 1, Many, (sender, e) => {
+				e.Action.ShouldBe(NotifyCollectionChangedAction.Reset);
 				eventRaised = true;
-				result = e.Action;
 			});
 
 			// Exercise
 			c.RemoveAt(2);
 
 			// Verify
-			Assert.True(eventRaised);
-			Assert.Equal(expectedResult, result);
+			eventRaised.ShouldBe(true);
 		}
 
 		[Fact]
-		public void RemoveItemInsideNonFullWillRaiseRemove()
+		public void CollectionChangedIssuesRemoveWhenItemRemovedInsideNonFull()
 		{
-			const NotifyCollectionChangedAction expectedResult = NotifyCollectionChangedAction.Remove;
+			// Setup
+			const int startIndex = 1;
+			const int removeIndex = 1;
 			bool eventRaised = false;
-			NotifyCollectionChangedAction result = (NotifyCollectionChangedAction) (-1);
 			var c = CreateSourceCollection(Many);
-			var sut = CreateRangeCollection(c, 1, TooMany, (sender, e) => {
+			var sut = CreateRangeCollection(c, startIndex, TooMany, (sender, e) => {
+				e.Action.ShouldBe(NotifyCollectionChangedAction.Remove);
+				e.OldStartingIndex.ShouldBe(removeIndex - startIndex);
 				eventRaised = true;
-				result = e.Action;
+			});
+			int expectedCount = sut.Count - 1;
+
+			// Exercise
+			c.RemoveAt(removeIndex);
+
+			// Verify
+			eventRaised.ShouldBe(true);
+			sut.Count.ShouldBe(expectedCount);
+		}
+
+		[Fact]
+		public void CollectionChangedShouldNotBeRaisedWhenItemRemovedBeyond()
+		{
+			// Setup
+			var c = CreateSourceCollection(Many);
+			var sut = CreateRangeCollection(c, 1, 1, (sender, e) => {
+				Assert.False(true, "CollectionChanged at " + e.OldStartingIndex);
 			});
 
 			// Exercise
-			int oldCount = sut.Count;
-			c.RemoveAt(1);
+			c.RemoveAt(2);
 
 			// Verify
-			Assert.True(eventRaised);
-			Assert.Equal(expectedResult, result);
-			Assert.Equal(-1, sut.Count - oldCount);
+		}
+
+		[Fact(Skip = "MoveItem implementation required", DisplayName = "Move item -> CollectionChanged(Reset)")]
+		public void CollectionChangedIssuesResetWhenItemMoveAffectsInside()
+		{
+			// Setup
+			int eventRaisedCount = 0;
+			var c = CreateSourceCollection(TooMany);
+			var sut = CreateRangeCollection(c, 1, Many, (sender, e) => {
+				e.Action.ShouldBe(NotifyCollectionChangedAction.Reset);
+				eventRaisedCount++;
+			});
+
+			// Exercise
+			//c.MoveItem(0, 1);
+			//c.MoveItem(1, 3);
+			//c.MoveItem(3, 4);
+
+			// Verify
+			eventRaisedCount.ShouldBe(3);
+		}
+
+		[Fact(Skip = "MoveItem implementation required", DisplayName = "Move item -> no CollectionChanged")]
+		public void CollectionChangedShouldNotBeRaisedWhenItemMovedOutside()
+		{
+			// Setup
+			var c = CreateSourceCollection(Many);
+			var sut = CreateRangeCollection(c, 1, 1, (sender, e) => {
+				Assert.False(true, "CollectionChanged at " + e.OldStartingIndex + " and " + e.NewStartingIndex);
+			});
+
+			// Exercise
+			//c.MoveItem(0, 2);
+
+			// Verify
+		}
+
+		[Fact]
+		public void CollectionChangedIssuesReplaceWhenItemReplacedInside()
+		{
+			// Setup
+			const int startIndex = 1;
+			const int replaceIndex = 2;
+			bool eventRaised = false;
+			var c = CreateSourceCollection(TooMany);
+			var sut = CreateRangeCollection(c, 1, Many, (sender, e) => {
+				e.Action.ShouldBe(NotifyCollectionChangedAction.Replace);
+				e.NewStartingIndex.ShouldBe(replaceIndex - startIndex);
+				eventRaised = true;
+			});
+
+			// Exercise
+			c[replaceIndex] = XIntegerObject.Create();
+
+			// Verify
+			eventRaised.ShouldBe(true);
+		}
+
+		[Fact]
+		public void CollectionChangedShouldNotBeRaisedWhenItemReplacedOutside()
+		{
+			// Setup
+			var c = CreateSourceCollection(Many);
+			var sut = CreateRangeCollection(c, 1, 1, (sender, e) => {
+				Assert.False(true, "CollectionChanged at " + e.NewStartingIndex);
+			});
+
+			// Exercise
+			c[0] = XIntegerObject.Create();
+			c[2] = XIntegerObject.Create();
+
+			// Verify
 		}
 		#endregion
 
@@ -445,11 +502,14 @@ namespace Digillect.Tests
 			return new XCollection<XObject>(XIntegerObject.CreateSeries(count));
 		}
 
-		private static IXList<XObject> CreateRangeCollection(IXList<XObject> source, int startIndex, int maxCount, NotifyCollectionChangedEventHandler changedHandler)
+		private static IXList<XObject> CreateRangeCollection(IXList<XObject> source, int startIndex, int maxCount, NotifyCollectionChangedEventHandler changedHandler = null)
 		{
 			var result = new XSubRangeCollection<XObject>(source, startIndex, maxCount);
 
-			result.CollectionChanged += changedHandler;
+			if ( changedHandler != null )
+			{
+				result.CollectionChanged += changedHandler;
+			}
 
 			return result;
 		}
