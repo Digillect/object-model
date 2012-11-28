@@ -9,6 +9,11 @@ using System.Runtime.Serialization;
 
 namespace Digillect.Collections
 {
+	/// <summary>
+	/// A collection of unique non-null objects which can be additionally accessed by their identifiers (dictionary-like).
+	/// </summary>
+	/// <typeparam name="TId">The type of the identifier.</typeparam>
+	/// <typeparam name="TObject">The type of the collection's members.</typeparam>
 #if !(SILVERLIGHT || WINDOWS8)
 	[Serializable]
 #endif
@@ -32,14 +37,32 @@ namespace Digillect.Collections
 		}
 
 		/// <summary>
-		/// Initializes new instance of the <see cref="XIdentifiedCollection&lt;TId,TObject&gt;"/> class using elements of the provided enumeration as the source for this list.
+		/// Initializes a new instance of the <see cref="XIdentifiedCollection&lt;TId,TObject&gt;"/> class that contains elements copied from the specified collection.
 		/// </summary>
-		/// <param name="collection">The enumeration which elements are used to construct a new list to use as the parameter for the <see cref="Collection&lt;T&gt;(IList&lt;T&gt;)"/> constructor.</param>
+		/// <param name="collection">The collection from which the elements are copied.</param>
+		/// <exception cref="ArgumentNullException">The <paramref name="collection"/> parameter cannot be null.</exception>
+		/// <exception cref="ArgumentException">The <paramref name="collection"/> parameter cannot contain <c>null</c> members.</exception>
 		public XIdentifiedCollection(IEnumerable<TObject> collection)
 			: base(collection)
 		{
 			Contract.Requires( collection != null );
 			Contract.Requires(Contract.ForAll(collection, item => item != null));
+
+			OnDeserialization();
+		}
+
+		/// <summary>
+		/// Initializes a new instance of the <see cref="XIdentifiedCollection&lt;TId,TObject&gt;"/> class that contains elements copied from the specified list.
+		/// </summary>
+		/// <param name="list">The list from which the elements are copied.</param>
+		/// <exception cref="ArgumentNullException">The <paramref name="list"/> parameter cannot be null.</exception>
+		/// <exception cref="ArgumentException">The <paramref name="list"/> parameter cannot contain <c>null</c> members.</exception>
+		[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1002:DoNotExposeGenericLists", Justification = "Base type uses it")]
+		public XIdentifiedCollection(List<TObject> list)
+			: base(list)
+		{
+			Contract.Requires(list != null);
+			Contract.Requires(Contract.ForAll(list, item => item != null));
 
 			OnDeserialization();
 		}
@@ -126,9 +149,15 @@ namespace Digillect.Collections
 		/// <param name="collection">Источник изменений.</param>
 		/// <param name="options">Операции, которые надо произвести с объектами, находящимися в данной коллекции.</param>
 		/// <returns>The <see cref="CollectionMergeResults">results</see> of the operation.</returns>
+		/// <seealso cref="IXUpdatable&lt;T&gt;"/>
+		/// <seealso cref="XCollectionsUtil.Merge"/>
 		public override CollectionMergeResults Update(IEnumerable<TObject> collection, CollectionMergeOptions options)
 		{
 			XCollectionsUtil.ValidateCollection(collection);
+
+#if !SILVERLIGHT
+			CheckReentrancy();
+#endif
 
 			if ( this.Items.IsReadOnly )
 			{
@@ -140,7 +169,7 @@ namespace Digillect.Collections
 				return CollectionMergeResults.Empty;
 			}
 
-			var results = this.Items.Merge(collection.Distinct(ReferenceEqualityComparer.Default), options);
+			var results = this.Items.Merge(collection.Distinct(ReferenceComparer), options);
 
 			if ( !results.IsEmpty )
 			{
@@ -149,11 +178,11 @@ namespace Digillect.Collections
 
 				if ( results.Added != results.Removed )
 				{
-					OnPropertyChanged("Count");
+					OnPropertyChanged(CountString);
 				}
 
-				OnPropertyChanged("Item[]");
-				OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset));
+				OnPropertyChanged(IndexerName);
+				OnCollectionReset();
 			}
 
 			return results;
@@ -188,29 +217,55 @@ namespace Digillect.Collections
 		#endregion
 
 		#region XCollection`1 Overrides
-		protected override void OnClearComplete()
+		/// <inheritdoc/>
+		protected override void ClearItems()
 		{
-			base.OnClearComplete();
+#if !SILVERLIGHT
+			CheckReentrancy();
+#endif
+
 			m_dictionary.Clear();
+
+			base.ClearItems();
 		}
 
-		protected override void OnInsertComplete(int index, TObject item)
+		/// <inheritdoc/>
+		[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1062:Validate arguments of public methods", MessageId = "0", Justification = "Should not be null in any case since the method is an event raiser")]
+		protected override void OnCollectionChanged(NotifyCollectionChangedEventArgs e)
 		{
-			base.OnInsertComplete(index, item);
-			m_dictionary.Add(item.Id, item);
-		}
+#if !SILVERLIGHT
+			using ( BlockReentrancy() )
+#endif
+			{
+				if ( e.Action == NotifyCollectionChangedAction.Add )
+				{
+					foreach ( TObject item in e.NewItems )
+					{
+						m_dictionary.Add(item.Id, item);
+					}
+				}
+				else if ( e.Action == NotifyCollectionChangedAction.Remove )
+				{
+					foreach ( TObject item in e.OldItems )
+					{
+						m_dictionary.Remove(item.Id);
+					}
+				}
+				else if ( e.Action == NotifyCollectionChangedAction.Replace )
+				{
+					foreach ( TObject oldItem in e.OldItems )
+					{
+						m_dictionary.Remove(oldItem.Id);
+					}
 
-		protected override void OnRemoveComplete(int index, TObject item)
-		{
-			base.OnRemoveComplete(index, item);
-			m_dictionary.Remove(item.Id);
-		}
+					foreach ( TObject newItem in e.NewItems )
+					{
+						m_dictionary.Add(newItem.Id, newItem);
+					}
+				}
 
-		protected override void OnSetComplete(int index, TObject oldItem, TObject newItem)
-		{
-			base.OnSetComplete(index, oldItem, newItem);
-			m_dictionary.Remove(oldItem.Id);
-			m_dictionary.Add(newItem.Id, newItem);
+				base.OnCollectionChanged(e);
+			}
 		}
 		#endregion
 
