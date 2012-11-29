@@ -44,5 +44,17 @@ namespace Digillect.Tests
 		{
 			return _rnd.Next();
 		}
+
+		public static int[] NewId(int count)
+		{
+			var ids = new int[count];
+
+			for ( int i = 0; i < count; i++ )
+			{
+				ids[i] = NewId();
+			}
+
+			return ids;
+		}
 	}
 }

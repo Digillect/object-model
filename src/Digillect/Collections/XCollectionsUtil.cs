@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.ComponentModel;
@@ -9,28 +10,29 @@ namespace Digillect.Collections
 {
 	public static class XCollectionsUtil
 	{
-		#region IsNullOrEmpty`1
+		#region IsNullOrEmpty
 		/// <summary>
-		/// Indicates whether the specified array is <c>null</c> has no elements.
+		/// Indicates whether the specified collection is <c>null</c> has no items.
 		/// </summary>
-		/// <typeparam name="T"><see cref="Type"/> of array members.</typeparam>
-		/// <param name="value">The array to test.</param>
+		/// <param name="value">The collection to test.</param>
 		/// <returns>
-		/// <c>true</c> if the <paramref name="value"/> is null or has no elements; otherwise, <c>false</c>.
+		/// <c>true</c> if the <paramref name="value"/> is null or has no items; otherwise, <c>false</c>.
 		/// </returns>
 		/// <remarks>
-		/// <c>IsNullOrEmpty</c> is a convenience method that enables you to simultaneously test whether an array is <c>null</c> or has no elements.
+		/// <c>IsNullOrEmpty</c> is a convenience method that enables you to simultaneously test whether a collection is <c>null</c> or has no items.
 		/// It is equivalent to the following code:
 		/// <code>
-		/// result = a == null || a.Length == 0;
+		/// result = <paramref name="value"/> == null || <paramref name="value"/>.Count == 0;
 		/// </code>
 		/// </remarks>
 		[Pure]
-		public static bool IsNullOrEmpty<T>(T[] value)
+		public static bool IsNullOrEmpty(ICollection value)
 		{
-			return value == null || value.Length == 0;
+			return value == null || value.Count == 0;
 		}
+		#endregion
 
+		#region IsNullOrEmpty`1
 		/// <summary>
 		/// Indicates whether the specified collection is <c>null</c> has no items.
 		/// </summary>
@@ -43,7 +45,7 @@ namespace Digillect.Collections
 		/// <c>IsNullOrEmpty</c> is a convenience method that enables you to simultaneously test whether a collection is <c>null</c> or has no items.
 		/// It is equivalent to the following code:
 		/// <code>
-		/// result = c == null || c.Count == 0;
+		/// result = <paramref name="value"/> == null || <paramref name="value"/>.Count == 0;
 		/// </code>
 		/// </remarks>
 		[Pure]
@@ -54,6 +56,15 @@ namespace Digillect.Collections
 		#endregion
 
 		#region RemoveAll`1 Extension
+		public static bool RemoveAll<T>(this ICollection<T> source, Func<T, bool> predicate)
+			where T : XObject
+		{
+			Contract.Requires(source != null);
+			Contract.Requires(predicate != null);
+
+			return source.RemoveAll(source.Where(predicate).ToArray());
+		}
+
 		public static bool RemoveAll<T>(this ICollection<T> source, IEnumerable<T> collection)
 		{
 			if ( source == null )
@@ -103,15 +114,6 @@ namespace Digillect.Collections
 			}
 
 			return modified;
-		}
-
-		public static bool RemoveAll<T>(this ICollection<T> source, Func<T, bool> predicate)
-			where T : XObject
-		{
-			Contract.Requires(source != null);
-			Contract.Requires(predicate != null);
-
-			return source.RemoveAll(source.Where(predicate).ToArray());
 		}
 		#endregion
 
@@ -562,12 +564,12 @@ namespace Digillect.Collections
 
 			void IXUpdatable<IXCollection<T>>.BeginUpdate()
 			{
-				throw new NotSupportedException(Errors.XCollectionReadOnlyException);
+				collection.BeginUpdate();
 			}
 
 			void IXUpdatable<IXCollection<T>>.EndUpdate()
 			{
-				throw new NotSupportedException(Errors.XCollectionReadOnlyException);
+				collection.EndUpdate();
 			}
 
 			bool IXUpdatable<IXCollection<T>>.IsUpdateRequired(IXCollection<T> source)
