@@ -6,9 +6,9 @@ set BuildTargets=%~dp0\packages\Digillect.Build.Tasks\1.0.0\tools\Build.targets
 set EnableNuGetPackageRestore=true
 
 if not exist "%BuildTargets%" (
-	nuget install -o packages .\packages.config
+	nuget.exe install -o "%~dp0\packages" "%~dp0\packages.config"
 )
 
 if not errorlevel 1 (
-	msbuild build.proj %*
+	%SystemRoot%\Microsoft.NET\Framework\v4.0.30319\MSBuild.exe build.proj %*
 )
