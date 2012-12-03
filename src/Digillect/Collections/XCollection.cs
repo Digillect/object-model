@@ -196,8 +196,6 @@ namespace Digillect.Collections
 				throw new ArgumentNullException("key");
 			}
 
-			Contract.EndContractBlock();
-
 			for ( int i = 0; i < this.Items.Count; i++ )
 			{
 				if ( key.Equals(this.Items[i].GetKey()) )

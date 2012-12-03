@@ -130,8 +130,6 @@ namespace Digillect.Collections
 		{
 			XCollectionsUtil.ValidateCollection(collection);
 
-			Contract.Ensures(Contract.Result<CollectionMergeResults>() != null);
-
 			if ( this.Items.IsReadOnly )
 			{
 				throw new NotSupportedException(Errors.XCollectionReadOnlyException);

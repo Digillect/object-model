@@ -101,8 +101,6 @@ namespace Digillect.Collections
 
 		public override int IndexOf(T item)
 		{
-			Contract.Ensures( Contract.Result<int>() >= -1 );
-
 			return CalculateFilteredIndex( this._originalCollection.IndexOf( item ) );
 		}
 		#endregion
@@ -243,7 +241,6 @@ namespace Digillect.Collections
 				{
 #if SILVERLIGHT
 					case NotifyCollectionChangedAction.Add:
-						Contract.Assume(e.NewItems.Count > 0);
 						if ( !Filter((T) e.NewItems[0]) )
 						{
 							return;
@@ -251,7 +248,6 @@ namespace Digillect.Collections
 						args = new NotifyCollectionChangedEventArgs(e.Action, e.NewItems[0], CalculateFilteredIndex(e.NewStartingIndex));
 						break;
 					case NotifyCollectionChangedAction.Remove:
-						Contract.Assume(e.OldItems.Count > 0);
 						if ( !Filter((T) e.OldItems[0]) )
 						{
 							return;
@@ -260,8 +256,6 @@ namespace Digillect.Collections
 						break;
 					case NotifyCollectionChangedAction.Replace:
 						// e.NewStartingIndex == e.OldStartingIndex
-						Contract.Assume(e.NewItems.Count > 0);
-						Contract.Assume(e.OldItems.Count > 0);
 						if ( !Filter((T) e.NewItems[0]) && !Filter((T) e.OldItems[0]) )
 						{
 							return;
@@ -270,20 +264,15 @@ namespace Digillect.Collections
 						break;
 #else
 					case NotifyCollectionChangedAction.Add:
-						Contract.Assume( e.NewItems != null );
-
 						var newItems = e.NewItems.Cast<T>().Where( Filter ).ToArray();
 
 						if( newItems.Length == 0 )
 							return;
 
 						args = new NotifyCollectionChangedEventArgs( e.Action, newItems, CalculateFilteredIndex( e.NewStartingIndex ) );
-
 						break;
 
 					case NotifyCollectionChangedAction.Remove:
-						Contract.Assume( e.OldItems != null );
-
 						var oldItems = e.OldItems.Cast<T>().Where( Filter ).ToArray();
 
 						if( oldItems.Length == 0 )
@@ -294,8 +283,6 @@ namespace Digillect.Collections
 
 					case NotifyCollectionChangedAction.Move:
 						// e.NewItems and e.OldItems have the same content
-						Contract.Assume( e.NewItems != null );
-
 						newItems = e.NewItems.Cast<T>().Where( Filter ).ToArray();
 
 						if( newItems.Length == 0 )
@@ -306,9 +293,6 @@ namespace Digillect.Collections
 
 					case NotifyCollectionChangedAction.Replace:
 						// e.NewStartingIndex == e.OldStartingIndex
-						Contract.Assume( e.NewItems != null );
-						Contract.Assume( e.OldItems != null );
-
 						newItems = e.NewItems.Cast<T>().Where( Filter ).ToArray();
 						oldItems = e.OldItems.Cast<T>().Where( Filter ).ToArray();
 
@@ -321,6 +305,7 @@ namespace Digillect.Collections
 					case NotifyCollectionChangedAction.Reset:
 						args = new NotifyCollectionChangedEventArgs(e.Action);
 						break;
+
 					default:
 						throw new ArgumentException(e.Action.ToString(), "e");
 				}

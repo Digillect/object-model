@@ -153,8 +153,6 @@ namespace Digillect.Collections
 				throw new ArgumentException(Errors.Arg_ArrayPlusOffTooSmall);
 			}
 
-			Contract.EndContractBlock();
-
 			foreach ( T item in this )
 			{
 				array[arrayIndex++] = item;
@@ -261,8 +259,6 @@ namespace Digillect.Collections
 			{
 				throw new ArgumentException("ArrayPlusOffTooSmall");
 			}
-
-			Contract.EndContractBlock();
 
 			T[] localArray = array as T[];
 
@@ -372,8 +368,8 @@ namespace Digillect.Collections
 		{
 			get
 			{
-				Contract.Requires(index >= 0);
-				Contract.Requires(index < this.Count);
+				Contract.Requires<ArgumentOutOfRangeException>(index >= 0);
+				Contract.Requires<ArgumentOutOfRangeException>(index < this.Count);
 
 				return null;
 			}

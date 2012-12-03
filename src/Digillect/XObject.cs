@@ -175,8 +175,6 @@ namespace Digillect
 				throw new ArgumentNullException("source");
 			}
 
-			Contract.EndContractBlock();
-
 			return !Object.ReferenceEquals(this, source);
 		}
 
@@ -190,8 +188,6 @@ namespace Digillect
 			{
 				throw new ArgumentNullException("source");
 			}
-
-			Contract.EndContractBlock();
 
 			if ( !IsObjectCompatible(source) )
 				throw new ArgumentException(Errors.XObjectSourceNotCompatibleException, "source");
