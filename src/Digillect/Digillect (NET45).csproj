@@ -27,7 +27,7 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <DocumentationFile>..\..\target\Debug\net45\Digillect.xml</DocumentationFile>
-    <NoWarn>1591,1607</NoWarn>
+    <NoWarn>1591</NoWarn>
     <CodeAnalysisRuleSet>..\DigillectRules.ruleset</CodeAnalysisRuleSet>
     <CodeContractsEnableRuntimeChecking>True</CodeContractsEnableRuntimeChecking>
     <CodeContractsRuntimeOnlyPublicSurface>False</CodeContractsRuntimeOnlyPublicSurface>
@@ -72,7 +72,7 @@
     <DefineConstants>TRACE;NET45</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <NoWarn>1591,1607</NoWarn>
+    <NoWarn>1591</NoWarn>
     <DocumentationFile>..\..\target\Release\net45\Digillect.xml</DocumentationFile>
     <CodeAnalysisRuleSet>..\DigillectRules.ruleset</CodeAnalysisRuleSet>
     <Prefer32Bit>false</Prefer32Bit>
@@ -115,7 +115,7 @@
     <DefineConstants>TRACE;DEBUG;NET45</DefineConstants>
     <DocumentationFile>
     </DocumentationFile>
-    <NoWarn>1591,1607</NoWarn>
+    <NoWarn>1591</NoWarn>
     <DebugType>full</DebugType>
     <PlatformTarget>AnyCPU</PlatformTarget>
     <ErrorReport>prompt</ErrorReport>

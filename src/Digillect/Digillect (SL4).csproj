@@ -39,7 +39,7 @@
     <WarningLevel>4</WarningLevel>
     <CodeAnalysisRuleSet>..\DigillectRules.ruleset</CodeAnalysisRuleSet>
     <DocumentationFile>..\..\target\Debug\sl4\Digillect.xml</DocumentationFile>
-    <NoWarn>1591,1607</NoWarn>
+    <NoWarn>1591</NoWarn>
     <CodeContractsEnableRuntimeChecking>True</CodeContractsEnableRuntimeChecking>
     <CodeContractsRuntimeOnlyPublicSurface>False</CodeContractsRuntimeOnlyPublicSurface>
     <CodeContractsRuntimeThrowOnFailure>True</CodeContractsRuntimeThrowOnFailure>
@@ -85,7 +85,7 @@
     <WarningLevel>4</WarningLevel>
     <CodeAnalysisRuleSet>..\DigillectRules.ruleset</CodeAnalysisRuleSet>
     <DocumentationFile>..\..\target\Release\sl4\Digillect.xml</DocumentationFile>
-    <NoWarn>1591,1607</NoWarn>
+    <NoWarn>1591</NoWarn>
     <CodeContractsEnableRuntimeChecking>False</CodeContractsEnableRuntimeChecking>
     <CodeContractsRuntimeOnlyPublicSurface>False</CodeContractsRuntimeOnlyPublicSurface>
     <CodeContractsRuntimeThrowOnFailure>True</CodeContractsRuntimeThrowOnFailure>
@@ -123,10 +123,10 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'CodeAnalysis|AnyCPU'">
     <DebugSymbols>true</DebugSymbols>
     <OutputPath>obj\sl4\CodeAnalysis\</OutputPath>
-    <DefineConstants>DEBUG;TRACE;SILVERLIGHT</DefineConstants>
+    <DefineConstants>TRACE;DEBUG;SILVERLIGHT</DefineConstants>
     <DocumentationFile>
     </DocumentationFile>
-    <NoWarn>1591,1607</NoWarn>
+    <NoWarn>1591</NoWarn>
     <NoStdLib>true</NoStdLib>
     <DebugType>full</DebugType>
     <ErrorReport>prompt</ErrorReport>

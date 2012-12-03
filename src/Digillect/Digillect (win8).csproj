@@ -26,6 +26,7 @@
     <DefineConstants>TRACE;DEBUG;WINDOWS8</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <NoWarn>1591</NoWarn>
     <DocumentationFile>..\..\target\Debug\win8\Digillect.xml</DocumentationFile>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
@@ -35,6 +36,7 @@
     <DefineConstants>TRACE;WINDOWS8</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <NoWarn>1591</NoWarn>
     <DocumentationFile>..\..\target\Release\win8\Digillect.xml</DocumentationFile>
   </PropertyGroup>
   <ItemGroup>

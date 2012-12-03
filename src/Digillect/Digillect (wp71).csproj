@@ -34,7 +34,7 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <DocumentationFile>..\..\target\Debug\wp71\Digillect.xml</DocumentationFile>
-    <NoWarn>1591,1607</NoWarn>
+    <NoWarn>1591</NoWarn>
     <CodeAnalysisRuleSet>..\DigillectRules.ruleset</CodeAnalysisRuleSet>
     <CodeContractsEnableRuntimeChecking>True</CodeContractsEnableRuntimeChecking>
     <CodeContractsRuntimeOnlyPublicSurface>False</CodeContractsRuntimeOnlyPublicSurface>
@@ -80,7 +80,7 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <DocumentationFile>..\..\target\Release\wp71\Digillect.xml</DocumentationFile>
-    <NoWarn>1591,1607</NoWarn>
+    <NoWarn>1591</NoWarn>
     <CodeAnalysisRuleSet>..\DigillectRules.ruleset</CodeAnalysisRuleSet>
     <CodeContractsEnableRuntimeChecking>False</CodeContractsEnableRuntimeChecking>
     <CodeContractsRuntimeOnlyPublicSurface>False</CodeContractsRuntimeOnlyPublicSurface>
@@ -119,10 +119,10 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'CodeAnalysis|AnyCPU'">
     <DebugSymbols>true</DebugSymbols>
     <OutputPath>obj\wp71\CodeAnalysis\</OutputPath>
-    <DefineConstants>TRACE;DEBUG;CODE_ANALYSIS;SILVERLIGHT;WINDOWS_PHONE;WINDOWS_PHONE_7;WINDOWS_PHONE_71</DefineConstants>
+    <DefineConstants>TRACE;DEBUG;SILVERLIGHT;WINDOWS_PHONE;WINDOWS_PHONE_7;WINDOWS_PHONE_71</DefineConstants>
     <DocumentationFile>
     </DocumentationFile>
-    <NoWarn>1591,1607</NoWarn>
+    <NoWarn>1591</NoWarn>
     <NoStdLib>true</NoStdLib>
     <DebugType>full</DebugType>
     <ErrorReport>prompt</ErrorReport>
