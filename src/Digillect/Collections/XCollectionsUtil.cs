@@ -382,10 +382,10 @@ namespace Digillect.Collections
 			}
 
 			Contract.EndContractBlock();
+			Contract.Assume(Contract.ForAll(source, item => item != null));
 
 			IXCollection<T> added = new XCollection<T>();
 			IXCollection<T> changed = new XCollection<T>();
-			Contract.Assume(Contract.ForAll(source, CollectionMemberNotNull));
 			IXCollection<T> deleted = new XCollection<T>(source);
 			IXCollection<T> modified = new XCollection<T>();
 			IXCollection<T> nonModified = new XCollection<T>();
@@ -487,26 +487,13 @@ namespace Digillect.Collections
 				throw new ArgumentNullException("collection");
 			}
 
-			if ( !Contract.ForAll(collection, CollectionMemberNotNull) )
+			if ( !Contract.ForAll(collection, item => item != null) )
 			{
 				throw new ArgumentException("Null element found.", "collection");
 			}
 
 			Contract.EndContractBlock();
 		}
-
-		#region CollectionMemberNotNull`1
-		/// <summary>
-		/// Helper function/predicate for code contracts.
-		/// </summary>
-		/// <param name="item">The item to check.</param>
-		/// <returns><c>true</c> if the <paramref name="item"/> is not <c>null</c>; otherwise, <c>false</c>.</returns>
-		[EditorBrowsable(EditorBrowsableState.Advanced)]
-		public static bool CollectionMemberNotNull<T>(T item)
-		{
-			return item != null;
-		} 
-		#endregion
 
 		#region class ReadOnlyXCollection`1
 #if !(SILVERLIGHT || WINDOWS8)
@@ -675,6 +662,7 @@ namespace Digillect.Collections
 			}
 			#endregion
 
+#if DEBUG || CONTRACTS_FULL
 			#region ObjectInvariant
 			[ContractInvariantMethod]
 			[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1822:MarkMembersAsStatic", Justification = "Required for code contracts.")]
@@ -683,6 +671,7 @@ namespace Digillect.Collections
 				Contract.Invariant(this.Count == this.collection.Count);
 			}
 			#endregion
+#endif
 		}
 		#endregion
 
@@ -741,6 +730,7 @@ namespace Digillect.Collections
 			}
 			#endregion
 
+#if DEBUG || CONTRACTS_FULL
 			#region ObjectInvariant
 			[ContractInvariantMethod]
 			[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1822:MarkMembersAsStatic", Justification = "Required for code contracts.")]
@@ -749,6 +739,7 @@ namespace Digillect.Collections
 				Contract.Invariant(this.Count == this.collection.Count);
 			}
 			#endregion
+#endif
 		}
 		#endregion
 

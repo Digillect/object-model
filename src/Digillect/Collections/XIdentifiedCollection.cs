@@ -39,7 +39,7 @@ namespace Digillect.Collections
 			: base(collection)
 		{
 			Contract.Requires( collection != null );
-			Contract.Requires(Contract.ForAll(collection, XCollectionsUtil.CollectionMemberNotNull));
+			Contract.Requires(Contract.ForAll(collection, item => item != null));
 
 			OnDeserialization();
 		}
@@ -214,6 +214,7 @@ namespace Digillect.Collections
 		}
 		#endregion
 
+#if DEBUG || CONTRACTS_FULL
 		#region ObjectInvariant
 		[ContractInvariantMethod]
 		[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1822:MarkMembersAsStatic", Justification = "Required for code contracts.")]
@@ -222,5 +223,6 @@ namespace Digillect.Collections
 			Contract.Invariant(m_dictionary.Count == this.Count);
 		}
 		#endregion
+#endif
 	}
 }

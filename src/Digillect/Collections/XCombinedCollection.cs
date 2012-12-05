@@ -30,7 +30,7 @@ namespace Digillect.Collections
 				throw new ArgumentException("No collections specified.", "collections");
 			}
 
-			if ( !Contract.ForAll(collections, XCollectionsUtil.CollectionMemberNotNull) )
+			if ( !Contract.ForAll(collections, item => item != null) )
 			{
 				throw new ArgumentException("Null element found.", "collections");
 			}

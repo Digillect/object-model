@@ -31,7 +31,7 @@ namespace Digillect.Collections
 		public IEnumerable<XKey> GetKeys()
 		{
 			Contract.Ensures(Contract.Result<IEnumerable<XKey>>() != null);
-			Contract.Ensures(Contract.ForAll(Contract.Result<IEnumerable<XKey>>(), XCollectionsUtil.CollectionMemberNotNull));
+			Contract.Ensures(Contract.ForAll(Contract.Result<IEnumerable<XKey>>(), item => item != null));
 
 			return null;
 		}
@@ -136,7 +136,7 @@ namespace Digillect.Collections
 		[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1822:MarkMembersAsStatic", Justification = "Required for code contracts.")]
 		private void ObjectInvariant()
 		{
-			Contract.Invariant(Contract.ForAll(this, XCollectionsUtil.CollectionMemberNotNull));
+			Contract.Invariant(Contract.ForAll(this, item => item != null));
 		}
 	}
 #endif

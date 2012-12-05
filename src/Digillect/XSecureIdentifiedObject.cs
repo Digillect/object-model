@@ -247,6 +247,7 @@ namespace Digillect
 			return id;
 		}
 
+#if DEBUG || CONTRACTS_FULL
 		#region ObjectInvariant
 		[ContractInvariantMethod]
 		[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1822:MarkMembersAsStatic", Justification = "Required for code contracts.")]
@@ -255,6 +256,7 @@ namespace Digillect
 			Contract.Invariant(this.id != null);
 		}
 		#endregion
+#endif
 	}
 
 	#region XSecureIdentifiedObject`1 contract binding

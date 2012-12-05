@@ -115,7 +115,7 @@ namespace Digillect.Collections
 		public void AddRange(IEnumerable<T> collection)
 		{
 			Contract.Requires( collection != null );
-			Contract.Requires(Contract.ForAll(collection, XCollectionsUtil.CollectionMemberNotNull));
+			Contract.Requires(Contract.ForAll(collection, item => item != null));
 
 			InsertRange(this.Count, collection);
 		}
@@ -413,7 +413,7 @@ namespace Digillect.Collections
 		public CollectionMergeResults Update(IEnumerable<T> collection)
 		{
 			Contract.Requires(collection != null);
-			Contract.Requires(Contract.ForAll(collection, XCollectionsUtil.CollectionMemberNotNull));
+			Contract.Requires(Contract.ForAll(collection, item => item != null));
 			Contract.Ensures(Contract.Result<CollectionMergeResults>() != null);
 
 			return Update(collection, CollectionMergeOptions.Full);
@@ -682,6 +682,7 @@ namespace Digillect.Collections
 		}
 		#endregion
 
+#if DEBUG || CONTRACTS_FULL
 		#region ObjectInvariant
 		[ContractInvariantMethod]
 		[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1822:MarkMembersAsStatic", Justification = "Required for code contracts.")]
@@ -690,6 +691,7 @@ namespace Digillect.Collections
 			Contract.Invariant(this.Items != null);
 		}
 		#endregion
+#endif
 
 		#region class ReferenceEqualityComparer
 		protected sealed class ReferenceEqualityComparer : IEqualityComparer<T>
