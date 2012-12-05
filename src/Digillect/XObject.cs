@@ -5,6 +5,8 @@ using System.Diagnostics;
 using System.Diagnostics.Contracts;
 using System.Runtime.Serialization;
 
+using Digillect.Collections;
+
 namespace Digillect
 {
 	/// <summary>
@@ -251,7 +253,7 @@ namespace Digillect
 		}
 
 		/// <summary>
-		/// Performs complex clone/update procedure for XCollection-derived property.
+		/// Performs complex clone/update procedure for IXCollection-derived property.
 		/// </summary>
 		/// <typeparam name="T">Type of the property.</typeparam>
 		/// <param name="thisField">Reference to the local field.</param>
@@ -259,7 +261,7 @@ namespace Digillect
 		/// <param name="cloning"><c>true</c> if cloning source, otherwise <c>false</c>.</param>
 		/// <param name="deepCloning"><c>true</c> if performing deep cloning, otherwise <c>false</c>.</param>
 		[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1045:DoNotPassTypesByReference", MessageId = "0#")]
-		protected static void ProcessCopyProperty<T>(ref Collections.XCollection<T> thisField, Collections.XCollection<T> otherField, bool cloning, bool deepCloning) where T : XObject
+		protected static void ProcessCopyProperty<T>(ref IXCollection<T> thisField, IXCollection<T> otherField, bool cloning, bool deepCloning)
 		{
 			if( cloning )
 			{
