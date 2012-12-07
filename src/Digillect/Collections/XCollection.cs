@@ -448,7 +448,7 @@ namespace Digillect.Collections
 			{
 				OnUpdated(EventArgs.Empty);
 
-				if ( results.Added != 0 || results.Removed != 0 )
+				if ( results.Added != results.Removed )
 				{
 					OnPropertyChanged("Count");
 				}
