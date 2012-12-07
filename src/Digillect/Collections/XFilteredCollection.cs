@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Diagnostics.Contracts;
 using System.Linq;
+using System.Threading;
 
 namespace Digillect.Collections
 {
@@ -18,8 +19,10 @@ namespace Digillect.Collections
 	{
 		private readonly IXList<T> _originalCollection;
 
-		private int count = -1;
-		private int version;
+		private int _count = -1;
+#if CUSTOM_ENUMERATOR
+		private int _version;
+#endif
 
 		#region Constructor/Disposer
 		protected XFilteredCollection(IXList<T> originalCollection)
@@ -75,8 +78,6 @@ namespace Digillect.Collections
 		#endregion
 
 		#region IXUpdatable`1 Members
-		public override event EventHandler Updated;
-
 		public override void BeginUpdate()
 		{
 			_originalCollection.BeginUpdate();
@@ -110,44 +111,33 @@ namespace Digillect.Collections
 		{
 			get
 			{
-				if ( this.count == -1 )
+				if ( _count == -1 )
 				{
-					lock ( this._originalCollection )
-					{
-						if ( this.count == -1 )
-						{
-							this.count = this._originalCollection.Count(Filter);
-						}
-					}
+					Interlocked.Exchange(ref _count, _originalCollection.Count(Filter));
 				}
 
-				Contract.Assume(this.count >= 0);
+				//Contract.Assume(_count >= 0);
 
-				return this.count;
+				return _count;
 			}
 		}
 
+		[ContractVerification(false)]
 		public override bool Contains(T item)
 		{
-			bool contains = this._originalCollection.Contains(item) && Filter(item);
-
-			if ( contains )
-			{
-				Contract.Assume(this.Count > 0);
-			}
-
-			return contains;
+			return this._originalCollection.Contains(item) && Filter(item);
 		}
 		#endregion
 
 		#region IEnumerable`1 Members
 		public override IEnumerator<T> GetEnumerator()
 		{
-			int version = this.version;
+#if CUSTOM_ENUMERATOR
+			int version = _version;
 
 			for ( int i = 0; i < _originalCollection.Count; i++ )
 			{
-				if ( this.version != version )
+				if ( version != _version )
 				{
 					throw new InvalidOperationException(Errors.XCollectionEnumFailedVersionException);
 				}
@@ -159,6 +149,9 @@ namespace Digillect.Collections
 					yield return obj;
 				}
 			}
+#else
+			return _originalCollection.Where(Filter).GetEnumerator();
+#endif
 		}
 		#endregion
 
@@ -179,6 +172,7 @@ namespace Digillect.Collections
 		[Pure]
 		protected abstract bool Filter(T obj);
 
+		[Pure]
 		protected int CalculateFilteredIndex(int originalIndex)
 		{
 			Contract.Ensures(Contract.Result<int>() >= -1);
@@ -201,6 +195,7 @@ namespace Digillect.Collections
 			return filteredIndex;
 		}
 
+		[Pure]
 		protected int CalculateOriginalIndex(int filteredIndex)
 		{
 			if ( filteredIndex < 0 )
@@ -226,105 +221,171 @@ namespace Digillect.Collections
 		#region Event Handlers
 		private void OriginalCollection_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
 		{
-			version++;
+#if CUSTOM_ENUMERATOR
+			_version++;
+#endif
 
 			if ( e.Action == NotifyCollectionChangedAction.Add || e.Action == NotifyCollectionChangedAction.Remove || e.Action == NotifyCollectionChangedAction.Reset )
 			{
-				count = -1;
+				_count = -1;
 			}
 
-			if ( CollectionChanged != null )
+			switch ( e.Action )
 			{
-				NotifyCollectionChangedEventArgs args;
-
-				switch ( e.Action )
-				{
 #if SILVERLIGHT
-					case NotifyCollectionChangedAction.Add:
-						if ( !Filter((T) e.NewItems[0]) )
-						{
-							return;
-						}
-						args = new NotifyCollectionChangedEventArgs(e.Action, e.NewItems[0], CalculateFilteredIndex(e.NewStartingIndex));
-						break;
-					case NotifyCollectionChangedAction.Remove:
-						if ( !Filter((T) e.OldItems[0]) )
-						{
-							return;
-						}
-						args = new NotifyCollectionChangedEventArgs(e.Action, e.OldItems[0], CalculateFilteredIndex(e.OldStartingIndex));
-						break;
-					case NotifyCollectionChangedAction.Replace:
-						// e.NewStartingIndex == e.OldStartingIndex
-						if ( !Filter((T) e.NewItems[0]) && !Filter((T) e.OldItems[0]) )
-						{
-							return;
-						}
-						args = new NotifyCollectionChangedEventArgs(e.Action, e.NewItems[0], e.OldItems[0], CalculateFilteredIndex(e.NewStartingIndex));
-						break;
+				case NotifyCollectionChangedAction.Add:
+					if ( !Filter((T) e.NewItems[0]) )
+					{
+						return;
+					}
+
+					OnPropertyChanged(CountString);
+					OnPropertyChanged(IndexerName);
+
+					if ( CollectionChanged != null )
+					{
+						CollectionChanged(this, new NotifyCollectionChangedEventArgs(e.Action, e.NewItems[0], CalculateFilteredIndex(e.NewStartingIndex)));
+					}
+
+					break;
+
+				case NotifyCollectionChangedAction.Remove:
+					if ( !Filter((T) e.OldItems[0]) )
+					{
+						return;
+					}
+
+					OnPropertyChanged(CountString);
+					OnPropertyChanged(IndexerName);
+
+					if ( CollectionChanged != null )
+					{
+						CollectionChanged(this, new NotifyCollectionChangedEventArgs(e.Action, e.OldItems[0], CalculateFilteredIndex(e.OldStartingIndex)));
+					}
+
+					break;
+
+				case NotifyCollectionChangedAction.Replace:
+					// e.NewStartingIndex == e.OldStartingIndex
+					if ( !Filter((T) e.NewItems[0]) && !Filter((T) e.OldItems[0]) )
+					{
+						return;
+					}
+
+					OnPropertyChanged(IndexerName);
+
+					if ( CollectionChanged != null )
+					{
+						CollectionChanged(this, new NotifyCollectionChangedEventArgs(e.Action, e.NewItems[0], e.OldItems[0], CalculateFilteredIndex(e.NewStartingIndex)));
+					}
+
+					break;
 #else
-					case NotifyCollectionChangedAction.Add:
-						var newItems = e.NewItems.Cast<T>().Where( Filter ).ToArray();
+				case NotifyCollectionChangedAction.Add:
+					T[] newItems = e.NewItems.Cast<T>().Where(Filter).ToArray();
 
-						if( newItems.Length == 0 )
-							return;
+					if ( newItems.Length == 0 )
+						return;
 
-						args = new NotifyCollectionChangedEventArgs( e.Action, newItems, CalculateFilteredIndex( e.NewStartingIndex ) );
-						break;
+					OnPropertyChanged(CountString);
+					OnPropertyChanged(IndexerName);
 
-					case NotifyCollectionChangedAction.Remove:
-						var oldItems = e.OldItems.Cast<T>().Where( Filter ).ToArray();
+					if ( CollectionChanged != null )
+					{
+						CollectionChanged(this, new NotifyCollectionChangedEventArgs(e.Action, newItems, CalculateFilteredIndex(e.NewStartingIndex)));
+					}
 
-						if( oldItems.Length == 0 )
-							return;
+					break;
 
-						args = new NotifyCollectionChangedEventArgs( e.Action, oldItems, CalculateFilteredIndex( e.OldStartingIndex ) );
-						break;
+				case NotifyCollectionChangedAction.Remove:
+					T[] oldItems = e.OldItems.Cast<T>().Where(Filter).ToArray();
 
-					case NotifyCollectionChangedAction.Move:
-						// e.NewItems and e.OldItems have the same content
-						newItems = e.NewItems.Cast<T>().Where( Filter ).ToArray();
+					if ( oldItems.Length == 0 )
+						return;
 
-						if( newItems.Length == 0 )
-							return;
+					OnPropertyChanged(CountString);
+					OnPropertyChanged(IndexerName);
 
-						args = new NotifyCollectionChangedEventArgs( e.Action, newItems, CalculateFilteredIndex( e.NewStartingIndex ), CalculateFilteredIndex( e.OldStartingIndex ) );
-						break;
+					if ( CollectionChanged != null )
+					{
+						CollectionChanged(this, new NotifyCollectionChangedEventArgs(e.Action, oldItems, CalculateFilteredIndex(e.OldStartingIndex)));
+					}
 
-					case NotifyCollectionChangedAction.Replace:
-						// e.NewStartingIndex == e.OldStartingIndex
-						newItems = e.NewItems.Cast<T>().Where( Filter ).ToArray();
-						oldItems = e.OldItems.Cast<T>().Where( Filter ).ToArray();
+					break;
 
-						if( newItems.Length == 0 && oldItems.Length == 0 )
-							return;
+				case NotifyCollectionChangedAction.Move:
+					// e.NewItems and e.OldItems have the same content
+					newItems = e.NewItems.Cast<T>().Where(Filter).ToArray();
 
-						args = new NotifyCollectionChangedEventArgs( e.Action, newItems, oldItems, CalculateFilteredIndex( e.NewStartingIndex ) );
-						break;
+					if ( newItems.Length == 0 )
+						return;
+
+					OnPropertyChanged(IndexerName);
+
+					if ( CollectionChanged != null )
+					{
+						CollectionChanged(this, new NotifyCollectionChangedEventArgs(e.Action, newItems, CalculateFilteredIndex(e.NewStartingIndex), CalculateFilteredIndex(e.OldStartingIndex)));
+					}
+
+					break;
+
+				case NotifyCollectionChangedAction.Replace:
+					// e.NewStartingIndex == e.OldStartingIndex
+					newItems = e.NewItems.Cast<T>().Where(Filter).ToArray();
+					oldItems = e.OldItems.Cast<T>().Where(Filter).ToArray();
+
+					if ( newItems.Length == 0 && oldItems.Length == 0 )
+						return;
+
+					OnPropertyChanged(IndexerName);
+
+					if ( CollectionChanged != null )
+					{
+						CollectionChanged(this, new NotifyCollectionChangedEventArgs(e.Action, newItems, oldItems, CalculateFilteredIndex(e.NewStartingIndex)));
+					}
+
+					break;
 #endif
-					case NotifyCollectionChangedAction.Reset:
-						args = new NotifyCollectionChangedEventArgs(e.Action);
-						break;
+				case NotifyCollectionChangedAction.Reset:
+					OnPropertyChanged(CountString);
+					OnPropertyChanged(IndexerName);
 
-					default:
-						throw new ArgumentException(e.Action.ToString(), "e");
-				}
+					if ( CollectionChanged != null )
+					{
+						CollectionChanged(this, new NotifyCollectionChangedEventArgs(e.Action));
+					}
 
-				CollectionChanged(this, args);
+					break;
+
+				default:
+					throw new ArgumentException(e.Action.ToString(), "e");
 			}
 		}
 
 		private void OriginalCollection_Updated(object sender, EventArgs e)
 		{
-			version++;
-			count = -1;
+#if CUSTOM_ENUMERATOR
+			_version++;
+#endif
+			_count = -1;
 
-			if ( Updated != null )
-			{
-				Updated(this, EventArgs.Empty);
-			}
+			OnPropertyChanged(CountString);
+			OnPropertyChanged(IndexerName);
+			OnUpdated(EventArgs.Empty);
 		}
 		#endregion
+
+#if DEBUG || CONTRACTS_FULL
+		#region ObjectInvariant
+		[ContractInvariantMethod]
+		[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1822:MarkMembersAsStatic", Justification = "Required for code contracts.")]
+		private void ObjectInvariant()
+		{
+			Contract.Invariant(_count >= -1);
+		}
+		#endregion
+#endif
+
 	}
 
 	#region XFilteredCollection`1 contract binding

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
+using System.ComponentModel;
 using System.Linq;
 
 using Shouldly;
@@ -16,13 +17,41 @@ namespace Digillect.Tests
 		private const int Many = 3;
 		private const int TooMany = 6;
 
-		#region Methods Tests
+		#region Delayed Collection Assignment Test
+		[Fact]
+		public void SetUnderlyingCollection_should_raise_CollectionChangedReset_and_Updated()
+		{
+			// Setup
+			var sut = new XSubRangeCollection<XObject>(1, 1);
+
+			bool expectedCollectionChanged = false;
+			bool expectedUpdated = false;
+
+			sut.CollectionChanged += (sender, e) => {
+				e.Action.ShouldBe(NotifyCollectionChangedAction.Reset);
+				expectedCollectionChanged = true;
+			};
+
+			sut.Updated += (sender, e) => {
+				expectedUpdated = true;
+			};
+
+			// Exercise
+			sut.UnderlyingCollection = CreateSourceCollection(Many);
+
+			// Verify
+			expectedCollectionChanged.ShouldBe(true);
+			expectedUpdated.ShouldBe(true);
+		}
+		#endregion
+
+		#region Properties Tests
 		[Fact]
 		public void CountReturnsZeroWithTotalElementsBelowStartIndex()
 		{
 			// Setup
 			const int expectedResult = 0;
-			var sut = new XSubRangeCollection<XObject>(CreateSourceCollection(Many), Many, 1);
+			var sut = CreateTestCollection(Many, Many, 1);
 
 			// Exercise
 
@@ -38,7 +67,7 @@ namespace Digillect.Tests
 			const int startIndex = TooMany - Many;
 			const int maxCount = TooMany;
 			const int expectedResult = notEnough - startIndex;
-			var sut = new XSubRangeCollection<XObject>(CreateSourceCollection(TooMany), startIndex, maxCount);
+			var sut = CreateTestCollection(TooMany, startIndex, maxCount);
 
 			// Exercise
 
@@ -53,19 +82,18 @@ namespace Digillect.Tests
 		{
 			// Setup
 			const int expectedResult = Many;
-			var c = CreateSourceCollection(TooMany);
 			XSubRangeCollection<XObject> sut;
 
 			// Verify at left bound
-			sut = new XSubRangeCollection<XObject>(c, 0, Many);
+			sut = CreateTestCollection(TooMany, 0, Many);
 			sut.Count.ShouldBe(expectedResult);
 
 			// Verify inside bounds
-			sut = new XSubRangeCollection<XObject>(c, TooMany - Many - 1, Many);
+			sut = CreateTestCollection(TooMany, TooMany - Many - 1, Many);
 			sut.Count.ShouldBe(expectedResult);
 
 			// Verify at right bound
-			sut = new XSubRangeCollection<XObject>(c, TooMany - Many, Many);
+			sut = CreateTestCollection(TooMany, TooMany - Many, Many);
 			sut.Count.ShouldBe(expectedResult);
 		}
 
@@ -75,9 +103,8 @@ namespace Digillect.Tests
 			// Setup
 			const int startIndex = 1;
 			const int testIndex = 1;
-			var c = CreateSourceCollection(TooMany);
-			XObject expectedResult = c[startIndex + testIndex];
-			var sut = new XSubRangeCollection<XObject>(c, startIndex, Many);
+			var sut = CreateTestCollection(TooMany, startIndex, Many);
+			XObject expectedResult = sut.UnderlyingCollection[startIndex + testIndex];
 
 			// Excercise
 			XObject result = sut[testIndex];
@@ -85,14 +112,39 @@ namespace Digillect.Tests
 			// Verify
 			result.ShouldBeSameAs(expectedResult);
 		}
+		#endregion
+
+		#region Methods Tests
+		[Fact]
+		public void BeginUpdate_should_block_events()
+		{
+			// Setup
+			bool eventsBlocked = false;
+			var sut = CreateTestCollection(Many, 1, 1, (sender, e) => {
+				Assert.False(eventsBlocked, "CollectionChanged with " + e.Action);
+			}, (sender, e) => {
+				Assert.False(eventsBlocked, "Updated");
+			}, (sender, e) => {
+				Assert.False(eventsBlocked, "PropertyChanged with " + e.PropertyName);
+			});
+
+			// Exercise
+			sut.BeginUpdate();
+			eventsBlocked = true;
+			sut.UnderlyingCollection.Update(CreateSourceCollection(TooMany));
+			sut.UnderlyingCollection.Insert(0, XIntegerObject.Create());
+			eventsBlocked = false;
+			sut.EndUpdate();
+
+			// Verify
+		}
 
 		[Fact]
 		public void ContainsItemReturnsTrueForInnerItem()
 		{
 			// Setup
-			var c = CreateSourceCollection(TooMany);
-			var sut = new XSubRangeCollection<XObject>(c, 1, 2);
-			XObject item = c[2];
+			var sut = CreateTestCollection(TooMany, 1, 2);
+			XObject item = sut.UnderlyingCollection[2];
 
 			// Excercise
 
@@ -104,9 +156,8 @@ namespace Digillect.Tests
 		public void ContainsItemReturnsFalseForBelowOuterItem()
 		{
 			// Setup
-			var c = CreateSourceCollection(TooMany);
-			var sut = new XSubRangeCollection<XObject>(c, 1, 2);
-			XObject item = c[0];
+			var sut = CreateTestCollection(TooMany, 1, 2);
+			XObject item = sut.UnderlyingCollection[0];
 
 			// Excercise
 
@@ -118,9 +169,8 @@ namespace Digillect.Tests
 		public void ContainsItemReturnsFalseForBeyondOuterItem()
 		{
 			// Setup
-			var c = CreateSourceCollection(TooMany);
-			var sut = new XSubRangeCollection<XObject>(c, 0, TooMany - 1);
-			XObject item = c[sut.Count];
+			var sut = CreateTestCollection(TooMany, 0, TooMany - 1);
+			XObject item = sut.UnderlyingCollection[sut.Count];
 
 			// Excercise
 
@@ -132,9 +182,8 @@ namespace Digillect.Tests
 		public void ContainsKeyReturnsTrueForInnerItem()
 		{
 			// Setup
-			var c = CreateSourceCollection(TooMany);
-			var sut = new XSubRangeCollection<XObject>(c, 1, 2);
-			XKey key = c[2].GetKey();
+			var sut = CreateTestCollection(TooMany, 1, 2);
+			XKey key = sut.UnderlyingCollection[2].GetKey();
 
 			// Excercise
 
@@ -146,9 +195,8 @@ namespace Digillect.Tests
 		public void ContainsKeyReturnsFalseForBelowOuterItem()
 		{
 			// Setup
-			var c = CreateSourceCollection(TooMany);
-			var sut = new XSubRangeCollection<XObject>(c, 1, 2);
-			XKey key = c[0].GetKey();
+			var sut = CreateTestCollection(TooMany, 1, 2);
+			XKey key = sut.UnderlyingCollection[0].GetKey();
 
 			// Excercise
 
@@ -160,9 +208,8 @@ namespace Digillect.Tests
 		public void ContainsKeyReturnsFalseForBeyondOuterItem()
 		{
 			// Setup
-			var c = CreateSourceCollection(TooMany);
-			var sut = new XSubRangeCollection<XObject>(c, 0, TooMany - 1);
-			XKey key = c[sut.Count].GetKey();
+			var sut = CreateTestCollection(TooMany, 0, TooMany - 1);
+			XKey key = sut.UnderlyingCollection[sut.Count].GetKey();
 
 			// Excercise
 
@@ -171,10 +218,10 @@ namespace Digillect.Tests
 		}
 
 		[Fact]
-		public void CopyToCopiesAllElements()
+		public void CopyTo_should_copy_all_items()
 		{
 			// Setup
-			var sut = CreateRangeCollection(CreateSourceCollection(TooMany), 1, Many);
+			var sut = CreateTestCollection(TooMany, 1, Many);
 
 			// Exercise
 			XObject[] result = new XObject[TooMany];
@@ -187,18 +234,50 @@ namespace Digillect.Tests
 		}
 
 		[Fact]
+		public void GetEnumerator_enumerating_should_fail_when_underlying_collection_has_changed()
+		{
+			// Setup
+			var sut = CreateTestCollection(TooMany, 1, Many);
+			IEnumerator<XObject> result;
+
+			// Exercise
+			result = sut.GetEnumerator();
+			result.MoveNext().ShouldBe(true);
+			sut.UnderlyingCollection.Insert(0, XIntegerObject.Create());
+
+			// Verify
+			Should.Throw<InvalidOperationException>(delegate { result.MoveNext(); });
+
+			// Exercise
+			result = sut.GetEnumerator();
+			result.MoveNext().ShouldBe(true);
+			sut.UnderlyingCollection.Insert(2, XIntegerObject.Create());
+
+			// Verify
+			Should.Throw<InvalidOperationException>(delegate { result.MoveNext(); });
+
+			// Exercise
+			result = sut.GetEnumerator();
+			result.MoveNext().ShouldBe(true);
+			sut.UnderlyingCollection.Add(XIntegerObject.Create());
+
+			// Verify
+			Should.Throw<InvalidOperationException>(delegate { result.MoveNext(); });
+		}
+
+		[Fact]
 		public void IndexOfItemReturnsProperIndexForInnerItem()
 		{
 			// Setup
 			const int expectedResult = 1;
-			var c = CreateSourceCollection(TooMany);
-			var sut = new XSubRangeCollection<XObject>(c, 1, 2);
-			XObject item = c[2];
+			var sut = CreateTestCollection(TooMany, 1, 2);
+			XObject item = sut.UnderlyingCollection[2];
 
 			// Excercise
+			int result = sut.IndexOf(item);
 
 			// Verify
-			sut.IndexOf(item).ShouldBe(expectedResult);
+			result.ShouldBe(expectedResult);
 		}
 
 		[Fact]
@@ -206,14 +285,14 @@ namespace Digillect.Tests
 		{
 			// Setup
 			const int expectedResult = -1;
-			var c = CreateSourceCollection(TooMany);
-			var sut = new XSubRangeCollection<XObject>(c, 1, 2);
-			XObject item = c[0];
+			var sut = CreateTestCollection(TooMany, 1, 2);
+			XObject item = sut.UnderlyingCollection[0];
 
 			// Excercise
+			int result = sut.IndexOf(item);
 
 			// Verify
-			sut.IndexOf(item).ShouldBe(expectedResult);
+			result.ShouldBe(expectedResult);
 		}
 
 		[Fact]
@@ -221,14 +300,14 @@ namespace Digillect.Tests
 		{
 			// Setup
 			const int expectedResult = -1;
-			var c = CreateSourceCollection(TooMany);
-			var sut = new XSubRangeCollection<XObject>(c, 0, TooMany - 1);
-			XObject item = c[sut.Count];
+			var sut = CreateTestCollection(TooMany, 0, TooMany - 1);
+			XObject item = sut.UnderlyingCollection[sut.Count];
 
 			// Excercise
+			int result = sut.IndexOf(item);
 
 			// Verify
-			sut.IndexOf(item).ShouldBe(expectedResult);
+			result.ShouldBe(expectedResult);
 		}
 
 		[Fact]
@@ -236,14 +315,14 @@ namespace Digillect.Tests
 		{
 			// Setup
 			const int expectedResult = 1;
-			var c = CreateSourceCollection(TooMany);
-			var sut = new XSubRangeCollection<XObject>(c, 1, 2);
-			XKey key = c[2].GetKey();
+			var sut = CreateTestCollection(TooMany, 1, 2);
+			XKey key = sut.UnderlyingCollection[2].GetKey();
 
 			// Excercise
+			int result = sut.IndexOf(key);
 
 			// Verify
-			sut.IndexOf(key).ShouldBe(expectedResult);
+			result.ShouldBe(expectedResult);
 		}
 
 		[Fact]
@@ -251,14 +330,14 @@ namespace Digillect.Tests
 		{
 			// Setup
 			const int expectedResult = -1;
-			var c = CreateSourceCollection(TooMany);
-			var sut = new XSubRangeCollection<XObject>(c, 1, 2);
-			XKey key = c[0].GetKey();
+			var sut = CreateTestCollection(TooMany, 1, 2);
+			XKey key = sut.UnderlyingCollection[0].GetKey();
 
 			// Excercise
+			int result = sut.IndexOf(key);
 
 			// Verify
-			sut.IndexOf(key).ShouldBe(expectedResult);
+			result.ShouldBe(expectedResult);
 		}
 
 		[Fact]
@@ -266,14 +345,14 @@ namespace Digillect.Tests
 		{
 			// Setup
 			const int expectedResult = -1;
-			var c = CreateSourceCollection(TooMany);
-			var sut = new XSubRangeCollection<XObject>(c, 0, TooMany - 1);
-			XKey key = c[sut.Count].GetKey();
+			var sut = CreateTestCollection(TooMany, 0, TooMany - 1);
+			XKey key = sut.UnderlyingCollection[sut.Count].GetKey();
 
 			// Excercise
+			int result = sut.IndexOf(key);
 
 			// Verify
-			sut.IndexOf(key).ShouldBe(expectedResult);
+			result.ShouldBe(expectedResult);
 		}
 		#endregion
 
@@ -283,14 +362,13 @@ namespace Digillect.Tests
 		{
 			// Setup
 			bool eventRaised = false;
-			var c = CreateSourceCollection(Many);
-			var sut = CreateRangeCollection(c, 1, 1, (sender, e) => {
+			var sut = CreateTestCollection(Many, 1, 1, (sender, e) => {
 				e.Action.ShouldBe(NotifyCollectionChangedAction.Reset);
 				eventRaised = true;
 			});
 
 			// Exercise
-			c.Insert(0, XIntegerObject.Create());
+			sut.UnderlyingCollection.Insert(0, XIntegerObject.Create());
 
 			// Verify
 			eventRaised.ShouldBe(true);
@@ -301,14 +379,13 @@ namespace Digillect.Tests
 		{
 			// Setup
 			bool eventRaised = false;
-			var c = CreateSourceCollection(TooMany);
-			var sut = CreateRangeCollection(c, 1, Many, (sender, e) => {
+			var sut = CreateTestCollection(TooMany, 1, Many, (sender, e) => {
 				e.Action.ShouldBe(NotifyCollectionChangedAction.Reset);
 				eventRaised = true;
 			});
 
 			// Exercise
-			c.Insert(2, XIntegerObject.Create());
+			sut.UnderlyingCollection.Insert(2, XIntegerObject.Create());
 
 			// Verify
 			eventRaised.ShouldBe(true);
@@ -318,8 +395,7 @@ namespace Digillect.Tests
 		public void CollectionChangedIssuesAddWhenItemAddedInsideNonFull()
 		{
 			bool eventRaised = false;
-			var c = CreateSourceCollection(Many);
-			var sut = CreateRangeCollection(c, 1, TooMany, (sender, e) => {
+			var sut = CreateTestCollection(Many, 1, TooMany, (sender, e) => {
 				e.Action.ShouldBe(NotifyCollectionChangedAction.Add);
 				e.NewStartingIndex.ShouldBe(Many - 1);
 				eventRaised = true;
@@ -327,7 +403,7 @@ namespace Digillect.Tests
 			int expectedCount = sut.Count + 1;
 
 			// Exercise
-			c.Add(XIntegerObject.Create());
+			sut.UnderlyingCollection.Add(XIntegerObject.Create());
 
 			// Verify
 			eventRaised.ShouldBe(true);
@@ -338,13 +414,12 @@ namespace Digillect.Tests
 		public void CollectionChangedShouldNotBeRaisedWhenItemAddedBeyond()
 		{
 			// Setup
-			var c = CreateSourceCollection(Many);
-			var sut = CreateRangeCollection(c, 1, 1, (sender, e) => {
+			var sut = CreateTestCollection(Many, 1, 1, (sender, e) => {
 				Assert.False(true, "CollectionChanged at " + e.NewStartingIndex);
 			});
 
 			// Exercise
-			c.Add(XIntegerObject.Create());
+			sut.UnderlyingCollection.Add(XIntegerObject.Create());
 
 			// Verify
 		}
@@ -354,14 +429,13 @@ namespace Digillect.Tests
 		{
 			// Setup
 			bool eventRaised = false;
-			var c = CreateSourceCollection(Many);
-			var sut = CreateRangeCollection(c, 1, 1, (sender, e) => {
+			var sut = CreateTestCollection(Many, 1, 1, (sender, e) => {
 				e.Action.ShouldBe(NotifyCollectionChangedAction.Reset);
 				eventRaised = true;
 			});
 
 			// Exercise
-			c.RemoveAt(0);
+			sut.UnderlyingCollection.RemoveAt(0);
 
 			// Verify
 			eventRaised.ShouldBe(true);
@@ -372,14 +446,13 @@ namespace Digillect.Tests
 		{
 			// Setup
 			bool eventRaised = false;
-			var c = CreateSourceCollection(TooMany);
-			var sut = CreateRangeCollection(c, 1, Many, (sender, e) => {
+			var sut = CreateTestCollection(TooMany, 1, Many, (sender, e) => {
 				e.Action.ShouldBe(NotifyCollectionChangedAction.Reset);
 				eventRaised = true;
 			});
 
 			// Exercise
-			c.RemoveAt(2);
+			sut.UnderlyingCollection.RemoveAt(2);
 
 			// Verify
 			eventRaised.ShouldBe(true);
@@ -392,8 +465,7 @@ namespace Digillect.Tests
 			const int startIndex = 1;
 			const int removeIndex = 1;
 			bool eventRaised = false;
-			var c = CreateSourceCollection(Many);
-			var sut = CreateRangeCollection(c, startIndex, TooMany, (sender, e) => {
+			var sut = CreateTestCollection(Many, startIndex, TooMany, (sender, e) => {
 				e.Action.ShouldBe(NotifyCollectionChangedAction.Remove);
 				e.OldStartingIndex.ShouldBe(removeIndex - startIndex);
 				eventRaised = true;
@@ -401,7 +473,7 @@ namespace Digillect.Tests
 			int expectedCount = sut.Count - 1;
 
 			// Exercise
-			c.RemoveAt(removeIndex);
+			sut.UnderlyingCollection.RemoveAt(removeIndex);
 
 			// Verify
 			eventRaised.ShouldBe(true);
@@ -412,13 +484,12 @@ namespace Digillect.Tests
 		public void CollectionChangedShouldNotBeRaisedWhenItemRemovedBeyond()
 		{
 			// Setup
-			var c = CreateSourceCollection(Many);
-			var sut = CreateRangeCollection(c, 1, 1, (sender, e) => {
+			var sut = CreateTestCollection(Many, 1, 1, (sender, e) => {
 				Assert.False(true, "CollectionChanged at " + e.OldStartingIndex);
 			});
 
 			// Exercise
-			c.RemoveAt(2);
+			sut.UnderlyingCollection.RemoveAt(2);
 
 			// Verify
 		}
@@ -428,32 +499,30 @@ namespace Digillect.Tests
 		{
 			// Setup
 			int eventRaisedCount = 0;
-			var c = CreateSourceCollection(TooMany);
-			var sut = CreateRangeCollection(c, 1, Many, (sender, e) => {
+			var sut = CreateTestCollection(TooMany, 1, Many, (sender, e) => {
 				e.Action.ShouldBe(NotifyCollectionChangedAction.Reset);
 				eventRaisedCount++;
 			});
 
 			// Exercise
-			//c.MoveItem(0, 1);
-			//c.MoveItem(1, 3);
-			//c.MoveItem(3, 4);
+			//sut.UnderlyingCollection.MoveItem(0, 1);
+			//sut.UnderlyingCollection.MoveItem(1, 3);
+			//sut.UnderlyingCollection.MoveItem(3, 4);
 
 			// Verify
 			eventRaisedCount.ShouldBe(3);
 		}
 
-		[Fact(Skip = "MoveItem implementation required", DisplayName = "Move item -> no CollectionChanged")]
+		[Fact(Skip = "MoveItem implementation required", DisplayName = "Move item -> !CollectionChanged")]
 		public void CollectionChangedShouldNotBeRaisedWhenItemMovedOutside()
 		{
 			// Setup
-			var c = CreateSourceCollection(Many);
-			var sut = CreateRangeCollection(c, 1, 1, (sender, e) => {
+			var sut = CreateTestCollection(Many, 1, 1, (sender, e) => {
 				Assert.False(true, "CollectionChanged at " + e.OldStartingIndex + " and " + e.NewStartingIndex);
 			});
 
 			// Exercise
-			//c.MoveItem(0, 2);
+			//sut.UnderlyingCollection.MoveItem(0, 2);
 
 			// Verify
 		}
@@ -465,15 +534,14 @@ namespace Digillect.Tests
 			const int startIndex = 1;
 			const int replaceIndex = 2;
 			bool eventRaised = false;
-			var c = CreateSourceCollection(TooMany);
-			var sut = CreateRangeCollection(c, 1, Many, (sender, e) => {
+			var sut = CreateTestCollection(TooMany, 1, Many, (sender, e) => {
 				e.Action.ShouldBe(NotifyCollectionChangedAction.Replace);
 				e.NewStartingIndex.ShouldBe(replaceIndex - startIndex);
 				eventRaised = true;
 			});
 
 			// Exercise
-			c[replaceIndex] = XIntegerObject.Create();
+			sut.UnderlyingCollection[replaceIndex] = XIntegerObject.Create();
 
 			// Verify
 			eventRaised.ShouldBe(true);
@@ -483,16 +551,31 @@ namespace Digillect.Tests
 		public void CollectionChangedShouldNotBeRaisedWhenItemReplacedOutside()
 		{
 			// Setup
-			var c = CreateSourceCollection(Many);
-			var sut = CreateRangeCollection(c, 1, 1, (sender, e) => {
+			var sut = CreateTestCollection(Many, 1, 1, (sender, e) => {
 				Assert.False(true, "CollectionChanged at " + e.NewStartingIndex);
 			});
 
 			// Exercise
-			c[0] = XIntegerObject.Create();
-			c[2] = XIntegerObject.Create();
+			sut.UnderlyingCollection[0] = XIntegerObject.Create();
+			sut.UnderlyingCollection[2] = XIntegerObject.Create();
 
 			// Verify
+		}
+
+		[Fact]
+		public void Updated_should_be_raised_when_underlying_collection_gets_updated()
+		{
+			// Setup
+			bool eventRaised = false;
+			var sut = CreateTestCollection(Many, 1, 1, updatedHandler: (sender, e) => {
+				eventRaised = true;
+			});
+
+			// Exercise
+			sut.UnderlyingCollection.Update(CreateSourceCollection(TooMany));
+
+			// Verify
+			eventRaised.ShouldBe(true);
 		}
 		#endregion
 
@@ -502,13 +585,23 @@ namespace Digillect.Tests
 			return new XCollection<XObject>(XIntegerObject.CreateSeries(count));
 		}
 
-		private static IXList<XObject> CreateRangeCollection(IXList<XObject> source, int startIndex, int maxCount, NotifyCollectionChangedEventHandler changedHandler = null)
+		private static XSubRangeCollection<XObject> CreateTestCollection(int sourceCount, int startIndex, int maxCount, NotifyCollectionChangedEventHandler changedHandler = null, EventHandler updatedHandler = null, PropertyChangedEventHandler propertyChangedHandler = null)
 		{
-			var result = new XSubRangeCollection<XObject>(source, startIndex, maxCount);
+			var result = new XSubRangeCollection<XObject>(CreateSourceCollection(sourceCount), startIndex, maxCount);
 
 			if ( changedHandler != null )
 			{
 				result.CollectionChanged += changedHandler;
+			}
+
+			if ( updatedHandler != null )
+			{
+				result.Updated += updatedHandler;
+			}
+
+			if ( propertyChangedHandler != null )
+			{
+				result.PropertyChanged += propertyChangedHandler;
 			}
 
 			return result;

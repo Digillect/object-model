@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Diagnostics.Contracts;
 using System.Linq;
+using System.Threading;
 
 namespace Digillect.Collections
 {
@@ -12,22 +13,27 @@ namespace Digillect.Collections
 	public class XCombinedCollection<T> : XBasedCollection<T>
 		where T : XObject
 	{
-		private readonly IXList<T>[] _collections;
+		private readonly IList<IXList<T>> _collections;
 
 		private int _count = -1;
+		private uint _updateCount;
 		private int _version;
 
 		#region Constructor/Disposer
+		[ContractVerification(false)]
 		public XCombinedCollection(params IXList<T>[] collections)
+			: this((IEnumerable<IXList<T>>) collections)
+		{
+			Contract.Requires(collections != null);
+			Contract.Requires(Contract.ForAll(collections, item => item != null));
+		}
+
+		[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures")]
+		public XCombinedCollection(IEnumerable<IXList<T>> collections)
 		{
 			if ( collections == null )
 			{
 				throw new ArgumentNullException("collections");
-			}
-
-			if ( collections.Length == 0 )
-			{
-				throw new ArgumentException("No collections specified.", "collections");
 			}
 
 			if ( !Contract.ForAll(collections, item => item != null) )
@@ -37,7 +43,7 @@ namespace Digillect.Collections
 
 			Contract.EndContractBlock();
 
-			_collections = (IXList<T>[]) collections.Clone();
+			_collections = new List<IXList<T>>(collections);
 
 			foreach ( var item in _collections )
 			{
@@ -54,89 +60,63 @@ namespace Digillect.Collections
 				{
 					item.CollectionChanged -= UnderlyingCollection_CollectionChanged;
 					item.Updated -= UnderlyingCollection_Updated;
+
+					for ( uint i = _updateCount; i != 0; i-- )
+					{
+						item.EndUpdate();
+					}
 				}
+
+				_collections.Clear();
+				_updateCount = 0;
 			}
 
 			base.Dispose(disposing);
 		}
 		#endregion
 
-		#region IXList`1 Members
-		public override int IndexOf(XKey key)
+		#region Events
+		public override event NotifyCollectionChangedEventHandler CollectionChanged;
+
+		protected virtual void OnCollectionChanged(NotifyCollectionChangedEventArgs e)
 		{
-			int count = 0;
-
-			foreach ( var c in _collections )
+			if ( _updateCount == 0 && CollectionChanged != null )
 			{
-				int index = c.IndexOf(key);
+				CollectionChanged(this, e);
+			}
+		}
 
-				if ( index >= 0 )
+		protected override void OnPropertyChanged(System.ComponentModel.PropertyChangedEventArgs e)
+		{
+			if ( _updateCount == 0 )
+			{
+				base.OnPropertyChanged(e);
+			}
+		}
+
+		protected override void OnUpdated(EventArgs e)
+		{
+			if ( _updateCount == 0 )
+			{
+				base.OnUpdated(e);
+			}
+		}
+		#endregion
+
+		#region Properties
+		public override int Count
+		{
+			get
+			{
+				if ( _count == -1 )
 				{
-					return count + index;
+					Interlocked.Exchange(ref _count, _collections.Sum(x => x.Count));
 				}
 
-				count += c.Count;
-			}
-
-			return -1;
-		}
-		#endregion
-
-		#region IXCollection`1 Members
-		[ContractVerification(false)]
-		public override bool ContainsKey(XKey key)
-		{
-			return _collections.Any(x => x.ContainsKey(key));
-		}
-
-		public override IEnumerable<XKey> GetKeys()
-		{
-			return _collections.SelectMany(x => x.GetKeys());
-		}
-
-		public override XBasedCollection<T> Clone(bool deep)
-		{
-			IXList<T>[] collections;
-
-			if ( deep )
-			{
-				collections = new IXList<T>[_collections.Length];
-
-				for ( int i = 0; i < _collections.Length; i++ )
-				{
-					collections[i] = (IXList<T>) _collections[i].Clone(deep);
-				}
-			}
-			else
-			{
-				collections = _collections;
-			}
-
-			return (XBasedCollection<T>) Activator.CreateInstance(GetType(), collections);
-		}
-		#endregion
-
-		#region IXUpdatable`1 Members
-		public override event EventHandler Updated;
-
-		public override void BeginUpdate()
-		{
-			foreach ( var c in _collections )
-			{
-				c.BeginUpdate();
+				return _count;
 			}
 		}
 
-		public override void EndUpdate()
-		{
-			foreach ( var c in _collections )
-			{
-				c.EndUpdate();
-			}
-		}
-		#endregion
-
-		#region IList`1 Members
 		public override T this[int index]
 		{
 			get
@@ -155,6 +135,121 @@ namespace Digillect.Collections
 
 				throw new ArgumentOutOfRangeException("index", Errors.ArgumentOutOfRange_Index);
 			}
+		}
+		#endregion
+
+		#region Methods
+		public override void BeginUpdate()
+		{
+			_updateCount++;
+
+			foreach ( var c in _collections )
+			{
+				c.BeginUpdate();
+			}
+		}
+
+		public override XBasedCollection<T> Clone(bool deep)
+		{
+			IList<IXList<T>> collections;
+
+			if ( deep )
+			{
+				collections = new List<IXList<T>>();
+
+				for ( int i = 0; i < _collections.Count; i++ )
+				{
+					collections.Add((IXList<T>) _collections[i].Clone(deep));
+				}
+			}
+			else
+			{
+				collections = _collections;
+			}
+
+			return (XBasedCollection<T>) Activator.CreateInstance(GetType(), collections);
+		}
+
+		[ContractVerification(false)]
+		public override bool Contains(T item)
+		{
+			return _collections.Any(x => x.Contains(item));
+		}
+
+		[ContractVerification(false)]
+		public override bool ContainsKey(XKey key)
+		{
+			return _collections.Any(x => x.ContainsKey(key));
+		}
+
+		public override void CopyTo(T[] array, int arrayIndex)
+		{
+			foreach ( var c in _collections )
+			{
+				c.CopyTo(array, arrayIndex);
+
+				arrayIndex += c.Count;
+			}
+		}
+
+		public override void EndUpdate()
+		{
+			if ( _updateCount == 0 )
+			{
+				return;
+			}
+
+			foreach ( var c in _collections )
+			{
+				c.EndUpdate();
+			}
+
+			if ( --_updateCount == 0 )
+			{
+				OnUpdated(EventArgs.Empty);
+				OnPropertyChanged(CountString);
+				OnPropertyChanged(IndexerName);
+				OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset));
+			}
+		}
+
+		public override IEnumerator<T> GetEnumerator()
+		{
+			int version = _version;
+
+			foreach ( var item in _collections.SelectMany(x => x) )
+			{
+				if ( version != _version )
+				{
+					throw new InvalidOperationException(Errors.XCollectionEnumFailedVersionException);
+				}
+
+				yield return item;
+			}
+		}
+
+		public override IEnumerable<XKey> GetKeys()
+		{
+			return _collections.SelectMany(x => x.GetKeys());
+		}
+
+		public override int IndexOf(XKey key)
+		{
+			int count = 0;
+
+			foreach ( var c in _collections )
+			{
+				int index = c.IndexOf(key);
+
+				if ( index >= 0 )
+				{
+					return count + index;
+				}
+
+				count += c.Count;
+			}
+
+			return -1;
 		}
 
 		public override int IndexOf(T item)
@@ -177,56 +272,104 @@ namespace Digillect.Collections
 		}
 		#endregion
 
-		#region ICollection`1 Members
-		public override int Count
+		#region Collections Manipulations
+		public void AddCollection(IXList<T> item)
 		{
-			get
+			if ( item == null )
 			{
-				if ( _count == -1 )
+				throw new ArgumentNullException("item");
+			}
+
+			Contract.EndContractBlock();
+
+			_collections.Add(item);
+
+			item.CollectionChanged += UnderlyingCollection_CollectionChanged;
+			item.Updated += UnderlyingCollection_Updated;
+
+			if ( _updateCount != 0 )
+			{
+				for ( uint i = 0; i < _updateCount; i++ )
 				{
-					_count = _collections.Sum(x => x.Count);
+					item.BeginUpdate();
 				}
-
-				return _count;
+			}
+			else if ( item.Count != 0 )
+			{
+				OnUpdated(EventArgs.Empty);
+				OnPropertyChanged(CountString);
+				OnPropertyChanged(IndexerName);
+				// WPF is known to not support range operations so we can not issue Add with all of the items at a time
+				OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset));
 			}
 		}
 
-		[ContractVerification(false)]
-		public override bool Contains(T item)
+		public void InsertCollection(int index, IXList<T> item)
 		{
-			return _collections.Any(x => x.Contains(item));
-		}
-
-		public override void CopyTo(T[] array, int arrayIndex)
-		{
-			foreach ( var c in _collections )
+			if ( item == null )
 			{
-				c.CopyTo(array, arrayIndex);
-
-				arrayIndex += c.Count;
+				throw new ArgumentNullException("item");
 			}
-		}
-		#endregion
 
-		#region IEnumerable`1 Members
-		public override IEnumerator<T> GetEnumerator()
-		{
-			int version = _version;
+			Contract.Requires(index >= 0);
 
-			foreach ( var item in _collections.SelectMany(x => x) )
+			_collections.Insert(index, item);
+
+			item.CollectionChanged += UnderlyingCollection_CollectionChanged;
+			item.Updated += UnderlyingCollection_Updated;
+
+			if ( _updateCount != 0 )
 			{
-				if ( _version != version )
+				for ( uint i = 0; i < _updateCount; i++ )
 				{
-					throw new InvalidOperationException(Errors.XCollectionEnumFailedVersionException);
+					item.BeginUpdate();
 				}
-
-				yield return item;
+			}
+			else if ( item.Count != 0 )
+			{
+				OnUpdated(EventArgs.Empty);
+				OnPropertyChanged(CountString);
+				OnPropertyChanged(IndexerName);
+				// WPF is known to not support range operations so we can not issue Add with all of the items at a time
+				OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset));
 			}
 		}
-		#endregion
 
-		#region INotifyCollectionChanged Members
-		public override event NotifyCollectionChangedEventHandler CollectionChanged;
+		public bool RemoveCollection(IXList<T> item)
+		{
+			if ( item == null )
+			{
+				throw new ArgumentNullException("item");
+			}
+
+			Contract.EndContractBlock();
+
+			if ( !_collections.Remove(item) )
+			{
+				return false;
+			}
+
+			item.CollectionChanged -= UnderlyingCollection_CollectionChanged;
+			item.Updated -= UnderlyingCollection_Updated;
+
+			if ( _updateCount != 0 )
+			{
+				for ( uint i = _updateCount; i != 0; i-- )
+				{
+					item.EndUpdate();
+				}
+			}
+			else if ( item.Count != 0 )
+			{
+				OnUpdated(EventArgs.Empty);
+				OnPropertyChanged(CountString);
+				OnPropertyChanged(IndexerName);
+				// WPF is known to not support range operations so we can not issue Remove with all of the items at a time
+				OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset));
+			}
+
+			return true;
+		}
 		#endregion
 
 		#region Protected Methods
@@ -262,7 +405,16 @@ namespace Digillect.Collections
 			if ( e.Action == NotifyCollectionChangedAction.Add || e.Action == NotifyCollectionChangedAction.Remove || e.Action == NotifyCollectionChangedAction.Reset )
 			{
 				_count = -1;
+
+				OnPropertyChanged(CountString);
 			}
+
+			if ( _updateCount != 0 )
+			{
+				return;
+			}
+
+			OnPropertyChanged(IndexerName);
 
 			if ( CollectionChanged != null )
 			{
@@ -316,10 +468,14 @@ namespace Digillect.Collections
 			_version++;
 			_count = -1;
 
-			if ( Updated != null )
+			if ( _updateCount != 0 )
 			{
-				Updated(this, EventArgs.Empty);
+				return;
 			}
+
+			OnUpdated(EventArgs.Empty);
+			OnPropertyChanged(CountString);
+			OnPropertyChanged(IndexerName);
 		}
 		#endregion
 	}
