@@ -17,12 +17,15 @@ namespace Digillect.Collections
 #if !(SILVERLIGHT || WINDOWS8)
 	[Serializable]
 #endif
-	public abstract class XBasedCollection<T> : IXList<T>, IList, IDisposable
+	public abstract class XBasedCollection<T> : IXList<T>, IList, INotifyPropertyChanged, IDisposable
 #if !(SILVERLIGHT || WINDOWS8)
 		, ICloneable
 #endif
 		where T : XObject
 	{
+		protected const string CountString = "Count";
+		protected const string IndexerName = "Item[]";
+
 		#region Constructor/Disposer
 		protected XBasedCollection()
 		{
@@ -68,7 +71,15 @@ namespace Digillect.Collections
 		#endregion
 
 		#region IXUpdatable`1 Members
-		public abstract event EventHandler Updated;
+		public event EventHandler Updated;
+
+		protected virtual void OnUpdated(EventArgs e)
+		{
+			if ( Updated != null )
+			{
+				Updated(this, e);
+			}
+		}
 
 		public abstract void BeginUpdate();
 
@@ -346,6 +357,23 @@ namespace Digillect.Collections
 
 		#region INotifyCollectionChanged Members
 		public abstract event NotifyCollectionChangedEventHandler CollectionChanged;
+		#endregion
+
+		#region INotifyPropertyChanged Members
+		public event PropertyChangedEventHandler PropertyChanged;
+
+		protected void OnPropertyChanged(string propertyName)
+		{
+			OnPropertyChanged(new PropertyChangedEventArgs(propertyName));
+		}
+
+		protected virtual void OnPropertyChanged(PropertyChangedEventArgs e)
+		{
+			if ( PropertyChanged != null )
+			{
+				PropertyChanged(this, e);
+			}
+		}
 		#endregion
 
 #if !(SILVERLIGHT || WINDOWS8)
