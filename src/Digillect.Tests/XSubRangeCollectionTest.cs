@@ -18,8 +18,8 @@ namespace Digillect.Tests
 		private const int TooMany = 6;
 
 		#region Delayed Collection Assignment Test
-		[Fact]
-		public void SetUnderlyingCollection_should_raise_CollectionChangedReset_and_Updated()
+		[Fact(DisplayName = "SetUnderlyingCollection should raise CollectionChanged(Reset) and Updated events")]
+		public void SetUnderlyingCollection_should_raise_CollectionChangedReset_and_Updated_events()
 		{
 			// Setup
 			var sut = new XSubRangeCollection<XObject>(1, 1);
@@ -28,11 +28,13 @@ namespace Digillect.Tests
 			bool expectedUpdated = false;
 
 			sut.CollectionChanged += (sender, e) => {
+				expectedCollectionChanged.ShouldBe(false);
 				e.Action.ShouldBe(NotifyCollectionChangedAction.Reset);
 				expectedCollectionChanged = true;
 			};
 
 			sut.Updated += (sender, e) => {
+				expectedUpdated.ShouldBe(false);
 				expectedUpdated = true;
 			};
 
@@ -115,7 +117,7 @@ namespace Digillect.Tests
 		#endregion
 
 		#region Methods Tests
-		[Fact]
+		[Fact(DisplayName = "BeginUpdate should block events")]
 		public void BeginUpdate_should_block_events()
 		{
 			// Setup
@@ -217,7 +219,7 @@ namespace Digillect.Tests
 			sut.ContainsKey(key).ShouldBe(false);
 		}
 
-		[Fact]
+		[Fact(DisplayName = "CopyTo should copy all items")]
 		public void CopyTo_should_copy_all_items()
 		{
 			// Setup
@@ -233,7 +235,7 @@ namespace Digillect.Tests
 			Assert.Equal(result.Skip(1).Take(sut.Count), sut);
 		}
 
-		[Fact]
+		[Fact(DisplayName = "GetEnumerator enumerating should fail when underlying collection has changed")]
 		public void GetEnumerator_enumerating_should_fail_when_underlying_collection_has_changed()
 		{
 			// Setup
@@ -363,6 +365,7 @@ namespace Digillect.Tests
 			// Setup
 			bool eventRaised = false;
 			var sut = CreateTestCollection(Many, 1, 1, (sender, e) => {
+				eventRaised.ShouldBe(false);
 				e.Action.ShouldBe(NotifyCollectionChangedAction.Reset);
 				eventRaised = true;
 			});
@@ -380,6 +383,7 @@ namespace Digillect.Tests
 			// Setup
 			bool eventRaised = false;
 			var sut = CreateTestCollection(TooMany, 1, Many, (sender, e) => {
+				eventRaised.ShouldBe(false);
 				e.Action.ShouldBe(NotifyCollectionChangedAction.Reset);
 				eventRaised = true;
 			});
@@ -396,6 +400,7 @@ namespace Digillect.Tests
 		{
 			bool eventRaised = false;
 			var sut = CreateTestCollection(Many, 1, TooMany, (sender, e) => {
+				eventRaised.ShouldBe(false);
 				e.Action.ShouldBe(NotifyCollectionChangedAction.Add);
 				e.NewStartingIndex.ShouldBe(Many - 1);
 				eventRaised = true;
@@ -430,6 +435,7 @@ namespace Digillect.Tests
 			// Setup
 			bool eventRaised = false;
 			var sut = CreateTestCollection(Many, 1, 1, (sender, e) => {
+				eventRaised.ShouldBe(false);
 				e.Action.ShouldBe(NotifyCollectionChangedAction.Reset);
 				eventRaised = true;
 			});
@@ -447,6 +453,7 @@ namespace Digillect.Tests
 			// Setup
 			bool eventRaised = false;
 			var sut = CreateTestCollection(TooMany, 1, Many, (sender, e) => {
+				eventRaised.ShouldBe(false);
 				e.Action.ShouldBe(NotifyCollectionChangedAction.Reset);
 				eventRaised = true;
 			});
@@ -466,6 +473,7 @@ namespace Digillect.Tests
 			const int removeIndex = 1;
 			bool eventRaised = false;
 			var sut = CreateTestCollection(Many, startIndex, TooMany, (sender, e) => {
+				eventRaised.ShouldBe(false);
 				e.Action.ShouldBe(NotifyCollectionChangedAction.Remove);
 				e.OldStartingIndex.ShouldBe(removeIndex - startIndex);
 				eventRaised = true;
@@ -494,7 +502,7 @@ namespace Digillect.Tests
 			// Verify
 		}
 
-		[Fact(Skip = "MoveItem implementation required", DisplayName = "Move item -> CollectionChanged(Reset)")]
+		[Fact]
 		public void CollectionChangedIssuesResetWhenItemMoveAffectsInside()
 		{
 			// Setup
@@ -505,15 +513,15 @@ namespace Digillect.Tests
 			});
 
 			// Exercise
-			//sut.UnderlyingCollection.MoveItem(0, 1);
-			//sut.UnderlyingCollection.MoveItem(1, 3);
-			//sut.UnderlyingCollection.MoveItem(3, 4);
+			((XCollection<XObject>) sut.UnderlyingCollection).Move(0, 1);
+			((XCollection<XObject>) sut.UnderlyingCollection).Move(1, 3);
+			((XCollection<XObject>) sut.UnderlyingCollection).Move(3, 4);
 
 			// Verify
 			eventRaisedCount.ShouldBe(3);
 		}
 
-		[Fact(Skip = "MoveItem implementation required", DisplayName = "Move item -> !CollectionChanged")]
+		[Fact]
 		public void CollectionChangedShouldNotBeRaisedWhenItemMovedOutside()
 		{
 			// Setup
@@ -522,7 +530,7 @@ namespace Digillect.Tests
 			});
 
 			// Exercise
-			//sut.UnderlyingCollection.MoveItem(0, 2);
+			((XCollection<XObject>) sut.UnderlyingCollection).Move(0, 2);
 
 			// Verify
 		}
@@ -535,6 +543,7 @@ namespace Digillect.Tests
 			const int replaceIndex = 2;
 			bool eventRaised = false;
 			var sut = CreateTestCollection(TooMany, 1, Many, (sender, e) => {
+				eventRaised.ShouldBe(false);
 				e.Action.ShouldBe(NotifyCollectionChangedAction.Replace);
 				e.NewStartingIndex.ShouldBe(replaceIndex - startIndex);
 				eventRaised = true;
@@ -562,12 +571,13 @@ namespace Digillect.Tests
 			// Verify
 		}
 
-		[Fact]
-		public void Updated_should_be_raised_when_underlying_collection_gets_updated()
+		[Fact(DisplayName = "Updated event should be raised when underlying collection gets updated")]
+		public void Updated_event_should_be_raised_when_underlying_collection_gets_updated()
 		{
 			// Setup
 			bool eventRaised = false;
 			var sut = CreateTestCollection(Many, 1, 1, updatedHandler: (sender, e) => {
+				eventRaised.ShouldBe(false);
 				eventRaised = true;
 			});
 
