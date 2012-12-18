@@ -17,45 +17,68 @@ namespace Digillect.Collections
 	{
 		#region Constructor
 		/// <summary>
-		/// Initializes new instance of the <see cref="XUniqueCollection&lt;T&gt;"/> class.
+		/// Initializes a new instance of the <see cref="XUniqueCollection&lt;T&gt;"/> class.
 		/// </summary>
 		public XUniqueCollection()
 		{
 		}
 
 		/// <summary>
-		/// Initializes new instance of the <see cref="XUniqueCollection&lt;T&gt;"/> class using elements of the provided enumeration as the source for this list.
+		/// Initializes a new instance of the <see cref="XUniqueCollection&lt;T&gt;"/> class that contains elements copied from the specified collection.
 		/// </summary>
-		/// <param name="collection">The enumeration which elements are used to construct a new list to use as the parameter for the <see cref="Collection&lt;T&gt;(IList&lt;T&gt;)"/> constructor.</param>
+		/// <param name="collection">The collection from which the elements are copied.</param>
+		/// <exception cref="ArgumentNullException">The <paramref name="collection"/> parameter cannot be null.</exception>
+		/// <exception cref="ArgumentException">The <paramref name="collection"/> parameter cannot contain <c>null</c> members.</exception>
 		public XUniqueCollection(IEnumerable<T> collection)
 			: base(collection)
 		{
 			Contract.Requires(collection != null);
 			Contract.Requires(Contract.ForAll(collection, item => item != null));
 		}
+
+		/// <summary>
+		/// Initializes a new instance of the <see cref="XUniqueCollection&lt;T&gt;"/> class that contains elements copied from the specified list.
+		/// </summary>
+		/// <param name="list">The list from which the elements are copied.</param>
+		/// <exception cref="ArgumentNullException">The <paramref name="list"/> parameter cannot be null.</exception>
+		/// <exception cref="ArgumentException">The <paramref name="list"/> parameter cannot contain <c>null</c> members.</exception>
+		[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1002:DoNotExposeGenericLists", Justification = "Base type uses it")]
+		public XUniqueCollection(List<T> list)
+			: base(list)
+		{
+			Contract.Requires(list != null);
+			Contract.Requires(Contract.ForAll(list, item => item != null));
+		}
 		#endregion
 
 		#region XCollection`1 Overrides
-		protected override void OnInsert(int index, T item)
+		/// <inheritdoc/>
+		protected override void InsertItem(int index, T item)
 		{
-			base.OnInsert(index, item);
-
 			if ( ContainsKey(item.GetKey()) )
 			{
 				throw new ArgumentException(Errors.XCollectionItemDuplicateException, "item");
 			}
+
+			base.InsertItem(index, item);
 		}
 
-		protected override void OnSet(int index, T oldItem, T newItem)
+		/// <inheritdoc/>
+		protected override void SetItem(int index, T item)
 		{
-			base.OnSet(index, oldItem, newItem);
-
-			XKey key = newItem.GetKey();
-
-			if ( !key.Equals(oldItem.GetKey()) && ContainsKey(key) )
+			if ( item == null )
 			{
-				throw new ArgumentException(Errors.XCollectionItemDuplicateException, "newItem");
+				throw new ArgumentNullException("item");
 			}
+
+			XKey key = item.GetKey();
+
+			if ( !key.Equals(this.Items[index].GetKey()) && ContainsKey(key) )
+			{
+				throw new ArgumentException(Errors.XCollectionItemDuplicateException, "item");
+			}
+
+			base.SetItem(index, item);
 		}
 		#endregion
 	}

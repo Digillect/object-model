@@ -16,12 +16,30 @@ namespace Digillect.Collections
 #if !(SILVERLIGHT || WINDOWS8)
 	[Serializable]
 #endif
-	public class XCollection<T> : Collection<T>, IXList<T>, INotifyPropertyChanged
+	public class XCollection<T> : ObservableCollection<T>, IXList<T>
 #if !(SILVERLIGHT || WINDOWS8)
 		, ICloneable
 #endif
 		where T : XObject
 	{
+		/// <summary>
+		/// The name of the <see cref="ICollection&lt;T&gt;.Count"/> property for the <see cref="INotifyPropertyChanged.PropertyChanged"/> event.
+		/// Contains the "Count" string.
+		/// </summary>
+		protected const string CountString = "Count";
+
+		/// <summary>
+		/// The name of the <see cref="IList&lt;T&gt;.this"/> property for the <see cref="INotifyPropertyChanged.PropertyChanged"/> event.
+		/// Contains the "Item[]" string.
+		/// </summary>
+		protected const string IndexerName = "Item[]";
+
+		/// <summary>
+		/// The comparer used to compare objects for equality by their references.
+		/// </summary>
+		[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA2104:DoNotDeclareReadOnlyMutableReferenceTypes")]
+		protected static readonly IEqualityComparer<T> ReferenceComparer = new ReferenceEqualityComparer();
+
 #if !(SILVERLIGHT || WINDOWS8)
 		[NonSerialized]
 #endif
@@ -29,35 +47,46 @@ namespace Digillect.Collections
 
 		#region Constructor
 		/// <summary>
-		/// Initializes new instance of the <see cref="XCollection&lt;T&gt;"/> class.
+		/// Initializes a new instance of the <see cref="XCollection&lt;T&gt;"/> class.
 		/// </summary>
 		public XCollection()
 		{
 		}
 
 		/// <summary>
-		/// Initializes new instance of the <see cref="XCollection&lt;T&gt;"/> class using elements of the provided enumeration as the source for this list.
+		/// Initializes a new instance of the <see cref="XCollection&lt;T&gt;"/> class that contains elements copied from the specified collection.
 		/// </summary>
-		/// <param name="collection">The enumeration which copy is used as the parameter for the <see cref="Collection&lt;T&gt;(IList&lt;T&gt;)"/> constructor.</param>
+		/// <param name="collection">The collection from which the elements are copied.</param>
+		/// <exception cref="ArgumentNullException">The <paramref name="collection"/> parameter cannot be null.</exception>
+		/// <exception cref="ArgumentException">The <paramref name="collection"/> parameter cannot contain <c>null</c> members.</exception>
 		public XCollection(IEnumerable<T> collection)
-			: base(new List<T>(collection))
+			: base(collection)
 		{
 			XCollectionsUtil.ValidateCollection(collection);
 		}
 
-#if false
 		/// <summary>
-		/// Initializes new instance of the <see cref="XCollection&lt;T&gt;"/> class using provided list as the underlying one.
+		/// Initializes a new instance of the <see cref="XCollection&lt;T&gt;"/> class that contains elements copied from the specified list.
 		/// </summary>
-		/// <param name="items">The list used as the parameter for the <see cref="Collection&lt;T&gt;(IList&lt;T&gt;)"/> constructor.</param>
-		private XCollection(IList<T> items)
-			: base(items)
+		/// <param name="list">The list from which the elements are copied.</param>
+		/// <exception cref="ArgumentNullException">The <paramref name="list"/> parameter cannot be null.</exception>
+		/// <exception cref="ArgumentException">The <paramref name="list"/> parameter cannot contain <c>null</c> members.</exception>
+		[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1002:DoNotExposeGenericLists", Justification = "Base type uses it")]
+		public XCollection(List<T> list)
+			: base(list)
 		{
+			XCollectionsUtil.ValidateCollection(list);
 		}
-#endif
 		#endregion
 
 		#region Protected Properties
+		/// <summary>
+		/// Gets a value indicating whether the collection is in update state
+		/// (i.e. the <see cref="BeginUpdate"/> method is called more times than the <see cref="EndUpdate"/> one).
+		/// </summary>
+		/// <value>
+		/// <c>true</c> if this instance is in update; otherwise, <c>false</c>.
+		/// </value>
 		protected bool IsInUpdate
 		{
 			get { return this.updateCount > 0; }
@@ -65,32 +94,54 @@ namespace Digillect.Collections
 		#endregion
 
 		#region Events and Event Raisers
+		/// <summary>
+		/// Occurs when the collection is updated using the <see cref="Update(IEnumerable&lt;T&gt;,CollectionMergeOptions)"/> method
+		/// or as a result of the <see cref="EndUpdate"/> method.
+		/// </summary>
+		/// <seealso cref="IXUpdatable&lt;T&gt;"/>
 		public event EventHandler Updated;
-		public event NotifyCollectionChangedEventHandler CollectionChanged;
-		public event PropertyChangedEventHandler PropertyChanged;
 
+		/// <summary>
+		/// Raises the <see cref="Updated"/> event.
+		/// </summary>
+		/// <param name="e">The <see cref="EventArgs"/> instance containing the event data.</param>
 		protected virtual void OnUpdated(EventArgs e)
 		{
 			if ( this.updateCount == 0 )
 			{
-				var handler = Updated;
-
-				if( handler != null )
-					handler(this, e);
+				if ( Updated != null )
+				{
+#if !SILVERLIGHT
+					using ( BlockReentrancy() )
+#endif
+					{
+						Updated(this, e);
+					}
+				}
 			}
 		}
 
-		protected virtual void OnCollectionChanged(NotifyCollectionChangedEventArgs e)
+		/// <inheritdoc/>
+		protected override void OnCollectionChanged(NotifyCollectionChangedEventArgs e)
 		{
 			if ( this.updateCount == 0 )
 			{
-				var handler = CollectionChanged;
-
-				if( handler != null )
-					handler(this, e);
+				base.OnCollectionChanged(e);
 			}
 		}
 
+		/// <summary>
+		/// Raises the <see cref="ObservableCollection&lt;T&gt;.CollectionChanged"/> event with the <see cref="NotifyCollectionChangedAction.Reset"/> action.
+		/// </summary>
+		protected void OnCollectionReset()
+		{
+			OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset));
+		}
+
+		/// <summary>
+		/// Raises the <see cref="ObservableCollection&lt;T&gt;.PropertyChanged"/> event with the provided arguments.
+		/// </summary>
+		/// <param name="propertyName">The name of a property being changed.</param>
 		protected void OnPropertyChanged(string propertyName)
 		{
 			if ( this.updateCount == 0 )
@@ -99,14 +150,12 @@ namespace Digillect.Collections
 			}
 		}
 
-		protected virtual void OnPropertyChanged(PropertyChangedEventArgs e)
+		/// <inheritdoc/>
+		protected override void OnPropertyChanged(PropertyChangedEventArgs e)
 		{
 			if ( this.updateCount == 0 )
 			{
-				var handler = PropertyChanged;
-
-				if( handler != null )
-					handler(this, e);
+				base.OnPropertyChanged(e);
 			}
 		}
 		#endregion
@@ -220,24 +269,11 @@ namespace Digillect.Collections
 
 			Contract.EndContractBlock();
 
-			List<T> is2 = this.Items as List<T>;
+			// WPF is known to not support events resulted from ranged operations so do insertion one by one
 
-			if ( is2 != null )
+			foreach ( T item in collection )
 			{
-				Contract.Assume(index <= is2.Count);
-				is2.InsertRange(index, collection);
-				OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Add, collection.ToArray(), index));
-			}
-			else
-			{
-				foreach ( var item in collection )
-				{
-					if ( item != null )
-					{
-						Contract.Assume(0 <= index && index <= this.Count);
-						Insert(index++, item);
-					}
-				}
+				Insert(index++, item);
 			}
 		}
 
@@ -342,6 +378,7 @@ namespace Digillect.Collections
 		/// В процессе операции ни одно из событий не возбуждается.
 		/// Не забудьте вызвать метод <see cref="EndUpdate()"/> столько раз, сколько раз вызывался метод <b>BeginUpdate()</b>.
 		/// </remarks>
+		/// <seealso cref="IXUpdatable&lt;T&gt;"/>
 		public void BeginUpdate()
 		{
 			if ( this.Items.IsReadOnly )
@@ -357,8 +394,9 @@ namespace Digillect.Collections
 		/// </summary>
 		/// <remarks>
 		/// Как только будет вызван последний метод <b>EndUpdate()</b>, соответствующий первому вызванному методу <see cref="BeginUpdate()"/>,
-		/// будет возбуждено событие <see cref="CollectionChanged"/> с типом операции <see cref="NotifyCollectionChangedAction.Reset"/>.
+		/// будет возбуждено событие <see cref="ObservableCollection&lt;T&gt;.CollectionChanged"/> с типом операции <see cref="NotifyCollectionChangedAction.Reset"/>.
 		/// </remarks>
+		/// <seealso cref="IXUpdatable&lt;T&gt;"/>
 		public void EndUpdate()
 		{
 			if ( this.Items.IsReadOnly )
@@ -372,9 +410,9 @@ namespace Digillect.Collections
 			if ( --this.updateCount == 0 )
 			{
 				OnUpdated(EventArgs.Empty);
-				OnPropertyChanged("Count");
-				OnPropertyChanged("Item[]");
-				OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset));
+				OnPropertyChanged(CountString);
+				OnPropertyChanged(IndexerName);
+				OnCollectionReset();
 			}
 		}
 
@@ -391,6 +429,7 @@ namespace Digillect.Collections
 		/// <returns>
 		/// <see langword="false"/> if two collections are the same (equal by reference) or <paramref name="options"/> are <see cref="CollectionMergeOptions.None"/>, otherwise, <see langword="true"/>.
 		/// </returns>
+		/// <seealso cref="IXUpdatable&lt;T&gt;"/>
 		public virtual bool IsUpdateRequired(IEnumerable<T> source, CollectionMergeOptions options)
 		{
 			return !Object.ReferenceEquals(this, source) && options != CollectionMergeOptions.None;
@@ -410,6 +449,7 @@ namespace Digillect.Collections
 		/// <remarks>
 		/// Вызов данного метода эквивалентен вызову метода <see cref="Update(IEnumerable&lt;T&gt;,CollectionMergeOptions)"/> со вторым параметром, равным <see cref="CollectionMergeOptions.Full"/>.
 		/// </remarks>
+		/// <seealso cref="IXUpdatable&lt;T&gt;"/>
 		public CollectionMergeResults Update(IEnumerable<T> collection)
 		{
 			Contract.Requires(collection != null);
@@ -425,12 +465,17 @@ namespace Digillect.Collections
 		/// <param name="collection">Источник изменений.</param>
 		/// <param name="options">Операции, которые надо произвести с объектами, находящимися в данной коллекции.</param>
 		/// <returns>The <see cref="CollectionMergeResults">results</see> of the operation.</returns>
+		/// <seealso cref="IXUpdatable&lt;T&gt;"/>
 		/// <seealso cref="XCollectionsUtil.Merge"/>
 		public virtual CollectionMergeResults Update(IEnumerable<T> collection, CollectionMergeOptions options)
 		{
 			XCollectionsUtil.ValidateCollection(collection);
 
 			Contract.Ensures(Contract.Result<CollectionMergeResults>() != null);
+
+#if !SILVERLIGHT
+			CheckReentrancy();
+#endif
 
 			if ( this.Items.IsReadOnly )
 			{
@@ -442,7 +487,7 @@ namespace Digillect.Collections
 				return CollectionMergeResults.Empty;
 			}
 
-			var results = this.Items.Merge(collection.Distinct(ReferenceEqualityComparer.Default), options);
+			var results = this.Items.Merge(collection.Distinct(ReferenceComparer), options);
 
 			if ( !results.IsEmpty )
 			{
@@ -450,11 +495,11 @@ namespace Digillect.Collections
 
 				if ( results.Added != results.Removed )
 				{
-					OnPropertyChanged("Count");
+					OnPropertyChanged(CountString);
 				}
 
-				OnPropertyChanged("Item[]");
-				OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset));
+				OnPropertyChanged(IndexerName);
+				OnCollectionReset();
 			}
 
 			return results;
@@ -508,54 +553,23 @@ namespace Digillect.Collections
 		#endregion
 
 		#region Collection`1 Overrides
-		protected override void ClearItems()
-		{
-			OnClear();
-			base.ClearItems();
-			OnClearComplete();
-
-			OnPropertyChanged("Count");
-			OnPropertyChanged("Item[]");
-			OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset));
-		}
-
+		/// <inheritdoc/>
 		protected override void InsertItem(int index, T item)
 		{
-			ValidateItem(item);
-			OnInsert(index, item);
+			if ( item == null )
+			{
+				throw new ArgumentNullException("item");
+			}
+
+			if ( this.Items.Contains(item, ReferenceComparer) )
+			{
+				throw new ArgumentException(Errors.XCollectionItemDuplicateException, "item");
+			}
+
 			base.InsertItem(index, item);
-
-			try
-			{
-				OnInsertComplete(index, item);
-			}
-			finally
-			{
-				OnPropertyChanged("Count");
-				OnPropertyChanged("Item[]");
-				OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Add, item, index));
-			}
 		}
 
-		protected override void RemoveItem(int index)
-		{
-			T item = this.Items[index];
-
-			OnRemove(index, item);
-			base.RemoveItem(index);
-
-			try
-			{
-				OnRemoveComplete(index, item);
-			}
-			finally
-			{
-				OnPropertyChanged("Count");
-				OnPropertyChanged("Item[]");
-				OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Remove, item, index));
-			}
-		}
-
+		/// <inheritdoc/>
 		protected override void SetItem(int index, T item)
 		{
 			T oldItem = this.Items[index];
@@ -565,81 +579,22 @@ namespace Digillect.Collections
 				return;
 			}
 
-			ValidateItem(item);
-			OnSet(index, oldItem, item);
-			base.SetItem(index, item);
-
-			try
-			{
-				OnSetComplete(index, oldItem, item);
-			}
-			finally
-			{
-				OnPropertyChanged("Item[]");
-				OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Replace, item, oldItem, index));
-			}
-		}
-		#endregion
-		#region Protected Collection Callbacks
-		/// <exclude/>
-		protected virtual void OnClear()
-		{
-		}
-
-		/// <exclude/>
-		protected virtual void OnClearComplete()
-		{
-		}
-
-		/// <exclude/>
-		protected virtual void OnInsert(int index, T item)
-		{
-			if ( this.Items.Contains(item, ReferenceEqualityComparer.Default) )
-			{
-				throw new ArgumentException(Errors.XCollectionItemDuplicateException, "item");
-			}
-		}
-
-		/// <exclude/>
-		protected virtual void OnInsertComplete(int index, T item)
-		{
-		}
-
-		/// <exclude/>
-		protected virtual void OnRemove(int index, T item)
-		{
-		}
-
-		/// <exclude/>
-		protected virtual void OnRemoveComplete(int index, T item)
-		{
-		}
-
-		/// <exclude/>
-		protected virtual void OnSet(int index, T oldItem, T newItem)
-		{
-			if ( this.Items.Contains(newItem, ReferenceEqualityComparer.Default) )
-			{
-				throw new ArgumentException(Errors.XCollectionItemDuplicateException, "newItem");
-			}
-		}
-
-		/// <exclude/>
-		protected virtual void OnSetComplete(int index, T oldItem, T newItem)
-		{
-		}
-
-		/// <exclude/>
-		protected virtual void ValidateItem(T item)
-		{
 			if ( item == null )
 			{
 				throw new ArgumentNullException("item");
 			}
+
+			if ( this.Items.Contains(item, ReferenceComparer) )
+			{
+				throw new ArgumentException(Errors.XCollectionItemDuplicateException, "item");
+			}
+
+			base.SetItem(index, item);
 		}
 		#endregion
 
 		#region Object Overrides
+		/// <inheritdoc/>
 		public override bool Equals(object obj)
 		{
 			if ( obj == null || GetType() != obj.GetType() )
@@ -669,6 +624,7 @@ namespace Digillect.Collections
 #endif
 		}
 
+		/// <inheritdoc/>
 		public override int GetHashCode()
 		{
 			int hashCode = this.Items.Count;
@@ -694,22 +650,18 @@ namespace Digillect.Collections
 #endif
 
 		#region class ReferenceEqualityComparer
-		protected sealed class ReferenceEqualityComparer : IEqualityComparer<T>
+		private sealed class ReferenceEqualityComparer : IEqualityComparer<T>
 		{
-			[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1000:DoNotDeclareStaticMembersOnGenericTypes")]
-			[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA2104:DoNotDeclareReadOnlyMutableReferenceTypes")]
-			public static readonly IEqualityComparer<T> Default = new ReferenceEqualityComparer();
-
-			private ReferenceEqualityComparer()
+			public ReferenceEqualityComparer()
 			{
 			}
 
-			public bool Equals(T x, T y)
+			bool IEqualityComparer<T>.Equals(T x, T y)
 			{
 				return Object.ReferenceEquals(x, y);
 			}
 
-			public int GetHashCode(T obj)
+			int IEqualityComparer<T>.GetHashCode(T obj)
 			{
 				return Object.ReferenceEquals(obj, null) ? 0 : obj.GetHashCode();
 			}
