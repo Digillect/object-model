@@ -369,8 +369,6 @@ namespace Digillect.Collections
 #endif
 			_count = -1;
 
-			OnPropertyChanged(CountString);
-			OnPropertyChanged(IndexerName);
 			OnUpdated(EventArgs.Empty);
 		}
 		#endregion

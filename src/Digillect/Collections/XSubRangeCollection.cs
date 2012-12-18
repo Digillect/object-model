@@ -557,21 +557,12 @@ namespace Digillect.Collections
 			_version++;
 #endif
 
-			int prevSize = Interlocked.Exchange(ref _size, CalculateCollectionSize());
+			Interlocked.Exchange(ref _size, CalculateCollectionSize());
 
-			if ( _updateCount != 0 )
+			if ( _updateCount == 0 )
 			{
-				return;
+				OnUpdated(EventArgs.Empty);
 			}
-
-			OnUpdated(EventArgs.Empty);
-
-			if ( prevSize != _size )
-			{
-				OnPropertyChanged(CountString);
-			}
-
-			OnPropertyChanged(IndexerName);
 		}
 		#endregion
 

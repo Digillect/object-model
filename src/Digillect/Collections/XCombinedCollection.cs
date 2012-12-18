@@ -406,7 +406,10 @@ namespace Digillect.Collections
 			{
 				_count = -1;
 
-				OnPropertyChanged(CountString);
+				if ( _updateCount == 0 )
+				{
+					OnPropertyChanged(CountString);
+				}
 			}
 
 			if ( _updateCount != 0 )
@@ -468,14 +471,10 @@ namespace Digillect.Collections
 			_version++;
 			_count = -1;
 
-			if ( _updateCount != 0 )
+			if ( _updateCount == 0 )
 			{
-				return;
+				OnUpdated(EventArgs.Empty);
 			}
-
-			OnUpdated(EventArgs.Empty);
-			OnPropertyChanged(CountString);
-			OnPropertyChanged(IndexerName);
 		}
 		#endregion
 	}
