@@ -22,8 +22,12 @@
 
 	<Target Name="TransformPackageVersion">
 		<PropertyGroup>
-			<PackageVersion Condition=" '$(BuildNumber)' != '' ">$([System.Text.RegularExpressions.Regex]::Replace( $(PackageVersion), "(\d+\.\d+\.\d+)\.(\d+)", "$1-dev-$2" ))</PackageVersion>
-			<PackageVersion Condition=" '$(BuildNumber)' == '' ">$([System.Text.RegularExpressions.Regex]::Replace( $(PackageVersion), "(\d+\.\d+\.\d+)\.(\d+)", "$1" ))</PackageVersion>
+			<_Major>$([System.Text.RegularExpressions.Regex]::Replace( $(PackageVersion), "(\d+.\d+.\d+)\.(\d+)", "$1" ))</_Major>
+			<_Build>$([System.Text.RegularExpressions.Regex]::Replace( $(PackageVersion), "(\d+.\d+.\d+)\.(\d+)", "$2" ))</_Build>
+			<_Final>$([System.String]::Format( "{0}-dev-{1:00000}", $(_Major), $([MSBuild]::Add( $(_Build), 0 )) ))</_Final>
+
+			<PackageVersion Condition=" '$(BuildNumber)' != '' ">$([System.Text.RegularExpressions.Regex]::Replace( $(PackageVersion), "(\d+\.\d+\.\d+\.\d+)", $(_Final) ))</PackageVersion>
+			<PackageVersion Condition=" '$(BuildNumber)' == '' ">$([System.Text.RegularExpressions.Regex]::Replace( $(PackageVersion), "(\d+\.\d+\.\d+\.\d+)", "$(_Major)" ))</PackageVersion>
 		</PropertyGroup>
 	</Target>
 </Project>
