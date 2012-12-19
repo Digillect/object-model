@@ -23,14 +23,27 @@ namespace Digillect.Collections
 #endif
 		where T : XObject
 	{
+		/// <summary>
+		/// The name of the <see cref="ICollection&lt;T&gt;.Count"/> property for the <see cref="INotifyPropertyChanged.PropertyChanged"/> event.
+		/// Contains the "Count" string.
+		/// </summary>
 		protected const string CountString = "Count";
+
+		/// <summary>
+		/// The name of the <see cref="IList&lt;T&gt;.this"/> property for the <see cref="INotifyPropertyChanged.PropertyChanged"/> event.
+		/// Contains the "Item[]" string.
+		/// </summary>
 		protected const string IndexerName = "Item[]";
 
 		#region Constructor/Disposer
+		/// <summary>
+		/// Default constructor.
+		/// </summary>
 		protected XBasedCollection()
 		{
 		}
 
+		/// <inheritdoc/>
 		public void Dispose()
 		{
 			Dispose(true);
@@ -43,10 +56,12 @@ namespace Digillect.Collections
 		#endregion
 
 		#region IXList`1 Members
+		/// <inheritdoc/>
 		public abstract int IndexOf(XKey key);
 		#endregion
 
 		#region IXCollection`1 Members
+		/// <inheritdoc/>
 		public virtual bool ContainsKey(XKey key)
 		{
 			return IndexOf(key) != -1;
@@ -57,22 +72,21 @@ namespace Digillect.Collections
 			throw new NotSupportedException(Errors.XCollectionReadOnlyException);
 		}
 
+		/// <inheritdoc/>
 		public virtual IEnumerable<XKey> GetKeys()
 		{
 			return this.Select(x => x.GetKey());
 		}
-
-		IXCollection<T> IXCollection<T>.Clone(bool deep)
-		{
-			return Clone(deep);
-		}
-
-		public abstract XBasedCollection<T> Clone(bool deep);
 		#endregion
 
 		#region IXUpdatable`1 Members
+		/// <inheritdoc/>
 		public event EventHandler Updated;
 
+		/// <summary>
+		/// Raises the <see cref="Updated" /> event.
+		/// </summary>
+		/// <param name="e">The <see cref="EventArgs" /> instance containing the event data.</param>
 		protected virtual void OnUpdated(EventArgs e)
 		{
 			if ( Updated != null )
@@ -81,8 +95,18 @@ namespace Digillect.Collections
 			}
 		}
 
+		IXCollection<T> IXUpdatable<IXCollection<T>>.Clone(bool deep)
+		{
+			return Clone(deep);
+		}
+
+		/// <inheritdoc cref="IXUpdatable&lt;T&gt;.Clone(bool)"/>
+		public abstract XBasedCollection<T> Clone(bool deep);
+
+		/// <inheritdoc/>
 		public abstract void BeginUpdate();
 
+		/// <inheritdoc/>
 		public abstract void EndUpdate();
 
 		bool IXUpdatable<IXCollection<T>>.IsUpdateRequired(IXCollection<T> source)
@@ -108,6 +132,7 @@ namespace Digillect.Collections
 			set { throw new NotSupportedException(Errors.XCollectionReadOnlyException); }
 		}
 
+		/// <inheritdoc/>
 		public abstract int IndexOf(T item);
 
 		void IList<T>.Insert(int index, T item)
@@ -122,6 +147,7 @@ namespace Digillect.Collections
 		#endregion
 
 		#region ICollection`1 Members
+		/// <inheritdoc/>
 		public abstract int Count
 		{
 			get;
@@ -142,11 +168,13 @@ namespace Digillect.Collections
 			throw new NotSupportedException(Errors.XCollectionReadOnlyException);
 		}
 
+		/// <inheritdoc/>
 		public virtual bool Contains(T item)
 		{
 			return IndexOf(item) != -1;
 		}
 
+		/// <inheritdoc/>
 		public virtual void CopyTo(T[] array, int arrayIndex)
 		{
 			if ( array == null )
@@ -177,6 +205,7 @@ namespace Digillect.Collections
 		#endregion
 
 		#region IEnumerable`1 Members
+		/// <inheritdoc/>
 		public abstract IEnumerator<T> GetEnumerator();
 		#endregion
 
@@ -324,6 +353,7 @@ namespace Digillect.Collections
 		#endregion
 
 		#region IEquatable`1 Members
+		/// <inheritdoc/>
 		public virtual bool Equals(IXList<T> other)
 		{
 			if ( other == null || this.Count != other.Count )
@@ -334,6 +364,7 @@ namespace Digillect.Collections
 			return this.SequenceEqual(other);
 		}
 
+		/// <inheritdoc/>
 		public virtual bool Equals(IXCollection<T> other)
 		{
 			if ( other == null || this.Count != other.Count )
@@ -356,17 +387,27 @@ namespace Digillect.Collections
 		#endregion
 
 		#region INotifyCollectionChanged Members
+		/// <inheritdoc/>
 		public abstract event NotifyCollectionChangedEventHandler CollectionChanged;
 		#endregion
 
 		#region INotifyPropertyChanged Members
+		/// <inheritdoc/>
 		public event PropertyChangedEventHandler PropertyChanged;
 
+		/// <summary>
+		/// Raises the <see cref="PropertyChanged" /> event.
+		/// </summary>
+		/// <param name="propertyName">The name of a property being changed.</param>
 		protected void OnPropertyChanged(string propertyName)
 		{
 			OnPropertyChanged(new PropertyChangedEventArgs(propertyName));
 		}
 
+		/// <summary>
+		/// Raises the <see cref="PropertyChanged" /> event.
+		/// </summary>
+		/// <param name="e">The <see cref="PropertyChangedEventArgs" /> instance containing the event data.</param>
 		protected virtual void OnPropertyChanged(PropertyChangedEventArgs e)
 		{
 			if ( PropertyChanged != null )

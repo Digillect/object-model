@@ -8,6 +8,9 @@ using System.Linq;
 
 namespace Digillect.Collections
 {
+	/// <summary>
+	/// Helpers and extensions for collections.
+	/// </summary>
 	public static class XCollectionsUtil
 	{
 		#region IsNullOrEmpty
@@ -56,6 +59,14 @@ namespace Digillect.Collections
 		#endregion
 
 		#region RemoveAll`1 Extension
+		/// <summary>
+		/// Removes all items from the <paramref name="source"/> collection which match the <paramref name="predicate"/>.
+		/// </summary>
+		/// <typeparam name="T">The type of the collection's members.</typeparam>
+		/// <param name="source">The source collection.</param>
+		/// <param name="predicate">The predicate to apply to items in the collection.</param>
+		/// <returns><c>true</c> if any items were removed; otherwise, <c>false</c>.</returns>
+		/// <exception cref="ArgumentNullException">The <paramref name="source"/> parameter cannot be null.</exception>
 		public static bool RemoveAll<T>(this ICollection<T> source, Func<T, bool> predicate)
 			where T : XObject
 		{
@@ -65,6 +76,14 @@ namespace Digillect.Collections
 			return source.RemoveAll(source.Where(predicate).ToArray());
 		}
 
+		/// <summary>
+		/// Removes all items from the <paramref name="source"/> collection which are contained in the provided <paramref name="collection"/>.
+		/// </summary>
+		/// <typeparam name="T">The type of the collection's members.</typeparam>
+		/// <param name="source">The source collection.</param>
+		/// <param name="collection">The collection which contains the items to remove.</param>
+		/// <returns><c>true</c> if any items were removed; otherwise, <c>false</c>.</returns>
+		/// <exception cref="ArgumentNullException">The <paramref name="source"/> parameter cannot be null.</exception>
 		public static bool RemoveAll<T>(this ICollection<T> source, IEnumerable<T> collection)
 		{
 			if ( source == null )
@@ -90,6 +109,14 @@ namespace Digillect.Collections
 			return modified;
 		}
 
+		/// <summary>
+		/// Removes all items from the <paramref name="source"/> collection which have keys contained in the provided <paramref name="collection"/>.
+		/// </summary>
+		/// <typeparam name="T">The type of the collection's members.</typeparam>
+		/// <param name="source">The source collection.</param>
+		/// <param name="collection">The collection which contains the keys to remove.</param>
+		/// <returns><c>true</c> if any items were removed; otherwise, <c>false</c>.</returns>
+		/// <exception cref="ArgumentNullException">The <paramref name="source"/> parameter cannot be null.</exception>
 		public static bool RemoveAll<T>(this IXCollection<T> source, IEnumerable<XKey> collection)
 			where T : XObject
 		{
@@ -469,6 +496,13 @@ namespace Digillect.Collections
 		#endregion
 
 		#region FilteredList
+		/// <summary>
+		/// Creates a <see cref="FilteredList&lt;T&gt;"/> instance using the <paramref name="filter"/> as a filter.
+		/// </summary>
+		/// <typeparam name="T">Type of the collection's members.</typeparam>
+		/// <param name="collection">Source collection.</param>
+		/// <param name="filter">A function which performs actual filtering.</param>
+		/// <returns></returns>
 		public static XFilteredCollection<T> FilteredList<T>(IXList<T> collection, Func<T, bool> filter)
 			where T : XObject
 		{

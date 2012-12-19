@@ -58,6 +58,7 @@ namespace Digillect.Collections
 			_size = CalculateCollectionSize();
 		}
 
+		/// <inheritdoc/>
 		protected override void Dispose(bool disposing)
 		{
 			if ( disposing )
@@ -82,8 +83,13 @@ namespace Digillect.Collections
 		#endregion
 
 		#region Events
+		/// <inheritdoc/>
 		public override event NotifyCollectionChangedEventHandler CollectionChanged;
 
+		/// <summary>
+		/// Raises the <see cref="CollectionChanged" /> event.
+		/// </summary>
+		/// <param name="e">The <see cref="NotifyCollectionChangedEventArgs" /> instance containing the event data.</param>
 		protected virtual void OnCollectionChanged(NotifyCollectionChangedEventArgs e)
 		{
 			if ( _updateCount == 0 && CollectionChanged != null )
@@ -92,6 +98,7 @@ namespace Digillect.Collections
 			}
 		}
 
+		/// <inheritdoc/>
 		protected override void OnPropertyChanged(System.ComponentModel.PropertyChangedEventArgs e)
 		{
 			if ( _updateCount == 0 )
@@ -100,6 +107,7 @@ namespace Digillect.Collections
 			}
 		}
 
+		/// <inheritdoc/>
 		protected override void OnUpdated(EventArgs e)
 		{
 			if ( _updateCount == 0 )
@@ -110,11 +118,13 @@ namespace Digillect.Collections
 		#endregion
 
 		#region Properties
+		/// <inheritdoc/>
 		public override int Count
 		{
 			get { return _size; }
 		}
 
+		/// <inheritdoc/>
 		public override T this[int index]
 		{
 			get
@@ -175,6 +185,7 @@ namespace Digillect.Collections
 		#endregion
 
 		#region Methods
+		/// <inheritdoc/>
 		public override void BeginUpdate()
 		{
 			_updateCount++;
@@ -185,6 +196,7 @@ namespace Digillect.Collections
 			}
 		}
 
+		/// <inheritdoc/>
 		public override XBasedCollection<T> Clone(bool deep)
 		{
 			if ( _underlyingCollection == null )
@@ -195,6 +207,7 @@ namespace Digillect.Collections
 			return new XSubRangeCollection<T>(deep ? (IXList<T>) _underlyingCollection.Clone(true) : _underlyingCollection, _startIndex, _maxCount);
 		}
 
+		/// <inheritdoc/>
 		[ContractVerification(false)]
 		public override bool Contains(T item)
 		{
@@ -206,6 +219,7 @@ namespace Digillect.Collections
 			return _underlyingCollection.Skip(_startIndex).Take(_size).Any(x => x.Equals(item));
 		}
 
+		/// <inheritdoc/>
 		[ContractVerification(false)]
 		public override bool ContainsKey(XKey key)
 		{
@@ -217,6 +231,7 @@ namespace Digillect.Collections
 			return _underlyingCollection.Skip(_startIndex).Take(_size).Any(x => x.GetKey() == key);
 		}
 
+		/// <inheritdoc/>
 		public override void EndUpdate()
 		{
 			if ( _updateCount == 0 )
@@ -238,6 +253,7 @@ namespace Digillect.Collections
 			}
 		}
 
+		/// <inheritdoc/>
 		public override IEnumerator<T> GetEnumerator()
 		{
 #if CUSTOM_ENUMERATOR
@@ -268,6 +284,7 @@ namespace Digillect.Collections
 #endif
 		}
 
+		/// <inheritdoc/>
 		public override int IndexOf(XKey key)
 		{
 			if ( _underlyingCollection != null )
@@ -288,6 +305,7 @@ namespace Digillect.Collections
 			return -1;
 		}
 
+		/// <inheritdoc/>
 		public override int IndexOf(T item)
 		{
 			if ( _underlyingCollection != null )

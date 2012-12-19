@@ -38,11 +38,6 @@ namespace Digillect.Collections
 		{
 			return null;
 		}
-
-		IXCollection<T> IXCollection<T>.Clone(bool deep)
-		{
-			return null;
-		}
 		#endregion
 
 		#region IList<T> Members
@@ -119,6 +114,11 @@ namespace Digillect.Collections
 		{
 			add { }
 			remove { }
+		}
+
+		IXCollection<T> IXUpdatable<IXCollection<T>>.Clone(bool deep)
+		{
+			return null;
 		}
 
 		void IXUpdatable<IXCollection<T>>.BeginUpdate()

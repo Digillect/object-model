@@ -40,6 +40,7 @@ namespace Digillect.Collections
 			_originalCollection.Updated += OriginalCollection_Updated;
 		}
 
+		/// <inheritdoc/>
 		protected override void Dispose(bool disposing)
 		{
 			if ( disposing )
@@ -60,6 +61,7 @@ namespace Digillect.Collections
 		#endregion
 
 		#region IXList`1 Members
+		/// <inheritdoc/>
 		public override int IndexOf(XKey key)
 		{
 			return CalculateFilteredIndex(this._originalCollection.IndexOf(key));
@@ -67,8 +69,10 @@ namespace Digillect.Collections
 		#endregion
 
 		#region IXCollection`1 Members
+		/// <inheritdoc/>
 		public override event NotifyCollectionChangedEventHandler CollectionChanged;
 
+		/// <inheritdoc/>
 		public override XBasedCollection<T> Clone(bool deep)
 		{
 			IXList<T> collection = deep ? (IXList<T>) this._originalCollection.Clone(true) : this._originalCollection;
@@ -78,11 +82,13 @@ namespace Digillect.Collections
 		#endregion
 
 		#region IXUpdatable`1 Members
+		/// <inheritdoc/>
 		public override void BeginUpdate()
 		{
 			_originalCollection.BeginUpdate();
 		}
 
+		/// <inheritdoc/>
 		public override void EndUpdate()
 		{
 			_originalCollection.EndUpdate();
@@ -90,6 +96,7 @@ namespace Digillect.Collections
 		#endregion
 
 		#region IList`1 Members
+		/// <inheritdoc/>
 		public override T this[int index]
 		{
 			get
@@ -100,6 +107,7 @@ namespace Digillect.Collections
 			}
 		}
 
+		/// <inheritdoc/>
 		public override int IndexOf(T item)
 		{
 			return CalculateFilteredIndex( this._originalCollection.IndexOf( item ) );
@@ -107,6 +115,7 @@ namespace Digillect.Collections
 		#endregion
 
 		#region ICollection`1 Members
+		/// <inheritdoc/>
 		public override int Count
 		{
 			get
@@ -122,6 +131,7 @@ namespace Digillect.Collections
 			}
 		}
 
+		/// <inheritdoc/>
 		[ContractVerification(false)]
 		public override bool Contains(T item)
 		{
@@ -130,6 +140,7 @@ namespace Digillect.Collections
 		#endregion
 
 		#region IEnumerable`1 Members
+		/// <inheritdoc/>
 		public override IEnumerator<T> GetEnumerator()
 		{
 #if CUSTOM_ENUMERATOR

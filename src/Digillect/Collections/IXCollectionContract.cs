@@ -36,14 +36,6 @@ namespace Digillect.Collections
 			return null;
 		}
 
-		public IXCollection<T> Clone(bool deep)
-		{
-			Contract.Ensures(Contract.Result<IXCollection<T>>() != null);
-			//Contract.Ensures(Contract.Result<IXCollection<T>>().Equals(this));
-
-			return null;
-		}
-
 		#region ICollection<T> Members
 		void ICollection<T>.Add(T item)
 		{
@@ -97,6 +89,11 @@ namespace Digillect.Collections
 		{
 			add { }
 			remove { }
+		}
+
+		IXCollection<T> IXUpdatable<IXCollection<T>>.Clone(bool deep)
+		{
+			return null;
 		}
 
 		void IXUpdatable<IXCollection<T>>.BeginUpdate()

@@ -14,6 +14,13 @@ namespace Digillect
 
 		public abstract event EventHandler Updated;
 
+		public T Clone(bool deep)
+		{
+			Contract.Ensures(Contract.Result<T>() != null);
+
+			return default(T);
+		}
+
 		public abstract void BeginUpdate();
 		public abstract void EndUpdate();
 

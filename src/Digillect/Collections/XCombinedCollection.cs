@@ -52,6 +52,7 @@ namespace Digillect.Collections
 			}
 		}
 
+		/// <inheritdoc/>
 		protected override void Dispose(bool disposing)
 		{
 			if ( disposing )
@@ -76,8 +77,13 @@ namespace Digillect.Collections
 		#endregion
 
 		#region Events
+		/// <inheritdoc/>
 		public override event NotifyCollectionChangedEventHandler CollectionChanged;
 
+		/// <summary>
+		/// Raises the <see cref="CollectionChanged" /> event.
+		/// </summary>
+		/// <param name="e">The <see cref="NotifyCollectionChangedEventArgs" /> instance containing the event data.</param>
 		protected virtual void OnCollectionChanged(NotifyCollectionChangedEventArgs e)
 		{
 			if ( _updateCount == 0 && CollectionChanged != null )
@@ -86,6 +92,7 @@ namespace Digillect.Collections
 			}
 		}
 
+		/// <inheritdoc/>
 		protected override void OnPropertyChanged(System.ComponentModel.PropertyChangedEventArgs e)
 		{
 			if ( _updateCount == 0 )
@@ -94,6 +101,7 @@ namespace Digillect.Collections
 			}
 		}
 
+		/// <inheritdoc/>
 		protected override void OnUpdated(EventArgs e)
 		{
 			if ( _updateCount == 0 )
@@ -104,6 +112,7 @@ namespace Digillect.Collections
 		#endregion
 
 		#region Properties
+		/// <inheritdoc/>
 		public override int Count
 		{
 			get
@@ -117,6 +126,7 @@ namespace Digillect.Collections
 			}
 		}
 
+		/// <inheritdoc/>
 		public override T this[int index]
 		{
 			get
@@ -139,6 +149,7 @@ namespace Digillect.Collections
 		#endregion
 
 		#region Methods
+		/// <inheritdoc/>
 		public override void BeginUpdate()
 		{
 			_updateCount++;
@@ -149,6 +160,7 @@ namespace Digillect.Collections
 			}
 		}
 
+		/// <inheritdoc/>
 		public override XBasedCollection<T> Clone(bool deep)
 		{
 			IList<IXList<T>> collections;
@@ -170,18 +182,21 @@ namespace Digillect.Collections
 			return (XBasedCollection<T>) Activator.CreateInstance(GetType(), collections);
 		}
 
+		/// <inheritdoc/>
 		[ContractVerification(false)]
 		public override bool Contains(T item)
 		{
 			return _collections.Any(x => x.Contains(item));
 		}
 
+		/// <inheritdoc/>
 		[ContractVerification(false)]
 		public override bool ContainsKey(XKey key)
 		{
 			return _collections.Any(x => x.ContainsKey(key));
 		}
 
+		/// <inheritdoc/>
 		public override void CopyTo(T[] array, int arrayIndex)
 		{
 			foreach ( var c in _collections )
@@ -192,6 +207,7 @@ namespace Digillect.Collections
 			}
 		}
 
+		/// <inheritdoc/>
 		public override void EndUpdate()
 		{
 			if ( _updateCount == 0 )
@@ -213,6 +229,7 @@ namespace Digillect.Collections
 			}
 		}
 
+		/// <inheritdoc/>
 		public override IEnumerator<T> GetEnumerator()
 		{
 			int version = _version;
@@ -228,11 +245,13 @@ namespace Digillect.Collections
 			}
 		}
 
+		/// <inheritdoc/>
 		public override IEnumerable<XKey> GetKeys()
 		{
 			return _collections.SelectMany(x => x.GetKeys());
 		}
 
+		/// <inheritdoc/>
 		public override int IndexOf(XKey key)
 		{
 			int count = 0;
@@ -252,6 +271,7 @@ namespace Digillect.Collections
 			return -1;
 		}
 
+		/// <inheritdoc/>
 		public override int IndexOf(T item)
 		{
 			int count = 0;

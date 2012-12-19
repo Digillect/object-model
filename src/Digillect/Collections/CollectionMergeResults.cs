@@ -11,6 +11,9 @@ namespace Digillect.Collections
 #endif
 	public sealed class CollectionMergeResults
 	{
+		/// <summary>
+		/// Represents an empty merge result.
+		/// </summary>
 		[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA2104:DoNotDeclareReadOnlyMutableReferenceTypes", Justification = "Indeed it is immutable")]
 		public static readonly CollectionMergeResults Empty = new CollectionMergeResults();
 

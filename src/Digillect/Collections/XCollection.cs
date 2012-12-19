@@ -196,23 +196,6 @@ namespace Digillect.Collections
 			return derived;
 		}
 
-#if false
-		/// <summary>
-		/// Gets an item with the specific key.
-		/// </summary>
-		/// <param name="key">The key of the item to find.</param>
-		/// <returns>An item with the specified key if the item exists in the <b>collection</b>; otherwise, <see langword="null"/>.</returns>
-		[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Contracts", "CC1055", Justification = "Validation performed in IndexOf method")]
-		public T Find(XKey key)
-		{
-			int index = IndexOf(key);
-
-			Contract.Assume(index < this.Items.Count);
-
-			return index == -1 ? null : this.Items[index];
-		}
-#endif
-
 		public void ForEach(Action<T> action)
 		{
 			if ( action == null )
@@ -228,6 +211,7 @@ namespace Digillect.Collections
 			}
 		}
 
+		/// <inheritdoc/>
 		public IEnumerable<XKey> GetKeys()
 		{
 			return this.Items.Select(x => x.GetKey());
@@ -322,7 +306,7 @@ namespace Digillect.Collections
 #endif
 
 		#region Clone Methods
-		IXCollection<T> IXCollection<T>.Clone( bool deep )
+		IXCollection<T> IXUpdatable<IXCollection<T>>.Clone(bool deep)
 		{
 			return Clone( deep );
 		}
@@ -343,7 +327,13 @@ namespace Digillect.Collections
 			return clone;
 		}
 
-		protected virtual void ProcessClone( XCollection<T> clone, bool deep )
+		/// <summary>
+		/// A helper for the <see cref="Clone" /> method.
+		/// </summary>
+		/// <param name="clone">A copy of this instance to process.</param>
+		/// <param name="deep"><see langword="true"/> to deep-clone inner collections (including their members), <see langword="false"/> to clone only inner collections but not their members.</param>
+		/// <exception cref="ArgumentNullException">The <paramref name="clone"/> parameter cannot be null.</exception>
+		protected virtual void ProcessClone(XCollection<T> clone, bool deep)
 		{
 			if ( clone == null )
 			{
@@ -361,6 +351,10 @@ namespace Digillect.Collections
 		}
 		#endregion
 
+		/// <summary>
+		/// A helper for the <see cref="Clone"/> method.
+		/// </summary>
+		/// <returns>A new object which has exactly the same type as this instance.</returns>
 		[EditorBrowsable( EditorBrowsableState.Advanced )]
 		[Pure]
 		protected virtual XCollection<T> CreateInstanceOfSameType()
@@ -507,6 +501,7 @@ namespace Digillect.Collections
 		#endregion
 
 		#region IEquatable`1 Members
+		/// <inheritdoc/>
 		public virtual bool Equals(IXCollection<T> other)
 		{
 			if ( other == null || this.Items.Count != other.Count )
@@ -527,6 +522,7 @@ namespace Digillect.Collections
 			return true;
 		}
 
+		/// <inheritdoc/>
 		public virtual bool Equals(IXList<T> other)
 		{
 			if ( other == null || this.Items.Count != other.Count )

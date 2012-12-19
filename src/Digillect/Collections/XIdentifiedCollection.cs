@@ -30,7 +30,7 @@ namespace Digillect.Collections
 
 		#region Constructor
 		/// <summary>
-		/// Initializes new instance of the <see cref="XIdentifiedCollection&lt;TId,TObject&gt;"/> class.
+		/// Initializes a new instance of the <see cref="XIdentifiedCollection&lt;TId,TObject&gt;"/> class.
 		/// </summary>
 		public XIdentifiedCollection()
 		{

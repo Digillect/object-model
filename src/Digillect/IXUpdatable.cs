@@ -13,7 +13,18 @@ namespace Digillect
 	public interface IXUpdatable<T>
 		where T : IXUpdatable<T>
 	{
+		/// <summary>
+		/// Occurs when this instance is updated using the <see cref="Update"/> method or as a result of the <see cref="EndUpdate"/> method.
+		/// </summary>
 		event EventHandler Updated;
+
+		/// <summary>
+		/// Creates a new object that is a copy of the current instance.
+		/// </summary>
+		/// <param name="deep"><see langword="true"/> to deep-clone inner collectios (including their members), <see langword="false"/> to clone only inner collections but not their members.</param>
+		/// <returns>A new object that is a copy of this instance.</returns>
+		[Pure]
+		T Clone(bool deep);
 
 		/// <summary>
 		/// Begins the mass-update operation.

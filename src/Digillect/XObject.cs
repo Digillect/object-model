@@ -150,16 +150,16 @@ namespace Digillect
 #endif
 
 		#region Clone/Update
-		public XObject Clone( bool deep )
+		/// <inheritdoc/>
+		public virtual XObject Clone(bool deep)
 		{
-			Contract.Ensures(Contract.Result<XObject>() != null);
-
 			XObject clone = CreateInstanceOfSameType();
 
 			clone.ProcessCopy( this, true, deep );
 
 			return clone;
 		}
+
 		/// <summary>
 		/// Determines whether update operation is needed.
 		/// </summary>
@@ -184,7 +184,7 @@ namespace Digillect
 		/// Updates object from the specified source.
 		/// </summary>
 		/// <param name="source">The source.</param>
-		public void Update(XObject source)
+		public virtual void Update(XObject source)
 		{
 			if ( source == null )
 			{
@@ -215,7 +215,7 @@ namespace Digillect
 		}
 
 		/// <summary>
-		/// Performs complex clone/update procedure for XObject-derived property.
+		/// Performs a complex clone/update procedure for a compatible property.
 		/// </summary>
 		/// <typeparam name="T">Type of the property.</typeparam>
 		/// <param name="thisField">Reference to the local field.</param>
@@ -224,75 +224,21 @@ namespace Digillect
 		/// <param name="deepCloning"><c>true</c> if performing deep cloning, otherwise <c>false</c>.</param>
 		[ContractVerification(false)]
 		[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1045:DoNotPassTypesByReference", MessageId = "0#")]
-		protected static void ProcessCopyProperty<T>(ref T thisField, T otherField, bool cloning, bool deepCloning) where T : XObject
+		protected static void ProcessCopyProperty<T>(ref T thisField, T otherField, bool cloning, bool deepCloning) where T : class, IXUpdatable<T>
 		{
 			Contract.Ensures(Object.Equals(thisField, otherField));
 
-			if( cloning )
+			if ( cloning || thisField == null )
 			{
-				thisField = otherField == null ? null : (T) otherField.Clone( deepCloning );
+				thisField = otherField == null ? null : otherField.Clone(cloning && deepCloning);
+			}
+			else if ( otherField == null )
+			{
+				thisField = null;
 			}
 			else
 			{
-				if( thisField != null )
-				{
-					if( otherField != null )
-					{
-						thisField.Update( otherField );
-					}
-					else
-					{
-						thisField = null;
-					}
-				}
-				else
-				{
-					if( otherField != null )
-					{
-						thisField = (T) otherField.Clone( false );
-					}
-				}
-			}
-		}
-
-		/// <summary>
-		/// Performs complex clone/update procedure for IXCollection-derived property.
-		/// </summary>
-		/// <typeparam name="T">Type of the property.</typeparam>
-		/// <param name="thisField">Reference to the local field.</param>
-		/// <param name="otherField">Same field in other instance.</param>
-		/// <param name="cloning"><c>true</c> if cloning source, otherwise <c>false</c>.</param>
-		/// <param name="deepCloning"><c>true</c> if performing deep cloning, otherwise <c>false</c>.</param>
-		[ContractVerification(false)]
-		[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1045:DoNotPassTypesByReference", MessageId = "0#")]
-		protected static void ProcessCopyProperty<T>(ref IXCollection<T> thisField, IXCollection<T> otherField, bool cloning, bool deepCloning)
-		{
-			Contract.Ensures(Object.Equals(thisField, otherField));
-
-			if( cloning )
-			{
-				thisField = otherField == null ? null : otherField.Clone(deepCloning);
-			}
-			else
-			{
-				if( thisField != null )
-				{
-					if( otherField != null )
-					{
-						thisField.Update( otherField );
-					}
-					else
-					{
-						thisField = null;
-					}
-				}
-				else
-				{
-					if( otherField != null )
-					{
-						thisField = otherField.Clone(false);
-					}
-				}
+				thisField.Update(otherField);
 			}
 		}
 
@@ -308,6 +254,10 @@ namespace Digillect
 			return obj != null && obj.GetType() == GetType();
 		}
 
+		/// <summary>
+		/// A helper for the <see cref="Clone"/> method.
+		/// </summary>
+		/// <returns>A new object which has exactly the same type as this instance.</returns>
 		[EditorBrowsable( EditorBrowsableState.Advanced )]
 		[Pure]
 #if false // !(SILVERLIGHT || WINDOWS8)
