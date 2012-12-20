@@ -145,8 +145,7 @@ namespace Digillect
 		/// </summary>
 		/// <param name="type">Object type.</param>
 		/// <returns>Created key.</returns>
-		[EditorBrowsable( EditorBrowsableState.Never )]
-		public static XKey CreateKey( Type type )
+		protected static XKey CreateKey( Type type )
 		{
 			Contract.Requires( type != null );
 #if !WINDOWS8

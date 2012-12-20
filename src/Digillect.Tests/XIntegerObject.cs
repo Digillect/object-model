@@ -60,13 +60,7 @@ namespace Digillect.Tests
 
 		public static XKey CreateKey( int id )
 		{
-			return CreateKey( id, typeof( XIntegerObject ) );
-		}
-
-		[EditorBrowsable( EditorBrowsableState.Never )]
-		public static XKey CreateKey( int id, Type type )
-		{
-			return XObject<int>.CreateKey( id, type );
+			return XObject<int>.CreateKey( id, typeof( XIntegerObject ) );
 		}
 	}
 }
