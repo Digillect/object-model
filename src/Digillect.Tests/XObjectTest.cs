@@ -44,5 +44,15 @@ namespace Digillect.Tests
 
 			Assert.Equal(obj, actual);
 		}
+
+		[Fact]
+		public void CreateKeyTest()
+		{
+			var originalObject = XIntegerObject.Create();
+			var originalKey = originalObject.GetKey();
+			var createdKey = XIntegerObject.CreateKey( originalObject.Id );
+
+			Assert.Equal( originalKey, createdKey );
+		}
 	}
 }

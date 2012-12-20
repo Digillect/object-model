@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Diagnostics.Contracts;
+using System.Reflection;
 using System.Runtime.Serialization;
 
 using Digillect.Collections;
@@ -137,6 +138,24 @@ namespace Digillect
 			Contract.Ensures(Contract.Result<XKey>() != null);
 
 			return new RootKey(GetType());
+		}
+
+		/// <summary>
+		/// Creates key for the specified type of the object.
+		/// </summary>
+		/// <param name="type">Object type.</param>
+		/// <returns>Created key.</returns>
+		protected static XKey CreateKey( Type type )
+		{
+			Contract.Requires( type != null );
+#if !WINDOWS8
+			Contract.Requires( typeof( XObject ).IsAssignableFrom( type ) );
+#else
+			Contract.Requires( typeof( XObject ).GetTypeInfo().IsAssignableFrom( type.GetTypeInfo() ) );
+#endif
+			Contract.Ensures( Contract.Result<XKey>() != null );
+
+			return new RootKey( type );
 		}
 		#endregion
 
