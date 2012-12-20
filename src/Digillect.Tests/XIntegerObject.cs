@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Text;
 
@@ -55,6 +56,17 @@ namespace Digillect.Tests
 			}
 
 			return ids;
+		}
+
+		public static XKey CreateKey( int id )
+		{
+			return CreateKey( id, typeof( XIntegerObject ) );
+		}
+
+		[EditorBrowsable( EditorBrowsableState.Never )]
+		public static XKey CreateKey( int id, Type type )
+		{
+			return XObject<int>.CreateKey( id, type );
 		}
 	}
 }
