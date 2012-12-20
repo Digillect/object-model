@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.Diagnostics.Contracts;
 using System.Runtime.Serialization;
@@ -60,6 +61,30 @@ namespace Digillect
 					OnPropertyChanged( "Id" );
 				}
 			}
+		}
+		#endregion
+
+		#region CreateKey
+		/// <summary>
+		/// Creates key for the specified identifier.
+		/// </summary>
+		/// <param name="id">Object identifier.</param>
+		/// <returns>Created key.</returns>
+		public static XKey CreateKey( TId id )
+		{
+			return CreateKey( id, typeof( XObject<TId> ) );
+		}
+
+		/// <summary>
+		/// Creates key for the specified identifier.
+		/// </summary>
+		/// <param name="id">Object identifier.</param>
+		/// <param name="type">Type of the target object.</param>
+		/// <returns>Created key.</returns>
+		[EditorBrowsable( EditorBrowsableState.Never )]
+		public static XKey CreateKey( TId id, Type type )
+		{
+			return XKey.From( id, CreateKey( type ) );
 		}
 		#endregion
 
