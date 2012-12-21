@@ -14,12 +14,12 @@ namespace Digillect.Tests
 		[Fact]
 		public void cache_should_return_object_by_id()
 		{
-			var cache = new XCache<int, XIntegerObject>();
+			var cache = new XCache<XIntegerObject>();
 			var original = XIntegerObject.Create();
 			
-			cache.CacheObject( original );
+			cache.Cache( original );
 
-			var retrieved = cache.Get( original.Id );
+			var retrieved = cache.Get( original.GetKey() );
 
 			Assert.Same( original, retrieved );
 		}
@@ -27,13 +27,13 @@ namespace Digillect.Tests
 		[Fact]
 		public void cache_should_return_cached_object()
 		{
-			var cache = new XCache<int, XIntegerObject>();
+			var cache = new XCache<XIntegerObject>();
 			var original = XIntegerObject.Create();
 			var second = original.Clone();
 
-			cache.CacheObject( original );
+			cache.Cache( original );
 
-			var cached = cache.CacheObject( second );
+			var cached = cache.Cache( second );
 
 			Assert.Same( original, cached );
 			Assert.NotSame( second, cached );
@@ -42,11 +42,11 @@ namespace Digillect.Tests
 		[Fact]
 		public void cache_should_return_equal_collection_for_the_same_query()
 		{
-			var cache = new XCache<int, XIntegerObject>();
+			var cache = new XCache<XIntegerObject>();
 			var query = new XQuery<XIntegerObject>();
 			var original = new XCollection<XIntegerObject>( XIntegerObject.CreateSeries( 3 ) );
 
-			cache.CacheQuery( query, original, this );
+			cache.Cache( query, original, this );
 
 			var cached = cache.Get( query );
 
@@ -56,11 +56,11 @@ namespace Digillect.Tests
 		[Fact]
 		public void cache_should_return_equal_collection_for_the_equal_query()
 		{
-			var cache = new XCache<int, XIntegerObject>();
+			var cache = new XCache<XIntegerObject>();
 			var query = new XQuery<XIntegerObject>( "hello" );
 			var original = new XCollection<XIntegerObject>( XIntegerObject.CreateSeries( 3 ) );
 
-			cache.CacheQuery( query, original, this );
+			cache.Cache( query, original, this );
 
 			var cached = cache.Get( new XQuery<XIntegerObject>( "hello" ) );
 
@@ -70,7 +70,7 @@ namespace Digillect.Tests
 		[Fact]
 		public void cache_should_convert_query_results()
 		{
-			var cache = new XCache<int, XIntegerObject>();
+			var cache = new XCache<XIntegerObject>();
 			var original = new XCollection<XIntegerObject>( XIntegerObject.CreateSeries( 100 ) );
 			var queryForAll = new IntegerQuery( "all" );
 			var queryForOdd = new IntegerQuery( "odd" );
@@ -80,7 +80,7 @@ namespace Digillect.Tests
 			queryForOdd.MatchFunction = o => o.Id % 2 != 0;
 			queryForEven.MatchFunction = o => o.Id % 2 == 0;
 
-			cache.CacheQuery( queryForAll, original, this );
+			cache.Cache( queryForAll, original, this );
 
 			var odd = cache.Get( queryForOdd, this );
 			var even = cache.Get( queryForEven, this );

@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Diagnostics.Contracts;
 using System.Linq;
 
 #if WINDOWS8
@@ -14,13 +15,11 @@ using Digillect.Collections;
 namespace Digillect
 {
 	[System.Diagnostics.CodeAnalysis.SuppressMessage( "Microsoft.Naming", "CA1710:IdentifiersShouldHaveCorrectSuffix" )]
-	public class XCache<TId, TObject, TCollection> : IDisposable, IEnumerable<TObject>
-		where TId : IEquatable<TId>, IComparable<TId>
-		where TObject : XObject<TId>
-		where TCollection : IXCollection<TObject>, new()
+	public class XCache<T> : IDisposable, IEnumerable<T>
+		where T : XObject
 	{
-		private readonly IDictionary<TId, WeakReference> _objectCache = new Dictionary<TId, WeakReference>();
-		private readonly IDictionary<XQuery<TObject>, XCachedQuery> _queryCache = new Dictionary<XQuery<TObject>, XCachedQuery>();
+		private readonly IDictionary<XKey, WeakReference> _objectCache = new Dictionary<XKey, WeakReference>();
+		private readonly IDictionary<XQuery<T>, XCachedQuery> _queryCache = new Dictionary<XQuery<T>, XCachedQuery>();
 #if WINDOWS8
 		private ThreadPoolTimer _cleanupTimer;
 #else
@@ -81,21 +80,36 @@ namespace Digillect
 
 		#region Public Methods : Objects
 		/// <summary>
-		/// Возвращает существующий объект из кеша.
+		/// Returns cached object, if any.
 		/// </summary>
-		public TObject Get( TId id )
+		public T Get( XKey key )
 		{
-			return GetCachedObjectEx( id );
+			if( key == null )
+			{
+				throw new ArgumentNullException( "key" );
+			}
+
+			Contract.EndContractBlock();
+
+			return GetCachedObjectEx( key );
 		}
 
-		public TObject CacheObject( TObject obj )
+		/// <summary>
+		/// Stores object in cache or updates existing object.
+		/// </summary>
+		/// <param name="obj">Object to cache.</param>
+		/// <returns>Cached object.</returns>
+		public T Cache( T obj )
 		{
 			if( obj == null )
 			{
 				throw new ArgumentNullException( "obj" );
 			}
 
-			TObject cached = GetCachedObjectEx( obj.Id );
+			Contract.Ensures( Contract.Result<T>() != null );
+
+			XKey key = obj.GetKey();
+			T cached = GetCachedObjectEx( key );
 
 			if( cached == null )
 			{
@@ -108,7 +122,7 @@ namespace Digillect
 
 			foreach( XCachedQuery cq in new List<XCachedQuery>( _queryCache.Values ) )
 			{
-				var eventArgs = new XCacheMatchEventArgs<TObject>( cq.Query, cached );
+				var eventArgs = new XCacheMatchEventArgs<T>( cq.Query, cached );
 				bool match;
 
 				OnMatch( eventArgs );
@@ -129,16 +143,16 @@ namespace Digillect
 
 				if( match )
 				{
-					if( !cq.List.Any( o => cached.Id.Equals( o.Id ) ) )
+					if( !cq.Items.ContainsKey( key ) )
 					{
-						cq.List.Add( cached );
+						cq.Items.Add( cached );
 					}
 				}
 				else
 				{
-					if( cq.List.Any( o => cached.Id.Equals( o.Id ) ) )
+					if( cq.Items.ContainsKey( key ) )
 					{
-						cq.List.Remove( cached.GetKey() );
+						cq.Items.Remove( key );
 					}
 				}
 			}
@@ -146,61 +160,87 @@ namespace Digillect
 			return cached;
 		}
 
-		public TCollection CacheCollection( IEnumerable<TObject> collection )
+		public IXList<T> Cache( IEnumerable<T> collection )
 		{
 			if( collection == null )
 			{
 				throw new ArgumentNullException( "collection" );
 			}
 
-			TCollection cached = new TCollection();
+			Contract.Ensures( Contract.Result<IXList<T>>() != null );
 
-			foreach( TObject o in collection )
+			XCollection<T> cached = new XCollection<T>();
+
+			foreach( T item in collection )
 			{
-				cached.Add( CacheObject( o ) );
+				cached.Add( Cache( item ) );
 			}
 
 			return cached;
 		}
 
-		public bool UncacheObject( TId id )
+		public bool Uncache( XKey key )
 		{
+			if( key == null )
+			{
+				throw new ArgumentNullException( "parameter" );
+			}
+
+			Contract.EndContractBlock();
+
 			foreach( XCachedQuery cq in new List<XCachedQuery>( _queryCache.Values ) )
 			{
-				var cached = cq.List.FirstOrDefault( o => id.Equals( o.Id ) );
+				var index = cq.Items.IndexOf( key );
 
-				if( cached != default( TObject ) )
+				if( index >= 0 )
 				{
-					cq.List.Remove( cached );
+					cq.Items.RemoveAt( index );
 				}
 			}
 
-			return UncacheObjectEx( id );
+			return UncacheObjectEx( key );
 		}
 
-		public bool Contains( TId id )
+		public bool Contains( XKey key )
 		{
-			return GetCachedObjectEx( id ) != null;
+			if( key == null )
+			{
+				throw new ArgumentNullException( "key" );
+			}
+
+			Contract.EndContractBlock();
+
+			return GetCachedObjectEx( key ) != null;
 		}
 		#endregion
 		#region Public Methods : Queries
 		/// <summary>
-		/// Возвращает результаты запроса, если запрос был прокеширован, иначе <see langword="null"/>.
+		/// Returns cached query result, if any.
 		/// </summary>
-		public TCollection Get( XQuery<TObject> query )
+		public IXList<T> Get( XQuery<T> query )
 		{
-			XCachedQuery cq = GetCachedQuery( query );
+			if( query == null )
+			{
+				throw new ArgumentNullException( "query" );
+			}
 
-			return cq == null ? default( TCollection ) : cq.List;
+			Contract.EndContractBlock();
+
+			XCachedQuery cq = _queryCache.ContainsKey( query ) ? _queryCache[query] : null;
+
+			return cq == null ? null : cq.Items;
 		}
 
-		/// <summary>
-		/// Возвращает результаты запроса, если они есть в кеше. Если <paramref name="cookie"/> не равен <see langword="null"/>,
-		/// то cookie добавляется к соответствующему <see cref="XCachedQuery"/>.
-		/// </summary>
-		public TCollection Get( XQuery<TObject> query, object cookie )
+		public IXList<T> Get( XQuery<T> query, object cookie )
 		{
-			XCachedQuery cq = GetCachedQuery( query );
+			if( query == null )
+			{
+				throw new ArgumentNullException( "query" );
+			}
+
+			Contract.EndContractBlock();
+
+			XCachedQuery cq = _queryCache.ContainsKey( query ) ? _queryCache[query] : null;
 
 			if( cq != null )
 			{
@@ -213,7 +253,7 @@ namespace Digillect
 			{
 				if( !QueriesConversionEnabled )
 				{
-					return default( TCollection );
+					return null;
 				}
 
 				foreach( XCachedQuery ccq in _queryCache.Values )
@@ -227,10 +267,10 @@ namespace Digillect
 
 				if( cq == null )
 				{
-					return default( TCollection );
+					return null;
 				}
 
-				TCollection converted = ConvertQueryResults( cq.List, query );
+				var converted = ConvertQueryResults( cq.Items, query );
 
 				if( cookie == null )
 				{
@@ -245,45 +285,7 @@ namespace Digillect
 				}
 			}
 
-			return cq.List;
-		}
-
-		[EditorBrowsable( EditorBrowsableState.Advanced )]
-		public XCachedQuery GetCachedQuery( XQuery<TObject> query )
-		{
-			if( query == null )
-			{
-				throw new ArgumentNullException( "query" );
-			}
-
-			return _queryCache.ContainsKey( query ) ? _queryCache[query] : null;
-		}
-
-		[EditorBrowsable( EditorBrowsableState.Advanced )]
-		public XCachedQuery AddCachedQuery( XQuery<TObject> query, TCollection list, object cookie )
-		{
-			XCachedQuery cq = GetCachedQuery( query );
-
-			if( cq != null )
-			{
-				cq.AddCookie( cookie );
-			}
-			else
-			{
-				if( Equals( list, default( TCollection ) ) )
-				{
-					list = new TCollection();
-				}
-
-				cq = new XCachedQuery( query, list, cookie );
-
-				lock( _queryCache )
-				{
-					_queryCache.Add( cq.Query, cq );
-				}
-			}
-
-			return cq;
+			return cq.Items;
 		}
 
 		/// <summary>
@@ -291,11 +293,23 @@ namespace Digillect
 		/// <see cref="XCachedQuery"/> или добавляет <paramref name="cookie"/> к уже существующему.
 		/// </summary>
 		/// <returns>Возвращает список объектов.</returns>
-		public TCollection CacheQuery( XQuery<TObject> query, IEnumerable<TObject> list, object cookie )
+		public IXList<T> Cache( XQuery<T> query, IEnumerable<T> list, object cookie )
 		{
-			TCollection cached = CacheCollection( list );
+			if( query == null )
+			{
+				throw new ArgumentNullException( "query" );
+			}
 
-			XCachedQuery cq = GetCachedQuery( query );
+			if( list == null )
+			{
+				throw new ArgumentNullException( "list" );
+			}
+
+			Contract.Ensures( Contract.Result<IXList<T>>() != null );
+
+			var cached = Cache( list );
+
+			XCachedQuery cq = _queryCache.ContainsKey( query ) ? _queryCache[query] : null;
 
 			if( cq != null )
 			{
@@ -319,12 +333,19 @@ namespace Digillect
 				}
 			}
 
-			return cq.List;
+			return cq.Items;
 		}
 
-		public bool ReleaseCachedQuery( XQuery<TObject> query, object cookie )
+		public bool Uncache( XQuery<T> query, object cookie )
 		{
-			XCachedQuery cq = GetCachedQuery( query );
+			if( query == null )
+			{
+				throw new ArgumentNullException( "query" );
+			}
+
+			Contract.EndContractBlock();
+
+			XCachedQuery cq = _queryCache.ContainsKey( query ) ? _queryCache[query] : null;
 
 			if( cq == null )
 			{
@@ -346,13 +367,27 @@ namespace Digillect
 			return false;
 		}
 
-		public bool Contains( XQuery<TObject> query )
+		public bool Contains( XQuery<T> query )
 		{
+			if( query == null )
+			{
+				throw new ArgumentNullException( "query" );
+			}
+
+			Contract.EndContractBlock();
+
 			return Contains( query, false );
 		}
 
-		public bool Contains( XQuery<TObject> query, bool ignoreConversion )
+		public bool Contains( XQuery<T> query, bool ignoreConversion )
 		{
+			if( query == null )
+			{
+				throw new ArgumentNullException( "query" );
+			}
+
+			Contract.EndContractBlock();
+
 			if( _queryCache.ContainsKey( query ) )
 			{
 				return true;
@@ -385,11 +420,11 @@ namespace Digillect
 		#endregion
 
 		#region Events and Event Handlers
-		public event EventHandler<XCacheObjectEventArgs<TObject>> ObjectCached;
-		//public event EventHandler<XCacheObjectEventArgs<TObject>> ObjectUncached;
-		public event EventHandler<XCacheMatchEventArgs<TObject>> Match;
+		public event EventHandler<XCacheObjectEventArgs<T>> ObjectCached;
+		public event EventHandler<XCacheObjectEventArgs<T>> ObjectUncached;
+		public event EventHandler<XCacheMatchEventArgs<T>> Match;
 
-		protected virtual void OnObjectCached( XCacheObjectEventArgs<TObject> e )
+		protected virtual void OnObjectCached( XCacheObjectEventArgs<T> e )
 		{
 			if( ObjectCached != null )
 			{
@@ -397,17 +432,15 @@ namespace Digillect
 			}
 		}
 
-#if false
-		protected virtual void OnObjectUncached( XCacheObjectEventArgs<TObject> e )
+		protected virtual void OnObjectUncached( XCacheObjectEventArgs<T> e )
 		{
 			if( ObjectUncached != null )
 			{
 				ObjectUncached( this, e );
 			}
 		}
-#endif
 
-		protected virtual void OnMatch( XCacheMatchEventArgs<TObject> e )
+		protected virtual void OnMatch( XCacheMatchEventArgs<T> e )
 		{
 			if( Match != null )
 			{
@@ -417,70 +450,74 @@ namespace Digillect
 		#endregion
 
 		#region Object Cache Private Methods
-		private TObject GetCachedObjectEx( TId id )
+		private T GetCachedObjectEx( XKey key )
 		{
-			if( !_objectCache.ContainsKey( id ) )
+			if( !_objectCache.ContainsKey( key ) )
 			{
 				return null;
 			}
 
-			WeakReference r = _objectCache[id];
+			WeakReference r = _objectCache[key];
 
 			if( r.IsAlive )
 			{
-				return (TObject) r.Target;
+				return (T) r.Target;
 			}
 
 			lock( _objectCache )
 			{
-				_objectCache.Remove( id );
+				_objectCache.Remove( key );
 			}
+
+			OnObjectUncached( new XCacheObjectEventArgs<T>( key, null ) );
 
 			return null;
 		}
 
-		private TObject CacheObjectEx( TObject o )
+		private T CacheObjectEx( T o )
 		{
+			XKey key = o.GetKey();
+
 			lock( _objectCache )
 			{
-				_objectCache[o.Id] = new WeakReference( o );
+				_objectCache[key] = new WeakReference( o );
 			}
 
-			OnObjectCached( new XCacheObjectEventArgs<TObject>( o ) );
+			OnObjectCached( new XCacheObjectEventArgs<T>( key, o ) );
 
 			return o;
 		}
 
-		private bool UncacheObjectEx( TId id )
+		private bool UncacheObjectEx( XKey key )
 		{
 			WeakReference r;
 
 			lock( _objectCache )
 			{
-				if( !_objectCache.ContainsKey( id ) )
+				if( !_objectCache.ContainsKey( key ) )
 				{
 					return false;
 				}
 
-				r = _objectCache[id];
+				r = _objectCache[key];
 
-				if( !_objectCache.Remove( id ) )
+				if( !_objectCache.Remove( key ) )
 				{
 					return false;
 				}
 			}
 
-			//OnObjectUncached( new XCacheObjectEventArgs<TId, TObject>( id, r.IsAlive ? (TObject) r.Target : null ) );
+			OnObjectUncached( new XCacheObjectEventArgs<T>( key, r.IsAlive ? (T) r.Target : null ) );
 
 			return true;
 		}
 		#endregion
 		#region Queries Private Methods
-		private static TCollection ConvertQueryResults( IEnumerable<TObject> original, XQuery<TObject> query )
+		private static XCollection<T> ConvertQueryResults( IEnumerable<T> original, XQuery<T> query )
 		{
-			TCollection result = new TCollection();
+			XCollection<T> result = new XCollection<T>();
 
-			foreach( TObject o in original )
+			foreach( T o in original )
 			{
 				if( query.Match( o ) )
 				{
@@ -508,8 +545,8 @@ namespace Digillect
 				return;
 			}
 
-			List<XQuery<TObject>> queriesToRemove = new List<XQuery<TObject>>();
-			List<TId> objectsToRemove = new List<TId>();
+			List<XQuery<T>> queriesToRemove = new List<XQuery<T>>();
+			List<XKey> objectsToRemove = new List<XKey>();
 
 			lock( _objectCache )
 			{
@@ -517,7 +554,7 @@ namespace Digillect
 
 				lock( _queryCache )
 				{
-					foreach( KeyValuePair<XQuery<TObject>, XCachedQuery> entry in _queryCache )
+					foreach( var entry in _queryCache )
 					{
 						if( entry.Value.CookiesCount == 0 )
 						{
@@ -525,7 +562,7 @@ namespace Digillect
 						}
 					}
 
-					foreach( KeyValuePair<TId, WeakReference> entry in _objectCache )
+					foreach( var entry in _objectCache )
 					{
 						if( !entry.Value.IsAlive )
 						{
@@ -533,14 +570,14 @@ namespace Digillect
 						}
 					}
 
-					foreach( XQuery<TObject> key in queriesToRemove )
+					foreach( var key in queriesToRemove )
 					{
 						_queryCache.Remove( key );
 					}
 
-					foreach( TId key in objectsToRemove )
+					foreach( var key in objectsToRemove )
 					{
-						//OnObjectUncached( new XCacheObjectEventArgs<TId, TObject>( key, null ) );
+						OnObjectUncached( new XCacheObjectEventArgs<T>( key, null ) );
 						_objectCache.Remove( key );
 					}
 				}
@@ -551,46 +588,47 @@ namespace Digillect
 		#endregion
 
 		#region class XCachedQuery
-		[EditorBrowsable( EditorBrowsableState.Advanced )]
 		[System.Diagnostics.CodeAnalysis.SuppressMessage( "Microsoft.Design", "CA1034:NestedTypesShouldNotBeVisible" )]
-		public sealed class XCachedQuery
+		private sealed class XCachedQuery
 		{
 			[System.Diagnostics.CodeAnalysis.SuppressMessage( "Microsoft.Performance", "CA1823:AvoidUnusedPrivateFields" )]
-			private readonly XQuery<TObject> _query;
+			private readonly XQuery<T> _query;
 			[System.Diagnostics.CodeAnalysis.SuppressMessage( "Microsoft.Performance", "CA1823:AvoidUnusedPrivateFields" )]
-			private readonly TCollection _list;
+			private readonly IXList<T> _items;
 			[System.Diagnostics.CodeAnalysis.SuppressMessage( "Microsoft.Performance", "CA1823:AvoidUnusedPrivateFields" )]
 			private readonly IList<WeakReference> _cookies = new List<WeakReference>();
 
 			#region Constructors/Disposer
-			public XCachedQuery( XQuery<TObject> query, TCollection list, object cookie )
+			public XCachedQuery( XQuery<T> query, IXList<T> collection, object cookie )
 			{
 				if( query == null )
 				{
 					throw new ArgumentNullException( "query" );
 				}
 
-				if( list == null )
+				if( collection == null )
 				{
-					throw new ArgumentNullException( "list" );
+					throw new ArgumentNullException( "collection" );
 				}
 
+				Contract.EndContractBlock();
+
 				_query = query.Clone();
-				_list = list;
+				_items = XCollectionsUtil.UnmodifiableList( collection );
 
 				AddCookie( cookie );
 			}
 			#endregion
 
 			#region Public Properties
-			public XQuery<TObject> Query
+			public XQuery<T> Query
 			{
 				get { return _query; }
 			}
 
-			public TCollection List
+			public IXList<T> Items
 			{
-				get { return _list; }
+				get { return _items; }
 			}
 
 			public int CookiesCount
@@ -726,13 +764,13 @@ namespace Digillect
 		#endregion
 
 		#region IEnumerable<TObject> Members
-		public IEnumerator<TObject> GetEnumerator()
+		public IEnumerator<T> GetEnumerator()
 		{
 			foreach( WeakReference r in _objectCache.Values )
 			{
 				if( r.IsAlive )
 				{
-					yield return r.Target as TObject;
+					yield return r.Target as T;
 				}
 			}
 		}
@@ -750,13 +788,15 @@ namespace Digillect
 		where TObject : XObject
 	{
 		#region Constructors/Disposer
-		internal XCacheObjectEventArgs( TObject @object )
+		internal XCacheObjectEventArgs( XKey key, TObject @object )
 		{
+			Key = key;
 			Object = @object;
 		}
 		#endregion
 
 		#region Public Properties
+		public XKey Key { get; private set; }
 		public TObject Object { get; private set; }
 		#endregion
 	}
@@ -781,10 +821,4 @@ namespace Digillect
 		#endregion
 	}
 	#endregion
-
-	public class XCache<TId, TObject> : XCache<TId, TObject, XCollection<TObject>>
-		where TId : IEquatable<TId>, IComparable<TId>
-		where TObject : XObject<TId>
-	{
-	}
 }
