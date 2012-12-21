@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Runtime.Serialization;
+using System.Diagnostics.Contracts;
 
 namespace Digillect
 {
@@ -11,6 +12,7 @@ namespace Digillect
 #if !(SILVERLIGHT || WINDOWS8)
 	[Serializable]
 #endif
+	[System.Diagnostics.CodeAnalysis.SuppressMessage( "Microsoft.Naming", "CA1710:IdentifiersShouldHaveCorrectSuffix" )]
 	public class XParameters : IEnumerable<KeyValuePair<string, object>>, IEquatable<XParameters>
 	{
 		private readonly Dictionary<string, object> _values = new Dictionary<string,object>( StringComparer.OrdinalIgnoreCase );
@@ -26,7 +28,19 @@ namespace Digillect
 		public static XParameters From<T>( string name, T value )
 			where T : IEquatable<T>
 		{
-			XParameters parameters = new XParameters();
+			if( name == null )
+			{
+				throw new ArgumentNullException( "name" );
+			}
+
+			if( value == null )
+			{
+				throw new ArgumentNullException( "value" );
+			}
+			
+			Contract.Ensures( Contract.Result<XParameters>() != null );
+
+			var parameters = new XParameters();
 
 			parameters.Add( name, value );
 
@@ -40,6 +54,8 @@ namespace Digillect
 			{
 				throw new ArgumentNullException( "other" );
 			}
+
+			Contract.Ensures( Contract.Result<XParameters>() != null );
 
 			XParameters parameters = new XParameters();
 
@@ -66,6 +82,8 @@ namespace Digillect
 				throw new ArgumentNullException( "value" );
 			}
 
+			Contract.Ensures( Contract.Result<XParameters>() != null );
+
 			_values.Add( name, value );
 
 			return this;
@@ -75,6 +93,13 @@ namespace Digillect
 		public T Get<T>( string name )
 			where T : IEquatable<T>
 		{
+			if( name == null )
+			{
+				throw new ArgumentNullException( "name" );
+			}
+
+			Contract.EndContractBlock();
+
 			if( !_values.ContainsKey( name ) )
 			{
 				return default( T );
@@ -86,6 +111,13 @@ namespace Digillect
 		public T Get<T>( string name, T defaultValue )
 			where T : IEquatable<T>
 		{
+			if( name == null )
+			{
+				throw new ArgumentNullException( "name" );
+			}
+
+			Contract.EndContractBlock();
+
 			if( !_values.ContainsKey( name ) )
 			{
 				return defaultValue;
@@ -140,7 +172,7 @@ namespace Digillect
 
 		public override bool Equals( object obj )
 		{
-			if( !(obj is XParameters) )
+			if( obj == null || obj.GetType() != GetType() )
 			{
 				return false;
 			}
@@ -148,6 +180,7 @@ namespace Digillect
 			return Equals( (XParameters) obj );
 		}
 		#endregion
+
 		public override int GetHashCode()
 		{
 			int hashCode = 17;

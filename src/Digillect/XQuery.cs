@@ -1,5 +1,6 @@
 using System;
-using System.ComponentModel;
+using System.Diagnostics.Contracts;
+using System.Runtime.Serialization;
 
 namespace Digillect
 {
@@ -9,20 +10,29 @@ namespace Digillect
 #if !(SILVERLIGHT || WINDOWS8)
 	[Serializable]
 #endif
+	[DataContract]
 	public class XQuery<T> : IEquatable<XQuery<T>>
-#if !(SILVERLIGHT || WINDOWS8)
-		, ICloneable
-#endif
-		where T : XObject
 	{
-		public const string None = null;
-		public const string All = "all";
-
-		private readonly string _method;
-		private readonly XParameters _parameters;
+		private string _method;
+		private XParameters _parameters;
 
 		#region Constructors/Disposer
-		public XQuery( string method = None, XParameters parameters = null )
+		public XQuery()
+			: this( null, null )
+		{
+		}
+
+        public XQuery( string method )
+			: this( method, null )
+		{
+		}
+
+		public XQuery( XParameters parameters )
+			: this( null, parameters )
+		{
+		}
+
+        public XQuery( string method, XParameters parameters )
 		{
 			_method = method;
 			_parameters = parameters == null ? new XParameters() : XParameters.From( parameters );
@@ -82,26 +92,47 @@ namespace Digillect
 		{
 			return Equals( query );
 		}
+		#endregion
 
-		/// <summary>
-		/// Создает неглубокую (shallow) копию объекта.
-		/// </summary>
-		/// <returns>Скопированный объект</returns>
+		#region Clone
 		public virtual XQuery<T> Clone()
 		{
-			return (XQuery<T>) MemberwiseClone();
+			Contract.Ensures( Contract.Result<XQuery<T>>() != null );
+
+			var clone = CreateInstanceOfSameType();
+
+			clone.ProcessClone( this );
+
+			return clone;
 		}
-#if !(SILVERLIGHT || WINDOWS8)
-		object ICloneable.Clone()
+
+		protected virtual XQuery<T> CreateInstanceOfSameType()
 		{
-			return Clone();
+			return (XQuery<T>) Activator.CreateInstance( GetType(), true );
 		}
-#endif
+
+		protected virtual void ProcessClone( XQuery<T> source )
+		{
+			if( source == null )
+			{
+				throw new ArgumentNullException( "source" );
+			}
+
+			Contract.EndContractBlock();
+
+			_method = source._method;
+			_parameters = XParameters.From( source._parameters );
+		}
 		#endregion
 
 		#region Object Overrides
-		public bool Equals( XQuery<T> otherQuery )
+		bool IEquatable<XQuery<T>>.Equals( XQuery<T> otherQuery )
 		{
+			if( otherQuery == null )
+			{
+				return false;
+			}
+
 			return object.Equals( _method, otherQuery._method ) && _parameters.Equals( otherQuery._parameters );
 		}
 

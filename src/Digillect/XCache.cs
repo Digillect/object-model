@@ -160,30 +160,23 @@ namespace Digillect
 			return cached;
 		}
 
-		public IXList<T> Cache( IEnumerable<T> collection )
+		public IEnumerable<T> Cache( IEnumerable<T> collection )
 		{
 			if( collection == null )
 			{
 				throw new ArgumentNullException( "collection" );
 			}
 
-			Contract.Ensures( Contract.Result<IXList<T>>() != null );
+			Contract.Ensures( Contract.Result<IEnumerable<T>>() != null );
 
-			XCollection<T> cached = new XCollection<T>();
-
-			foreach( T item in collection )
-			{
-				cached.Add( Cache( item ) );
-			}
-
-			return cached;
+			return CacheCollectionEx( collection );
 		}
 
-		public bool Uncache( XKey key )
+		public bool RemoveFromCache( XKey key )
 		{
 			if( key == null )
 			{
-				throw new ArgumentNullException( "parameter" );
+				throw new ArgumentNullException( "key" );
 			}
 
 			Contract.EndContractBlock();
@@ -201,7 +194,7 @@ namespace Digillect
 			return UncacheObjectEx( key );
 		}
 
-		public bool Contains( XKey key )
+		public bool ContainsKey( XKey key )
 		{
 			if( key == null )
 			{
@@ -228,7 +221,7 @@ namespace Digillect
 
 			XCachedQuery cq = _queryCache.ContainsKey( query ) ? _queryCache[query] : null;
 
-			return cq == null ? null : cq.Items;
+			return cq == null ? null : cq.ReadonlyItems;
 		}
 
 		public IXList<T> Get( XQuery<T> query, object cookie )
@@ -285,7 +278,7 @@ namespace Digillect
 				}
 			}
 
-			return cq.Items;
+			return cq.ReadonlyItems;
 		}
 
 		/// <summary>
@@ -307,7 +300,7 @@ namespace Digillect
 
 			Contract.Ensures( Contract.Result<IXList<T>>() != null );
 
-			var cached = Cache( list );
+			var cached = CacheCollectionEx( list );
 
 			XCachedQuery cq = _queryCache.ContainsKey( query ) ? _queryCache[query] : null;
 
@@ -333,10 +326,10 @@ namespace Digillect
 				}
 			}
 
-			return cq.Items;
+			return cq.ReadonlyItems;
 		}
 
-		public bool Uncache( XQuery<T> query, object cookie )
+		public bool RemoveFromCache( XQuery<T> query, object cookie )
 		{
 			if( query == null )
 			{
@@ -367,7 +360,7 @@ namespace Digillect
 			return false;
 		}
 
-		public bool Contains( XQuery<T> query )
+		public bool ContainsQuery( XQuery<T> query )
 		{
 			if( query == null )
 			{
@@ -376,10 +369,10 @@ namespace Digillect
 
 			Contract.EndContractBlock();
 
-			return Contains( query, false );
+			return ContainsQuery( query, false );
 		}
 
-		public bool Contains( XQuery<T> query, bool ignoreConversion )
+		public bool ContainsQuery( XQuery<T> query, bool ignoreConversion )
 		{
 			if( query == null )
 			{
@@ -420,23 +413,23 @@ namespace Digillect
 		#endregion
 
 		#region Events and Event Handlers
-		public event EventHandler<XCacheObjectEventArgs<T>> ObjectCached;
-		public event EventHandler<XCacheObjectEventArgs<T>> ObjectUncached;
+		public event EventHandler<XCacheObjectEventArgs<T>> ObjectAddedToCache;
+		public event EventHandler<XCacheObjectEventArgs<T>> ObjectRemovedFromCache;
 		public event EventHandler<XCacheMatchEventArgs<T>> Match;
 
-		protected virtual void OnObjectCached( XCacheObjectEventArgs<T> e )
+		protected virtual void OnObjectAddedToCache( XCacheObjectEventArgs<T> e )
 		{
-			if( ObjectCached != null )
+			if( ObjectAddedToCache != null )
 			{
-				ObjectCached( this, e );
+				ObjectAddedToCache( this, e );
 			}
 		}
 
-		protected virtual void OnObjectUncached( XCacheObjectEventArgs<T> e )
+		protected virtual void OnObjectRemovedFromCache( XCacheObjectEventArgs<T> e )
 		{
-			if( ObjectUncached != null )
+			if( ObjectRemovedFromCache != null )
 			{
-				ObjectUncached( this, e );
+				ObjectRemovedFromCache( this, e );
 			}
 		}
 
@@ -469,7 +462,7 @@ namespace Digillect
 				_objectCache.Remove( key );
 			}
 
-			OnObjectUncached( new XCacheObjectEventArgs<T>( key, null ) );
+			OnObjectRemovedFromCache( new XCacheObjectEventArgs<T>( key, null ) );
 
 			return null;
 		}
@@ -483,7 +476,7 @@ namespace Digillect
 				_objectCache[key] = new WeakReference( o );
 			}
 
-			OnObjectCached( new XCacheObjectEventArgs<T>( key, o ) );
+			OnObjectAddedToCache( new XCacheObjectEventArgs<T>( key, o ) );
 
 			return o;
 		}
@@ -507,9 +500,24 @@ namespace Digillect
 				}
 			}
 
-			OnObjectUncached( new XCacheObjectEventArgs<T>( key, r.IsAlive ? (T) r.Target : null ) );
+			OnObjectRemovedFromCache( new XCacheObjectEventArgs<T>( key, r.IsAlive ? (T) r.Target : null ) );
 
 			return true;
+		}
+
+		private XCollection<T> CacheCollectionEx( IEnumerable<T> collection )
+		{
+			XCollection<T> cached = new XCollection<T>();
+
+			foreach( T item in collection )
+			{
+				if( item != null )
+				{
+					cached.Add( Cache( item ) );
+				}
+			}
+
+			return cached;
 		}
 		#endregion
 		#region Queries Private Methods
@@ -577,7 +585,7 @@ namespace Digillect
 
 					foreach( var key in objectsToRemove )
 					{
-						OnObjectUncached( new XCacheObjectEventArgs<T>( key, null ) );
+						OnObjectRemovedFromCache( new XCacheObjectEventArgs<T>( key, null ) );
 						_objectCache.Remove( key );
 					}
 				}
@@ -588,13 +596,13 @@ namespace Digillect
 		#endregion
 
 		#region class XCachedQuery
-		[System.Diagnostics.CodeAnalysis.SuppressMessage( "Microsoft.Design", "CA1034:NestedTypesShouldNotBeVisible" )]
 		private sealed class XCachedQuery
 		{
 			[System.Diagnostics.CodeAnalysis.SuppressMessage( "Microsoft.Performance", "CA1823:AvoidUnusedPrivateFields" )]
 			private readonly XQuery<T> _query;
 			[System.Diagnostics.CodeAnalysis.SuppressMessage( "Microsoft.Performance", "CA1823:AvoidUnusedPrivateFields" )]
 			private readonly IXList<T> _items;
+			private readonly IXList<T> _readonlyItems;
 			[System.Diagnostics.CodeAnalysis.SuppressMessage( "Microsoft.Performance", "CA1823:AvoidUnusedPrivateFields" )]
 			private readonly IList<WeakReference> _cookies = new List<WeakReference>();
 
@@ -614,7 +622,8 @@ namespace Digillect
 				Contract.EndContractBlock();
 
 				_query = query.Clone();
-				_items = XCollectionsUtil.UnmodifiableList( collection );
+				_items = collection;
+				_readonlyItems = XCollectionsUtil.UnmodifiableList( collection );
 
 				AddCookie( cookie );
 			}
@@ -629,6 +638,11 @@ namespace Digillect
 			public IXList<T> Items
 			{
 				get { return _items; }
+			}
+
+			public IXList<T> ReadonlyItems
+			{
+				get { return _readonlyItems; }
 			}
 
 			public int CookiesCount
