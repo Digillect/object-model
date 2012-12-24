@@ -357,6 +357,18 @@ namespace Digillect.Tests
 			Should.Throw<NotSupportedException>(() => sut.RemoveAt(0));
 			Should.Throw<NotSupportedException>(() => sut.Update(new XCollection<XObject>()));
 		}
+
+		[Fact]
+		public void UnmodifiableList_should_equals_correctly()
+		{
+			var series = new XCollection<XIntegerObject>( XIntegerObject.CreateSeries( 5 ) );
+			var seriesClone = series.Clone( true );
+			var sut = XCollectionsUtil.UnmodifiableList( series );
+			var obj = XCollectionsUtil.UnmodifiableList( seriesClone );
+
+			sut.ShouldBe( obj );
+			sut.ShouldBe( seriesClone );
+		}
 		#endregion
 	}
 }

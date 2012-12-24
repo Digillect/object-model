@@ -22,7 +22,7 @@ namespace Digillect
 		{
 		}
 
-        public XQuery( string method )
+		public XQuery( string method )
 			: this( method, null )
 		{
 		}
@@ -32,7 +32,7 @@ namespace Digillect
 		{
 		}
 
-        public XQuery( string method, XParameters parameters )
+		public XQuery( string method, XParameters parameters )
 		{
 			_method = method;
 			_parameters = parameters == null ? new XParameters() : XParameters.From( parameters );
@@ -143,7 +143,7 @@ namespace Digillect
 				return false;
 			}
 
-			return Equals( (XQuery<T>) obj );
+			return ((IEquatable<XQuery<T>>) this).Equals( (XQuery<T>) obj );
 		}
 
 		public override int GetHashCode()

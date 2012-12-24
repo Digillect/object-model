@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 
 using Xunit;
+using Shouldly;
 
 using Digillect;
 using Digillect.Collections;
@@ -14,23 +15,35 @@ namespace Digillect.Tests
 		[Fact]
 		public void query_should_clone()
 		{
-			var original = new IntegerQuery( IntegerQuery.All, XParameters.From( "Id", 1 ) );
+			var original = new IntegerQuery( "Entity", XParameters.From( "Id", 1 ) );
 			var clone = original.Clone();
 
-			Assert.NotSame( original, clone );
-			Assert.Equal( original, clone );
+			clone.ShouldNotBeSameAs( original );
+			clone.ShouldBe( original );
 		}
 
 		class IntegerQuery : XQuery<XIntegerObject>
 		{
-			public IntegerQuery( string method = None, XParameters parameters = null )
-				: base( method, parameters )
+			#region Constructors/Disposer
+			public IntegerQuery()
 			{
 			}
 
-			protected IntegerQuery()
+			public IntegerQuery( string method )
+				: base( method )
 			{
 			}
+
+			public IntegerQuery( XParameters parameters )
+				: base( parameters )
+			{
+			}
+
+			public IntegerQuery( string method, XParameters parameters )
+				: base( method, parameters )
+			{
+			}
+			#endregion
 
 			public Func<XQuery<XIntegerObject>, bool> CanConvertFunction { get; set; }
 			public Func<XIntegerObject, bool> MatchFunction { get; set; }

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 
 using Xunit;
+using Shouldly;
 
 using Digillect;
 using Digillect.Collections;
@@ -21,7 +22,7 @@ namespace Digillect.Tests
 
 			var retrieved = cache.Get( original.GetKey() );
 
-			Assert.Same( original, retrieved );
+			retrieved.ShouldBe( original );
 		}
 
 		[Fact]
@@ -35,8 +36,8 @@ namespace Digillect.Tests
 
 			var cached = cache.Cache( second );
 
-			Assert.Same( original, cached );
-			Assert.NotSame( second, cached );
+			cached.ShouldBeSameAs( original );
+			cached.ShouldNotBeSameAs( second );
 		}
 
 		[Fact]
@@ -50,7 +51,7 @@ namespace Digillect.Tests
 
 			var cached = cache.Get( query );
 
-			Assert.Equal( original, cached );
+			cached.ShouldBe( original );
 		}
 
 		[Fact]
@@ -60,11 +61,12 @@ namespace Digillect.Tests
 			var query = new XQuery<XIntegerObject>( "hello" );
 			var original = new XCollection<XIntegerObject>( XIntegerObject.CreateSeries( 3 ) );
 
-			cache.Cache( query, original, this );
+			var response = cache.Cache( query, original, this );
 
 			var cached = cache.Get( new XQuery<XIntegerObject>( "hello" ) );
 
-			Assert.Equal( original, cached );
+			cached.ShouldBe( response );
+			cached.ShouldBe( original );
 		}
 
 		[Fact]
@@ -85,20 +87,38 @@ namespace Digillect.Tests
 			var odd = cache.Get( queryForOdd, this );
 			var even = cache.Get( queryForEven, this );
 
-			Assert.NotNull( odd );
-			Assert.NotNull( even );
-			Assert.Equal( original.Count, odd.Count + even.Count );
-			Assert.True( odd.All( o => o.Id % 2 != 0 ) );
-			Assert.True( even.All( o => o.Id % 2 == 0 ) );
+			odd.ShouldNotBe( null );
+			even.ShouldNotBe( null );
+
+			original.Count.ShouldBe( odd.Count + even.Count );
+
+			odd.All( o => o.Id % 2 != 0 ).ShouldBe( true );
+			even.All( o => o.Id % 2 == 0 ).ShouldBe( true );
 		}
 
 		class IntegerQuery : XQuery<XIntegerObject>
 		{
-			public IntegerQuery( string method = None, XParameters parameters = null )
+			#region Constructors/Disposer
+			public IntegerQuery()
+			{
+			}
+
+			public IntegerQuery( string method )
+				: base( method )
+			{
+			}
+
+			public IntegerQuery( XParameters parameters )
+				: base( parameters )
+			{
+			}
+
+			public IntegerQuery( string method, XParameters parameters )
 				: base( method, parameters )
 			{
 			}
-			
+			#endregion
+
 			public Func<XQuery<XIntegerObject>, bool> CanConvertFunction { get; set; }
 			public Func<XIntegerObject, bool> MatchFunction { get; set; }
 
@@ -129,6 +149,16 @@ namespace Digillect.Tests
 				{
 					return false;
 				}
+			}
+
+			protected override void ProcessClone( XQuery<XIntegerObject> source )
+			{
+				base.ProcessClone( source );
+
+				var other = (IntegerQuery) source;
+
+				CanConvertFunction = other.CanConvertFunction;
+				MatchFunction = other.MatchFunction;
 			}
 		}
 	}
