@@ -51,6 +51,7 @@ namespace Digillect.Collections
 			OnDeserialization();
 		}
 
+#if !WINDOWS8
 		/// <summary>
 		/// Initializes a new instance of the <see cref="XIdentifiedCollection&lt;TId,TObject&gt;"/> class that contains elements copied from the specified list.
 		/// </summary>
@@ -66,6 +67,7 @@ namespace Digillect.Collections
 
 			OnDeserialization();
 		}
+#endif
 		#endregion
 
 		#region Public Indexers

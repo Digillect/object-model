@@ -65,6 +65,7 @@ namespace Digillect.Collections
 			XCollectionsUtil.ValidateCollection(collection);
 		}
 
+#if !WINDOWS8
 		/// <summary>
 		/// Initializes a new instance of the <see cref="XCollection&lt;T&gt;"/> class that contains elements copied from the specified list.
 		/// </summary>
@@ -77,6 +78,7 @@ namespace Digillect.Collections
 		{
 			XCollectionsUtil.ValidateCollection(list);
 		}
+#endif
 		#endregion
 
 		#region Protected Properties

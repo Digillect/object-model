@@ -36,6 +36,7 @@ namespace Digillect.Collections
 			Contract.Requires(Contract.ForAll(collection, item => item != null));
 		}
 
+#if !WINDOWS8
 		/// <summary>
 		/// Initializes a new instance of the <see cref="XUniqueCollection&lt;T&gt;"/> class that contains elements copied from the specified list.
 		/// </summary>
@@ -49,6 +50,7 @@ namespace Digillect.Collections
 			Contract.Requires(list != null);
 			Contract.Requires(Contract.ForAll(list, item => item != null));
 		}
+#endif
 		#endregion
 
 		#region XCollection`1 Overrides
