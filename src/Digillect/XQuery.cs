@@ -74,6 +74,7 @@ namespace Digillect
 		/// </summary>
 		/// <param name="value">Объект для проверки.</param>
 		/// <returns><see langword="true"/> в случае соответствия, иначе <see langword="false"/>.</returns>
+		[Pure]
 		public virtual bool Match( T value )
 		{
 			return false;
@@ -88,6 +89,7 @@ namespace Digillect
 		/// <remarks>
 		/// Данная реализация использует метод <see cref="Equals"/> для определения возможности преобразования.
 		/// </remarks>
+		[Pure]
 		public virtual bool CanConvertTo( XQuery<T> query )
 		{
 			return Equals( query );
@@ -95,6 +97,7 @@ namespace Digillect
 		#endregion
 
 		#region Clone
+		[Pure]
 		public virtual XQuery<T> Clone()
 		{
 			Contract.Ensures( Contract.Result<XQuery<T>>() != null );
@@ -106,9 +109,16 @@ namespace Digillect
 			return clone;
 		}
 
+		[Pure]
 		protected virtual XQuery<T> CreateInstanceOfSameType()
 		{
+			Contract.Ensures(Contract.Result<XQuery<T>>() != null);
+
+#if WINDOWS8
+			return (XQuery<T>) Activator.CreateInstance(GetType());
+#else
 			return (XQuery<T>) Activator.CreateInstance( GetType(), true );
+#endif
 		}
 
 		protected virtual void ProcessClone( XQuery<T> source )

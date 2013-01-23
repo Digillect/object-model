@@ -99,7 +99,7 @@ namespace Digillect
 		#region Key management
 		/// <summary>
 		/// Gets key, identifying current object. If no cached key available, the new one will be created
-		/// through the call to <see cref="CreateKey"/>.
+		/// through the call to <see cref="CreateKey()"/>.
 		/// </summary>
 		/// <returns>Key, identifying this object.</returns>
 		[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1024:UsePropertiesWhereAppropriate")]
@@ -147,12 +147,20 @@ namespace Digillect
 		/// <returns>Created key.</returns>
 		protected static XKey CreateKey( Type type )
 		{
-			Contract.Requires( type != null );
+			if ( type == null )
+			{
+				throw new ArgumentNullException("type");
+			}
+
 #if !WINDOWS8
-			Contract.Requires( typeof( XObject ).IsAssignableFrom( type ) );
+			if ( !typeof(XObject).IsAssignableFrom(type) )
 #else
-			Contract.Requires( typeof( XObject ).GetTypeInfo().IsAssignableFrom( type.GetTypeInfo() ) );
+			if ( !typeof(XObject).GetTypeInfo().IsAssignableFrom(type.GetTypeInfo()) )
 #endif
+			{
+				throw new ArgumentException("Incompatible type.", "type");
+			}
+
 			Contract.Ensures( Contract.Result<XKey>() != null );
 
 			return new RootKey( type );

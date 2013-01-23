@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Diagnostics.Contracts;
+using System.Reflection;
 using System.Runtime.Serialization;
 
 namespace Digillect
@@ -132,6 +133,13 @@ namespace Digillect
 		/// <returns>Created key.</returns>
 		protected static XKey CreateKey( TId id, Type type )
 		{
+			Contract.Requires(type != null);
+#if !WINDOWS8
+			Contract.Requires(typeof(XObject).IsAssignableFrom(type));
+#else
+			Contract.Requires(typeof(XObject).GetTypeInfo().IsAssignableFrom(type.GetTypeInfo()));
+#endif
+
 			return XKey.From( id, CreateKey( type ) );
 		}
 		#endregion

@@ -25,6 +25,7 @@ namespace Digillect
 		#endregion
 
 		#region From<T>
+		[Pure]
 		public static XParameters From<T>( string name, T value )
 			where T : IEquatable<T>
 		{
@@ -48,6 +49,7 @@ namespace Digillect
 		}
 		#endregion
 		#region From
+		[Pure]
 		public static XParameters From( XParameters other )
 		{
 			if( other == null )
@@ -90,6 +92,7 @@ namespace Digillect
 		}
 		#endregion
 		#region Get/Get<T>
+		[Pure]
 		public T Get<T>( string name )
 			where T : IEquatable<T>
 		{
@@ -108,6 +111,7 @@ namespace Digillect
 			return (T) _values[name];
 		}
 
+		[Pure]
 		public T Get<T>( string name, T defaultValue )
 			where T : IEquatable<T>
 		{
