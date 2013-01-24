@@ -24,6 +24,11 @@ namespace Digillect.Tests
 			return (XIntegerObject) Clone(true);
 		}
 
+		protected override XObject CreateInstanceOfSameType()
+		{
+			return new XIntegerObject();
+		}
+
 		public static XIntegerObject Create()
 		{
 			return new XIntegerObject(NewId());

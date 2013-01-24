@@ -12,11 +12,9 @@ namespace Digillect
 #if !(SILVERLIGHT || WINDOWS8)
 	[Serializable]
 #endif
-	public class ObservableObject
-#if !(SILVERLIGHT || WINDOWS8) || WINDOWS_PHONE
-		: INotifyPropertyChanging, INotifyPropertyChanged
-#else
-		: INotifyPropertyChanged
+	public class ObservableObject : INotifyPropertyChanged
+#if !(WINDOWS8 || SILVERLIGHT && !WINDOWS_PHONE)
+		, INotifyPropertyChanging
 #endif
 	{
 		#region Constructor
@@ -29,7 +27,7 @@ namespace Digillect
 		#endregion
 
 		#region Events and Event Raisers
-#if !(SILVERLIGHT || WINDOWS8) || WINDOWS_PHONE
+#if !(WINDOWS8 || SILVERLIGHT && !WINDOWS_PHONE)
 		/// <summary>
 		/// Occurs when a property value is changing. Not guaranteed to be raised.
 		/// </summary>
@@ -57,8 +55,8 @@ namespace Digillect
 		/// <param name="e">The <see cref="Digillect.ComponentModel.PropertyChangingEventArgs"/> instance containing the event data.</param>
 		protected virtual void OnPropertyChanging( Digillect.ComponentModel.PropertyChangingEventArgs e )
 		{
-#if !(SILVERLIGHT || WINDOWS8) || WINDOWS_PHONE
-			if( PropertyChanging != null )
+#if !(WINDOWS8 || SILVERLIGHT && !WINDOWS_PHONE)
+			if ( PropertyChanging != null )
 			{
 				PropertyChanging( this, e );
 			}
@@ -69,7 +67,7 @@ namespace Digillect
 		/// Raises the <see cref="E:PropertyChanged"/> event.
 		/// </summary>
 		/// <param name="propertyName">Name of the property.</param>
-#if NET45 || WINDOWS8 || WINDOWS_PHONE_8
+#if NET45
 		[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1026:DefaultParametersShouldNotBeUsed", Justification = "Required for the CallerMemberName attribute.")]
 		protected void OnPropertyChanged( [CallerMemberName] string propertyName = null )
 #else
@@ -94,29 +92,28 @@ namespace Digillect
 		/// notifies listeners only when necessary.
 		/// </summary>
 		/// <typeparam name="T">Type of the property.</typeparam>
-		/// <param name="storage">Reference to a property with both getter and setter.</param>
-		/// <param name="value">Desired value for the property.</param>
+		/// <param name="location">The variable to set to the specified value.</param>
+		/// <param name="value">The value to which the <paramref name="location"/> parameter is set.</param>
 		/// <param name="propertyName">Name of the property used to notify listeners.</param>
-		/// <returns>True if the value was changed, false if the existing value matched the
-		/// desired value.</returns>
+		/// <returns><c>True</c> if the value has changed; <c>false</c> if the <paramref name="location"/> matches (by equality) the <paramref name="value"/>.</returns>
 		/// <remarks>
 		/// <b>.NET 4.5.</b> <paramref name="propertyName"/> is optional and can be provided automatically
-		/// when invoked from compilers that support <c>CallerMemberName</c>.
+		/// when invoked from compilers which support the <c>CallerMemberName</c> attribute.
 		/// </remarks>
 		[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1045:DoNotPassTypesByReference", MessageId = "0#")]
-#if NET45 || WINDOWS8 || WINDOWS_PHONE_8
+#if NET45
 		[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1026:DefaultParametersShouldNotBeUsed", Justification = "Required for the CallerMemberName attribute.")]
-		protected bool SetProperty<T>( ref T storage, T value, [CallerMemberName] String propertyName = null )
+		protected bool SetProperty<T>(ref T location, T value, [CallerMemberName] string propertyName = null)
 #else
-		protected bool SetProperty<T>(ref T storage, T value, string propertyName)
+		protected bool SetProperty<T>(ref T location, T value, string propertyName)
 #endif
 		{
-			if( object.Equals( storage, value ) )
+			if( object.Equals( location, value ) )
 				return false;
 
-			OnPropertyChanging( propertyName, value, storage );
+			OnPropertyChanging(propertyName, location, value);
 
-			storage = value;
+			location = value;
 			
 			OnPropertyChanged( propertyName );
 			return true;

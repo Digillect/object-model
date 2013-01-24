@@ -1,17 +1,13 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2012
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Digillect (net45)", "src\Digillect\Digillect (net45).csproj", "{6A0D13DA-0078-46EB-99AC-6B62C4FC136B}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Digillect (win8)", "src\Digillect\Digillect (win8).csproj", "{F213AEB9-82D4-43CB-BAB1-C929DB11E717}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Digillect (wp80)", "src\Digillect\Digillect (wp80).csproj", "{325D26BB-53D3-4383-9572-BC631CDC9189}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Digillect (wp71)", "src\Digillect\Digillect (wp71).csproj", "{173D9764-D139-4319-9532-4332C58F96C7}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Digillect (net40)", "src\Digillect\Digillect (net40).csproj", "{F3F1B6B4-8771-4B81-93DC-C0F1DD68D9E0}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Digillect (sl4)", "src\Digillect\Digillect (sl4).csproj", "{8CE98474-DFA3-42FA-AE2F-991F52A75977}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Digillect", "src\Digillect\Digillect.csproj", "{69480627-02F5-45E9-9107-90F2AB917374}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Digillect.Tests", "src\Digillect.Tests\Digillect.Tests.csproj", "{ABDC1825-8F24-4A80-87F3-F30A59F76BAF}"
 EndProject
@@ -22,24 +18,6 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{6A0D13DA-0078-46EB-99AC-6B62C4FC136B}.CodeAnalysis|Any CPU.ActiveCfg = CodeAnalysis|Any CPU
-		{6A0D13DA-0078-46EB-99AC-6B62C4FC136B}.CodeAnalysis|Any CPU.Build.0 = CodeAnalysis|Any CPU
-		{6A0D13DA-0078-46EB-99AC-6B62C4FC136B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{6A0D13DA-0078-46EB-99AC-6B62C4FC136B}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{6A0D13DA-0078-46EB-99AC-6B62C4FC136B}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{6A0D13DA-0078-46EB-99AC-6B62C4FC136B}.Release|Any CPU.Build.0 = Release|Any CPU
-		{F213AEB9-82D4-43CB-BAB1-C929DB11E717}.CodeAnalysis|Any CPU.ActiveCfg = Release|Any CPU
-		{F213AEB9-82D4-43CB-BAB1-C929DB11E717}.CodeAnalysis|Any CPU.Build.0 = Release|Any CPU
-		{F213AEB9-82D4-43CB-BAB1-C929DB11E717}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{F213AEB9-82D4-43CB-BAB1-C929DB11E717}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{F213AEB9-82D4-43CB-BAB1-C929DB11E717}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{F213AEB9-82D4-43CB-BAB1-C929DB11E717}.Release|Any CPU.Build.0 = Release|Any CPU
-		{325D26BB-53D3-4383-9572-BC631CDC9189}.CodeAnalysis|Any CPU.ActiveCfg = CodeAnalysis|Any CPU
-		{325D26BB-53D3-4383-9572-BC631CDC9189}.CodeAnalysis|Any CPU.Build.0 = CodeAnalysis|Any CPU
-		{325D26BB-53D3-4383-9572-BC631CDC9189}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{325D26BB-53D3-4383-9572-BC631CDC9189}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{325D26BB-53D3-4383-9572-BC631CDC9189}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{325D26BB-53D3-4383-9572-BC631CDC9189}.Release|Any CPU.Build.0 = Release|Any CPU
 		{173D9764-D139-4319-9532-4332C58F96C7}.CodeAnalysis|Any CPU.ActiveCfg = CodeAnalysis|Any CPU
 		{173D9764-D139-4319-9532-4332C58F96C7}.CodeAnalysis|Any CPU.Build.0 = CodeAnalysis|Any CPU
 		{173D9764-D139-4319-9532-4332C58F96C7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
@@ -58,6 +36,12 @@ Global
 		{8CE98474-DFA3-42FA-AE2F-991F52A75977}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8CE98474-DFA3-42FA-AE2F-991F52A75977}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8CE98474-DFA3-42FA-AE2F-991F52A75977}.Release|Any CPU.Build.0 = Release|Any CPU
+		{69480627-02F5-45E9-9107-90F2AB917374}.CodeAnalysis|Any CPU.ActiveCfg = CodeAnalysis|Any CPU
+		{69480627-02F5-45E9-9107-90F2AB917374}.CodeAnalysis|Any CPU.Build.0 = CodeAnalysis|Any CPU
+		{69480627-02F5-45E9-9107-90F2AB917374}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{69480627-02F5-45E9-9107-90F2AB917374}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{69480627-02F5-45E9-9107-90F2AB917374}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{69480627-02F5-45E9-9107-90F2AB917374}.Release|Any CPU.Build.0 = Release|Any CPU
 		{ABDC1825-8F24-4A80-87F3-F30A59F76BAF}.CodeAnalysis|Any CPU.ActiveCfg = Debug|Any CPU
 		{ABDC1825-8F24-4A80-87F3-F30A59F76BAF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{ABDC1825-8F24-4A80-87F3-F30A59F76BAF}.Debug|Any CPU.Build.0 = Debug|Any CPU

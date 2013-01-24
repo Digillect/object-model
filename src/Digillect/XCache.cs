@@ -4,77 +4,25 @@ using System.ComponentModel;
 using System.Diagnostics.Contracts;
 using System.Linq;
 
-#if WINDOWS8
-using Windows.System.Threading;
-#else
-using System.Threading;
-#endif
-
 using Digillect.Collections;
 
 namespace Digillect
 {
 	[System.Diagnostics.CodeAnalysis.SuppressMessage( "Microsoft.Naming", "CA1710:IdentifiersShouldHaveCorrectSuffix" )]
-	public class XCache<T> : IDisposable, IEnumerable<T>
+	public class XCache<T> : IEnumerable<T>
 		where T : XObject
 	{
 		private readonly IDictionary<XKey, WeakReference> _objectCache = new Dictionary<XKey, WeakReference>();
 		private readonly IDictionary<XQuery<T>, XCachedQuery> _queryCache = new Dictionary<XQuery<T>, XCachedQuery>();
-#if WINDOWS8
-		private ThreadPoolTimer _cleanupTimer;
-#else
-		private readonly Timer _cleanupTimer;
-#endif
-
-		private int _cleanupInterval = 10 * 60 * 1000;
-		private bool _cleanupInProgress;
 
 		#region Constructors/Disposer
 		public XCache()
 		{
 			QueriesConversionEnabled = true;
-			CleanupEnabled = true;
-
-#if WINDOWS8
-			_cleanupTimer = ThreadPoolTimer.CreatePeriodicTimer( timer => ProcessCleanup(), TimeSpan.FromMilliseconds( _cleanupInterval ) );
-#else
-			_cleanupTimer = new Timer( state => ProcessCleanup(), this, 10 * 60 * 1000, 10 * 60 * 1000 );
-#endif
-		}
-
-		public void Dispose()
-		{
-			Dispose( true );
-			GC.SuppressFinalize( this );
-		}
-
-		protected virtual void Dispose( bool disposing )
-		{
-			if( disposing )
-			{
-#if WINDOWS8
-#else
-				_cleanupTimer.Dispose();
-#endif
-			}
 		}
 		#endregion
 
 		#region Public Properties
-		public int CleanupInterval
-		{
-			get { return _cleanupInterval; }
-			set
-			{
-				if( _cleanupInterval != value )
-				{
-					_cleanupInterval = value;
-					UpdateCleanupTimerInterval();
-				}
-			}
-		}
-
-		public bool CleanupEnabled { get; set; }
 		public bool QueriesConversionEnabled { get; set; }
 		#endregion
 
@@ -181,14 +129,9 @@ namespace Digillect
 
 			Contract.EndContractBlock();
 
-			foreach( XCachedQuery cq in new List<XCachedQuery>( _queryCache.Values ) )
+			foreach ( XCachedQuery cq in _queryCache.Values )
 			{
-				var index = cq.Items.IndexOf( key );
-
-				if( index >= 0 )
-				{
-					cq.Items.RemoveAt( index );
-				}
+				cq.Items.Remove(key);
 			}
 
 			return UncacheObjectEx( key );
@@ -242,21 +185,13 @@ namespace Digillect
 					cq.AddCookie( cookie );
 				}
 			}
+			else if ( !this.QueriesConversionEnabled )
+			{
+				return null;
+			}
 			else
 			{
-				if( !QueriesConversionEnabled )
-				{
-					return null;
-				}
-
-				foreach( XCachedQuery ccq in _queryCache.Values )
-				{
-					if( ccq.Query.CanConvertTo( query ) )
-					{
-						cq = ccq;
-						break;
-					}
-				}
+				cq = _queryCache.Values.FirstOrDefault(x => x.Query.CanConvertTo(query));
 
 				if( cq == null )
 				{
@@ -286,7 +221,7 @@ namespace Digillect
 		/// <see cref="XCachedQuery"/> или добавляет <paramref name="cookie"/> к уже существующему.
 		/// </summary>
 		/// <returns>Возвращает список объектов.</returns>
-		public IXList<T> Cache( XQuery<T> query, IEnumerable<T> list, object cookie )
+		public IEnumerable<T> Cache(XQuery<T> query, IEnumerable<T> list, object cookie)
 		{
 			if( query == null )
 			{
@@ -298,7 +233,7 @@ namespace Digillect
 				throw new ArgumentNullException( "list" );
 			}
 
-			Contract.Ensures( Contract.Result<IXList<T>>() != null );
+			Contract.Ensures(Contract.Result<IEnumerable<T>>() != null);
 
 			var cached = CacheCollectionEx( list );
 
@@ -338,12 +273,12 @@ namespace Digillect
 
 			Contract.EndContractBlock();
 
-			XCachedQuery cq = _queryCache.ContainsKey( query ) ? _queryCache[query] : null;
-
-			if( cq == null )
+			if ( !_queryCache.ContainsKey(query) )
 			{
 				return false;
 			}
+
+			XCachedQuery cq = _queryCache[query];
 
 			cq.RemoveCookie( cookie );
 
@@ -537,29 +472,13 @@ namespace Digillect
 		}
 		#endregion
 		#region Cleanup Private Methods
-		private void UpdateCleanupTimerInterval()
-		{
-#if WINDOWS8
-			_cleanupTimer = ThreadPoolTimer.CreatePeriodicTimer( timer => ProcessCleanup(), TimeSpan.FromMilliseconds( _cleanupInterval ) );
-#else
-			_cleanupTimer.Change( _cleanupInterval, _cleanupInterval );
-#endif
-		}
-
 		private void ProcessCleanup()
 		{
-			if( _cleanupInProgress )
-			{
-				return;
-			}
-
 			List<XQuery<T>> queriesToRemove = new List<XQuery<T>>();
 			List<XKey> objectsToRemove = new List<XKey>();
 
 			lock( _objectCache )
 			{
-				_cleanupInProgress = true;
-
 				lock( _queryCache )
 				{
 					foreach( var entry in _queryCache )
@@ -589,8 +508,6 @@ namespace Digillect
 						_objectCache.Remove( key );
 					}
 				}
-
-				_cleanupInProgress = false;
 			}
 		}
 		#endregion
@@ -598,12 +515,9 @@ namespace Digillect
 		#region class XCachedQuery
 		private sealed class XCachedQuery
 		{
-			[System.Diagnostics.CodeAnalysis.SuppressMessage( "Microsoft.Performance", "CA1823:AvoidUnusedPrivateFields" )]
 			private readonly XQuery<T> _query;
-			[System.Diagnostics.CodeAnalysis.SuppressMessage( "Microsoft.Performance", "CA1823:AvoidUnusedPrivateFields" )]
 			private readonly IXList<T> _items;
 			private readonly IXList<T> _readonlyItems;
-			[System.Diagnostics.CodeAnalysis.SuppressMessage( "Microsoft.Performance", "CA1823:AvoidUnusedPrivateFields" )]
 			private readonly IList<WeakReference> _cookies = new List<WeakReference>();
 
 			#region Constructors/Disposer
