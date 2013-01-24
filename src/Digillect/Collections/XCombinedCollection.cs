@@ -448,7 +448,7 @@ namespace Digillect.Collections
 
 				switch ( e.Action )
 				{
-#if SILVERLIGHT
+#if NET40 && SILVERLIGHT
 					case NotifyCollectionChangedAction.Add:
 						args = new NotifyCollectionChangedEventArgs(e.Action, e.NewItems[0], CalculateCombinedIndex(collection, e.NewStartingIndex));
 						break;

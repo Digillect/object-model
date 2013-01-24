@@ -243,7 +243,7 @@ namespace Digillect.Collections
 
 			switch ( e.Action )
 			{
-#if SILVERLIGHT
+#if NET40 && SILVERLIGHT
 				case NotifyCollectionChangedAction.Add:
 					if ( !Filter((T) e.NewItems[0]) )
 					{

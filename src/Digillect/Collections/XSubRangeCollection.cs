@@ -364,7 +364,7 @@ namespace Digillect.Collections
 
 			switch ( e.Action )
 			{
-#if SILVERLIGHT
+#if NET40 && SILVERLIGHT
 				case NotifyCollectionChangedAction.Add:
 					if ( e.NewStartingIndex >= _startIndex + _size )
 					{

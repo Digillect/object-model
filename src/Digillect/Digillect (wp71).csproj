@@ -28,7 +28,7 @@
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
     <OutputPath>..\..\target\Debug\wp71\</OutputPath>
-    <DefineConstants>TRACE;DEBUG;SILVERLIGHT;WINDOWS_PHONE;WINDOWS_PHONE_7;WINDOWS_PHONE_71</DefineConstants>
+    <DefineConstants>TRACE;DEBUG;NET40;SILVERLIGHT;WINDOWS_PHONE;WINDOWS_PHONE_7;WINDOWS_PHONE_71</DefineConstants>
     <NoStdLib>true</NoStdLib>
     <NoConfig>true</NoConfig>
     <ErrorReport>prompt</ErrorReport>
@@ -74,7 +74,7 @@
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>..\..\target\Release\wp71\</OutputPath>
-    <DefineConstants>TRACE;SILVERLIGHT;WINDOWS_PHONE;WINDOWS_PHONE_7;WINDOWS_PHONE_71</DefineConstants>
+    <DefineConstants>TRACE;NET40;SILVERLIGHT;WINDOWS_PHONE;WINDOWS_PHONE_7;WINDOWS_PHONE_71</DefineConstants>
     <NoStdLib>true</NoStdLib>
     <NoConfig>true</NoConfig>
     <ErrorReport>prompt</ErrorReport>
@@ -119,7 +119,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'CodeAnalysis|AnyCPU'">
     <DebugSymbols>true</DebugSymbols>
     <OutputPath>obj\wp71\CodeAnalysis\</OutputPath>
-    <DefineConstants>TRACE;DEBUG;SILVERLIGHT;WINDOWS_PHONE;WINDOWS_PHONE_7;WINDOWS_PHONE_71</DefineConstants>
+    <DefineConstants>TRACE;DEBUG;NET40;SILVERLIGHT;WINDOWS_PHONE;WINDOWS_PHONE_7;WINDOWS_PHONE_71</DefineConstants>
     <DocumentationFile>
     </DocumentationFile>
     <NoWarn>1591</NoWarn>

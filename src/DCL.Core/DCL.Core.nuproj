@@ -6,19 +6,19 @@
 
 		<BuildPath>..\..\target\$(Configuration)</BuildPath>
 		<OutputPath>..\..\target\$(Configuration)\$(MSBuildProjectName)</OutputPath>
-		<VersionAssembly>$(BuildPath)\net45\Digillect.dll</VersionAssembly>
+		<VersionAssembly>$(BuildPath)\net45+wp8+win8\Digillect.dll</VersionAssembly>
 	</PropertyGroup>
 
 	<ItemGroup>
 		<LibNet40 Include="$(BuildPath)\net40\**\Digillect.*" Exclude="$(BuildPath)\**\*.xml.old"/>
-		<LibNet45 Include="$(BuildPath)\net45\**\Digillect.*" Exclude="$(BuildPath)\**\*.xml.old"/>
-		<LibWin8 Include="$(BuildPath)\win8\**\Digillect.*" Exclude="$(BuildPath)\**\*.xml.old"/>
 		<LibSL4 Include="$(BuildPath)\sl4\**\Digillect.*" Exclude="$(BuildPath)\**\*.xml.old"/>
 		<LibWP71 Include="$(BuildPath)\wp71\**\Digillect.*" Exclude="$(BuildPath)\**\*.xml.old"/>
-		<LibWP80 Include="$(BuildPath)\wp80\**\Digillect.*" Exclude="$(BuildPath)\**\*.xml.old"/>
+		<LibPortable Include="$(BuildPath)\net45+wp8+win8\**\Digillect.*" Exclude="$(BuildPath)\**\*.xml.old">
+			<Profile>net45+wp8+win8</Profile>
+		</LibPortable>
 	</ItemGroup>
 
-	<Import Project="..\..\packages\Digillect.Build.Tools.1.1.0\tools\NuGet.Packaging.targets"/>
+	<Import Project="..\..\packages\Digillect.Build.Tools.1.1.1\tools\NuGet.Packaging.targets"/>
 
 	<Target Name="TransformPackageVersion">
 		<PropertyGroup>

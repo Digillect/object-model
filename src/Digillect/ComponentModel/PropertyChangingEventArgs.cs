@@ -2,27 +2,28 @@ using System;
 
 namespace Digillect.ComponentModel
 {
-#if !(SILVERLIGHT || WINDOWS8)
+#if !(WINDOWS8 || SILVERLIGHT && !WINDOWS_PHONE)
 	/// <summary>
 	/// Provides data for the <see cref="ObservableObject.PropertyChanging"/> event.
 	/// </summary>
-#if false
-	[System.Security.Permissions.HostProtectionAttribute(System.Security.Permissions.SecurityAction.LinkDemand, SharedState = true)]
-#endif
-	[Serializable]
+	/// <seealso cref="System.ComponentModel.PropertyChangingEventArgs"/>
+	/// <seealso cref="System.ComponentModel.INotifyPropertyChanging"/>
 #else
 	/// <summary>
 	/// Provides data for the <b>PropertyChanging</b> event.
 	/// </summary>
 #endif
+#if !(SILVERLIGHT || WINDOWS8)
+	[Serializable]
+#endif
 	public class PropertyChangingEventArgs
-#if !(SILVERLIGHT || WINDOWS8) || WINDOWS_PHONE
+#if !(WINDOWS8 || SILVERLIGHT && !WINDOWS_PHONE)
 		: System.ComponentModel.PropertyChangingEventArgs
 #else
 		: EventArgs
 #endif
 	{
-#if SILVERLIGHT && !WINDOWS_PHONE
+#if WINDOWS8 || SILVERLIGHT && !WINDOWS_PHONE
 		/// <summary>
 		/// Gets the name of the property whose value is changing.
 		/// </summary>
@@ -44,17 +45,17 @@ namespace Digillect.ComponentModel
 
 		#region Constructor
 		/// <summary>
-		/// Creates new instance of the object.
+		/// Initializes a new instance of the <see cref="PropertyChangingEventArgs"/> class.
 		/// </summary>
 		/// <param name="propertyName">Name of the property being changed.</param>
 		/// <param name="currentValue">Current property value.</param>
 		/// <param name="proposedValue">Proposed property value.</param>
 		public PropertyChangingEventArgs(string propertyName, object currentValue, object proposedValue)
-#if !(SILVERLIGHT || WINDOWS8) || WINDOWS_PHONE
+#if !(WINDOWS8 || SILVERLIGHT && !WINDOWS_PHONE)
 			: base(propertyName)
 #endif
 		{
-#if SILVERLIGHT && !WINDOWS_PHONE
+#if WINDOWS8 || SILVERLIGHT && !WINDOWS_PHONE
 			this.PropertyName = propertyName;
 #endif
 			this.CurrentValue = currentValue;
