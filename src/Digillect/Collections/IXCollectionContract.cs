@@ -24,6 +24,7 @@ namespace Digillect.Collections
 		public bool Remove(XKey key)
 		{
 			Contract.Requires<ArgumentNullException>(key != null, "key");
+			Contract.Ensures(!Contract.Result<bool>() || this.Count == Contract.OldValue(this.Count) - 1);
 
 			return false;
 		}

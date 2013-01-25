@@ -431,7 +431,9 @@ namespace Digillect.Collections
 			return !Object.ReferenceEquals(this, source) && options != CollectionMergeOptions.None;
 		}
 
+#if !NET45
 		[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Contracts", "Requires", Justification = "Can't restrict interface requirements")]
+#endif
 		void IXUpdatable<IXCollection<T>>.Update(IXCollection<T> source)
 		{
 			Update(source, CollectionMergeOptions.Full);

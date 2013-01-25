@@ -129,6 +129,7 @@ namespace Digillect
 			}
 
 			Contract.EndContractBlock();
+			Contract.Assume(source._parameters != null);
 
 			_method = source._method;
 			_parameters = XParameters.From( source._parameters );
@@ -170,5 +171,16 @@ namespace Digillect
 			return hashCode;
 		}
 		#endregion
+
+#if DEBUG || CONTRACTS_FULL
+		#region ObjectInvariant
+		[ContractInvariantMethod]
+		[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1822:MarkMembersAsStatic", Justification = "Required for code contracts.")]
+		private void ObjectInvariant()
+		{
+			Contract.Invariant(_parameters != null);
+		}
+		#endregion
+#endif
 	}
 }

@@ -18,9 +18,6 @@ namespace Digillect.Collections
 	[Serializable]
 #endif
 	public class XIdentifiedCollection<TId, TObject> : XUniqueCollection<TObject>
-#if !(SILVERLIGHT || WINDOWS8)
-		, IDeserializationCallback
-#endif
 		where TObject : XObject, IXIdentified<TId>
 	{
 #if !(SILVERLIGHT || WINDOWS8)
@@ -48,7 +45,7 @@ namespace Digillect.Collections
 			Contract.Requires( collection != null );
 			Contract.Requires(Contract.ForAll(collection, item => item != null));
 
-			OnDeserialization();
+			RestoreDictionaryState();
 		}
 
 #if !WINDOWS8
@@ -65,7 +62,7 @@ namespace Digillect.Collections
 			Contract.Requires(list != null);
 			Contract.Requires(Contract.ForAll(list, item => item != null));
 
-			OnDeserialization();
+			RestoreDictionaryState();
 		}
 #endif
 		#endregion
@@ -93,6 +90,7 @@ namespace Digillect.Collections
 		#endregion
 
 		#region Public Methods
+		[Pure]
 		public bool Contains(TId id)
 		{
 			Contract.Ensures(!Contract.Result<bool>() || this.Count > 0);
@@ -100,9 +98,11 @@ namespace Digillect.Collections
 			return m_dictionary.ContainsKey(id);
 		}
 
+		[Pure]
 		public int IndexOf(TId id)
 		{
 			Contract.Ensures(Contract.Result<int>() >= -1);
+			Contract.Ensures(Contract.Result<int>() < this.Count);
 
 			if ( m_dictionary.ContainsKey(id) )
 			{
@@ -131,7 +131,11 @@ namespace Digillect.Collections
 		}
 
 		[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1024:UsePropertiesWhereAppropriate")]
+#if NET45
+		public IReadOnlyList<TId> GetIdentifiers()
+#else
 		public IList<TId> GetIdentifiers()
+#endif
 		{
 			TId[] identifiers = new TId[this.Items.Count];
 
@@ -175,7 +179,7 @@ namespace Digillect.Collections
 
 			if ( !results.IsEmpty )
 			{
-				OnDeserialization();
+				RestoreDictionaryState();
 				OnUpdated(EventArgs.Empty);
 
 				if ( results.Added != results.Removed )
@@ -191,16 +195,21 @@ namespace Digillect.Collections
 		}
 		#endregion
 
-		#region IDeserializationCallback Members
-#if !(SILVERLIGHT || WINDOWS8)
-		void IDeserializationCallback.OnDeserialization(object sender)
-		{
-			OnDeserialization();
-		}
+		#region OnDeserializedCallback
+		[OnDeserialized]
+#if NET45
+		[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA1801:ReviewUnusedParameters", MessageId = "context")] 
 #endif
+		private void OnDeserializedCallback(StreamingContext context)
+		{
+			RestoreDictionaryState();
+		}
 
+		/// <summary>
+		/// Restores the internal dictionary's contents.
+		/// </summary>
 		[EditorBrowsable(EditorBrowsableState.Advanced)]
-		protected void OnDeserialization()
+		protected void RestoreDictionaryState()
 		{
 			if ( m_dictionary == null )
 			{
