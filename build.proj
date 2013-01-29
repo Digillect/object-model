@@ -11,15 +11,15 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<ProjectReference Include="src\Digillect\Digillect (net40).csproj"/>
-		<ProjectReference Include="src\Digillect\Digillect (sl4).csproj"/>
-		<ProjectReference Include="src\Digillect\Digillect (wp71).csproj"/>
-		<ProjectReference Include="src\Digillect\Digillect.csproj"/>
-		<ProjectReference Include="src\Digillect.Tests\Digillect.Tests.csproj"/>
+		<ProjectReference Include="src\Digillect.ObjectModel\Digillect.ObjectModel (net40).csproj"/>
+		<ProjectReference Include="src\Digillect.ObjectModel\Digillect.ObjectModel (sl4).csproj"/>
+		<ProjectReference Include="src\Digillect.ObjectModel\Digillect.ObjectModel (wp71).csproj"/>
+		<ProjectReference Include="src\Digillect.ObjectModel\Digillect.ObjectModel.csproj"/>
+		<ProjectReference Include="src\Digillect.ObjectModel.Tests\Digillect.ObjectModel.Tests.csproj"/>
 	</ItemGroup>
 
 	<ItemGroup>
-		<PackagingProjectReference Include="src\DCL.Core\DCL.Core.nuproj"/>
+		<PackagingProjectReference Include="Digillect.ObjectModel.nuproj"/>
 	</ItemGroup>
 
 	<Target Name="UpdateAssemblyVersion" Condition="'$(BuildNumber)' != ''">

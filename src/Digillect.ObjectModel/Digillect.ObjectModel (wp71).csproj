@@ -10,7 +10,7 @@
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>Digillect</RootNamespace>
-    <AssemblyName>Digillect</AssemblyName>
+    <AssemblyName>Digillect.ObjectModel</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <SilverlightVersion>$(TargetFrameworkVersion)</SilverlightVersion>
     <TargetFrameworkProfile>WindowsPhone71</TargetFrameworkProfile>
@@ -27,13 +27,13 @@
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
-    <OutputPath>..\..\target\Debug\wp71\</OutputPath>
+    <OutputPath>..\..\target\Debug\bin\wp71\</OutputPath>
     <DefineConstants>TRACE;DEBUG;NET40;SILVERLIGHT;WINDOWS_PHONE;WINDOWS_PHONE_7;WINDOWS_PHONE_71</DefineConstants>
     <NoStdLib>true</NoStdLib>
     <NoConfig>true</NoConfig>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <DocumentationFile>..\..\target\Debug\wp71\Digillect.xml</DocumentationFile>
+    <DocumentationFile>..\..\target\Debug\bin\wp71\Digillect.ObjectModel.xml</DocumentationFile>
     <NoWarn>1591</NoWarn>
     <CodeAnalysisRuleSet>..\DigillectRules.ruleset</CodeAnalysisRuleSet>
     <CodeContractsEnableRuntimeChecking>True</CodeContractsEnableRuntimeChecking>
@@ -73,13 +73,13 @@
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
-    <OutputPath>..\..\target\Release\wp71\</OutputPath>
+    <OutputPath>..\..\target\Release\bin\wp71\</OutputPath>
     <DefineConstants>TRACE;NET40;SILVERLIGHT;WINDOWS_PHONE;WINDOWS_PHONE_7;WINDOWS_PHONE_71</DefineConstants>
     <NoStdLib>true</NoStdLib>
     <NoConfig>true</NoConfig>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <DocumentationFile>..\..\target\Release\wp71\Digillect.xml</DocumentationFile>
+    <DocumentationFile>..\..\target\Release\bin\wp71\Digillect.ObjectModel.xml</DocumentationFile>
     <NoWarn>1591</NoWarn>
     <CodeAnalysisRuleSet>..\DigillectRules.ruleset</CodeAnalysisRuleSet>
     <CodeContractsEnableRuntimeChecking>False</CodeContractsEnableRuntimeChecking>
@@ -120,8 +120,6 @@
     <DebugSymbols>true</DebugSymbols>
     <OutputPath>obj\wp71\CodeAnalysis\</OutputPath>
     <DefineConstants>TRACE;DEBUG;NET40;SILVERLIGHT;WINDOWS_PHONE;WINDOWS_PHONE_7;WINDOWS_PHONE_71</DefineConstants>
-    <DocumentationFile>
-    </DocumentationFile>
     <NoWarn>1591</NoWarn>
     <NoStdLib>true</NoStdLib>
     <DebugType>full</DebugType>

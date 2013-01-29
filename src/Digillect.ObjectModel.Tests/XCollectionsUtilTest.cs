@@ -27,7 +27,7 @@ namespace Digillect.Tests
 
 			XCollectionsUtil.IsNullOrEmpty(sut).ShouldBe(true);
 
-			sut = new List<object>();
+			sut = new ArrayList();
 
 			XCollectionsUtil.IsNullOrEmpty(sut).ShouldBe(true);
 
