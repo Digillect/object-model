@@ -72,6 +72,7 @@ namespace Digillect
 		/// <param name="id">Object identifier.</param>
 		/// <param name="type">Type of the target object.</param>
 		/// <returns>Created key.</returns>
+		[Pure]
 		protected static XKey CreateKey( TId id, Type type )
 		{
 			Contract.Requires(type != null);

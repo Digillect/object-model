@@ -133,6 +133,7 @@ namespace Digillect
 		/// Creates the key.
 		/// </summary>
 		/// <returns>Created key.</returns>
+		[Pure]
 		protected virtual XKey CreateKey()
 		{
 			Contract.Ensures(Contract.Result<XKey>() != null);
@@ -145,6 +146,7 @@ namespace Digillect
 		/// </summary>
 		/// <param name="type">Object type.</param>
 		/// <returns>Created key.</returns>
+		[Pure]
 		protected static XKey CreateKey( Type type )
 		{
 			if ( type == null )
