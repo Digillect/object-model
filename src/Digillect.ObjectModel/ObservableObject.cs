@@ -111,11 +111,18 @@ namespace Digillect
 			if( object.Equals( location, value ) )
 				return false;
 
-			OnPropertyChanging(propertyName, location, value);
+			if ( propertyName != null )
+			{
+				OnPropertyChanging(propertyName, location, value);
+			}
 
 			location = value;
-			
-			OnPropertyChanged( propertyName );
+
+			if ( propertyName != null )
+			{
+				OnPropertyChanged(propertyName);
+			}
+
 			return true;
 		}
 		#endregion
