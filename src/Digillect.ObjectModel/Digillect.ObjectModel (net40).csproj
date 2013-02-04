@@ -185,13 +185,13 @@
     <Compile Include="ObservableObject.cs" />
     <Compile Include="Reflection\ReflectionHelpers.cs" />
     <Compile Include="XCache.cs" />
+    <Compile Include="XImmutableIdentifiedObject.cs" />
     <Compile Include="XKey.cs" />
     <Compile Include="XKeyNotAvailableException.cs" />
     <Compile Include="XObject.cs" />
     <Compile Include="XObject`1.cs" />
     <Compile Include="XParameters.cs" />
     <Compile Include="XQuery.cs" />
-    <Compile Include="XSecureIdentifiedObject.cs" />
   </ItemGroup>
   <ItemGroup>
     <CodeAnalysisDictionary Include="..\CustomDictionary.xml">
