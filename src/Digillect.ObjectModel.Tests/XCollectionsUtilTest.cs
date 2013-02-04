@@ -20,7 +20,7 @@ namespace Digillect.Tests
 		/// <summary>
 		/// A test for IsNullOrEmpty(ICollection)
 		///</summary>
-		[Fact]
+		[Fact(DisplayName = "XCollectionsUtil.IsNullOrEmpty should return true when ICollection is null or empty")]
 		public void IsNullOrEmpty_should_return_true_when_ICollection_is_null_or_empty()
 		{
 			IList sut = null;
@@ -39,7 +39,7 @@ namespace Digillect.Tests
 		/// <summary>
 		/// A test for IsNullOrEmpty`1(ICollection`1)
 		///</summary>
-		[Fact]
+		[Fact(DisplayName = "XCollectionsUtil.IsNullOrEmpty should return true when ICollection`1 is null or empty")]
 		public void IsNullOrEmpty_should_return_true_when_ICollection1_is_null_or_empty()
 		{
 			ICollection<object> sut = null;
@@ -51,6 +51,26 @@ namespace Digillect.Tests
 			XCollectionsUtil.IsNullOrEmpty(sut).ShouldBe(true);
 
 			sut.Add(null);
+
+			XCollectionsUtil.IsNullOrEmpty(sut).ShouldBe(false);
+		}
+
+		/// <summary>
+		/// A test for IsNullOrEmpty`1(IReadOnlyCollection`1)
+		///</summary>
+		[Fact(DisplayName = "XCollectionsUtil.IsNullOrEmpty should return true when IReadOnlyCollection`1 is null or empty")]
+		public void IsNullOrEmpty_should_return_true_when_IReadOnlyCollection1_is_null_or_empty()
+		{
+			IReadOnlyCollection<object> sut = null;
+
+			XCollectionsUtil.IsNullOrEmpty(sut).ShouldBe(true);
+
+			var list = new List<object>();
+			sut = list.AsReadOnly();
+
+			XCollectionsUtil.IsNullOrEmpty(sut).ShouldBe(true);
+
+			list.Add(null);
 
 			XCollectionsUtil.IsNullOrEmpty(sut).ShouldBe(false);
 		}

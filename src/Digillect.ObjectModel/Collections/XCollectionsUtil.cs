@@ -15,7 +15,7 @@ namespace Digillect.Collections
 	{
 		#region IsNullOrEmpty
 		/// <summary>
-		/// Indicates whether the specified collection is <c>null</c> has no items.
+		/// Indicates whether the specified collection is <c>null</c> or has no items.
 		/// </summary>
 		/// <param name="value">The collection to test.</param>
 		/// <returns>
@@ -37,7 +37,7 @@ namespace Digillect.Collections
 
 		#region IsNullOrEmpty`1
 		/// <summary>
-		/// Indicates whether the specified collection is <c>null</c> has no items.
+		/// Indicates whether the specified collection is <c>null</c> or has no items.
 		/// </summary>
 		/// <typeparam name="T"><see cref="Type"/> of collection members.</typeparam>
 		/// <param name="value">The collection to test.</param>
@@ -56,6 +56,29 @@ namespace Digillect.Collections
 		{
 			return value == null || value.Count == 0;
 		}
+
+#if NET45
+		/// <summary>
+		/// Indicates whether the specified collection is <c>null</c> or has no items.
+		/// </summary>
+		/// <typeparam name="T"><see cref="Type"/> of collection members.</typeparam>
+		/// <param name="value">The collection to test.</param>
+		/// <returns>
+		/// <c>true</c> if the <paramref name="value"/> is null or has no items; otherwise, <c>false</c>.
+		/// </returns>
+		/// <remarks>
+		/// <c>IsNullOrEmpty</c> is a convenience method that enables you to simultaneously test whether a collection is <c>null</c> or has no items.
+		/// It is equivalent to the following code:
+		/// <code>
+		/// result = <paramref name="value"/> == null || <paramref name="value"/>.Count == 0;
+		/// </code>
+		/// </remarks>
+		[Pure]
+		public static bool IsNullOrEmpty<T>(IReadOnlyCollection<T> value)
+		{
+			return value == null || value.Count == 0;
+		}
+#endif
 		#endregion
 
 		#region RemoveAll`1 Extension
