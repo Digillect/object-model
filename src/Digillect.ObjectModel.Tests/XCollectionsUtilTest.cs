@@ -317,7 +317,7 @@ namespace Digillect.Tests
 			var sut = new XCollection<XObject>(data);
 
 			// Exercise
-			bool result = sut.RemoveAll(XIntegerObject.NewId(3).Select(x => XKey.From(x, null)));
+			bool result = sut.RemoveAll(XIntegerObject.NewId(3).Select(x => XIntegerObject.CreateKey(x)));
 
 			// Verify
 			result.ShouldBe(false);

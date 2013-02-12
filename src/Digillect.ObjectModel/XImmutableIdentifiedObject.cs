@@ -118,12 +118,12 @@ namespace Digillect
 		{
 			Contract.Requires(type != null);
 #if !WINDOWS8
-			Contract.Requires(typeof(XObject).IsAssignableFrom(type));
+			Contract.Requires(typeof(XImmutableIdentifiedObject<TId>).IsAssignableFrom(type));
 #else
-			Contract.Requires(typeof(XObject).GetTypeInfo().IsAssignableFrom(type.GetTypeInfo()));
+			Contract.Requires(typeof(XImmutableIdentifiedObject<TId>).GetTypeInfo().IsAssignableFrom(type.GetTypeInfo()));
 #endif
 
-			return XKey.From( id, CreateKey( type ) );
+			return CreateKey(type).WithKey(id);
 		}
 		#endregion
 
@@ -131,7 +131,7 @@ namespace Digillect
 		/// <inheritdoc/>
 		protected override XKey CreateKey()
 		{
-			return XKey.From(_id, base.CreateKey());
+			return base.CreateKey().WithKey(_id);
 		}
 
 		/// <inheritdoc/>

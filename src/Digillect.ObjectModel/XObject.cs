@@ -102,6 +102,7 @@ namespace Digillect
 		/// through the call to <see cref="CreateKey()"/>.
 		/// </summary>
 		/// <returns>Key, identifying this object.</returns>
+		/// <exception cref="XKeyNotAvailableException"><see cref="CreateKey()"/> returned <c>null</c>.</exception>
 		[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1024:UsePropertiesWhereAppropriate")]
 		public XKey GetKey()
 		{
@@ -138,7 +139,7 @@ namespace Digillect
 		{
 			Contract.Ensures(Contract.Result<XKey>() != null);
 
-			return new RootKey(GetType());
+			return XKey.Empty.WithKey(GetType().AssemblyQualifiedName, "__type");
 		}
 
 		/// <summary>
@@ -165,7 +166,7 @@ namespace Digillect
 
 			Contract.Ensures( Contract.Result<XKey>() != null );
 
-			return new RootKey( type );
+			return XKey.Empty.WithKey(type.AssemblyQualifiedName, "__type");
 		}
 		#endregion
 
@@ -323,71 +324,6 @@ namespace Digillect
 				return;
 			if( --updateCount == 0 )
 				OnUpdated( EventArgs.Empty );
-		}
-		#endregion
-
-		#region class RootKey
-		[DebuggerDisplay("Type = {_type}")]
-#if !(SILVERLIGHT || WINDOWS8)
-		[Serializable]
-#endif
-		private sealed class RootKey : XKey, IEquatable<RootKey>
-		{
-			private readonly Type _type;
-
-			public RootKey(Type type)
-			{
-				Contract.Requires(type != null);
-
-				this._type = type;
-			}
-
-			public override int CompareTo(XKey other)
-			{
-				if ( Object.ReferenceEquals(other, null) )
-				{
-					return 1;
-				}
-
-				RootKey otherKey = other as RootKey;
-
-				if ( otherKey == null )
-				{
-					throw new ArgumentException("Invalid key.", "other");
-				}
-
-				if ( this._type == otherKey._type )
-				{
-					return 0;
-				}
-
-				return String.Compare(this._type.AssemblyQualifiedName, otherKey._type.AssemblyQualifiedName, StringComparison.OrdinalIgnoreCase);
-			}
-
-			public bool Equals(RootKey other)
-			{
-				if ( Object.ReferenceEquals(other, null) )
-				{
-					return false;
-				}
-
-				return Object.ReferenceEquals(this, other) || this._type == other._type;
-			}
-
-			public override bool Equals(XKey other)
-			{
-				return Equals(other as RootKey);
-			}
-
-			public override int GetHashCode()
-			{
-				return this._type.GetHashCode();
-			}
-
-			public override string ToString()
-			{
-				return _type.ToString();
-			}
 		}
 		#endregion
 	}

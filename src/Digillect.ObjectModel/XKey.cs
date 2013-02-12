@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Diagnostics.Contracts;
+using System.Linq;
 using System.Text;
 
 namespace Digillect
@@ -12,49 +14,118 @@ namespace Digillect
 #if !(SILVERLIGHT || WINDOWS8)
 	[Serializable]
 #endif
-	public abstract class XKey : IComparable<XKey>, IEquatable<XKey>
+	public sealed class XKey : IEquatable<XKey>
 	{
-		private readonly XKey _parentKey;
+		private const string IdKeyName = "id";
+
+		public static readonly XKey Empty = new XKey();
+
+		private readonly KeyValuePair<string, object>[] _keys;
+		private readonly int _hashCode = 17;
 
 		#region Constructor
-		/// <summary>
-		/// Initializes a new instance of the <see cref="XKey"/> class.
-		/// </summary>
-		protected XKey()
+		private XKey()
 		{
+			_keys = new KeyValuePair<string, object>[0];
 		}
 
-		/// <summary>
-		/// Initializes a new instance of the <see cref="XKey"/> class.
-		/// </summary>
-		/// <param name="parentKey">The parent key.</param>
-		protected XKey(XKey parentKey)
+		private XKey(KeyValuePair<string, object>[] baseKeys, string name, object value)
 		{
-			this._parentKey = parentKey;
+#if NET40 && SILVERLIGHT
+			int index = -1;
+
+			for ( int i = 0; i < baseKeys.Length; i++ )
+			{
+				if ( String.Equals(baseKeys[i].Key, name, StringComparison.OrdinalIgnoreCase) )
+				{
+					index = i;
+
+					break;
+				}
+			}
+#else
+			int index = Array.FindIndex(baseKeys, x => String.Equals(x.Key, name, StringComparison.OrdinalIgnoreCase));
+#endif
+
+			if ( index == -1 )
+			{
+				_keys = new KeyValuePair<string, object>[baseKeys.Length + 1];
+
+				Array.Copy(baseKeys, 0, _keys, 0, baseKeys.Length);
+				_keys[_keys.Length - 1] = new KeyValuePair<string, object>(name, value);
+				Array.Sort(_keys, (x, y) => String.Compare(x.Key, y.Key, StringComparison.OrdinalIgnoreCase));
+			}
+			else
+			{
+				_keys = (KeyValuePair<string, object>[]) _keys.Clone();
+
+				_keys[index] = new KeyValuePair<string, object>(name, value);
+			}
+
+			foreach ( var pair in _keys )
+			{
+				_hashCode = (_hashCode * 37 + pair.Key.GetHashCode()) * 37 + pair.Value.GetHashCode();
+			}
 		}
 		#endregion
 
-		/// <summary>
-		/// Gets the parent key.
-		/// </summary>
-		public XKey ParentKey
+		public object this[string name]
 		{
-			get { return _parentKey; }
+			get
+			{
+#if NET40 && SILVERLIGHT
+				return _keys.FirstOrDefault(x => String.Equals(x.Key, name, StringComparison.OrdinalIgnoreCase));
+#else
+				return Array.Find(_keys, x => String.Equals(x.Key, name, StringComparison.OrdinalIgnoreCase));
+#endif
+			}
 		}
 
-		/// <summary>
-		/// Compares key to other key.
-		/// </summary>
-		/// <param name="other">The other key.</param>
-		/// <returns>Negative value if this key is less then other key, positive value if other key is less then this one or zero if keys are equal.</returns>
-		public abstract int CompareTo(XKey other);
+		#region Public Methods
+		public XKey WithKey<T>(T keyValue, string keyName = IdKeyName) where T : IEquatable<T>
+		{
+			if ( keyName == null )
+			{
+				throw new ArgumentNullException("keyName");
+			}
+
+			Contract.Ensures(Contract.Result<XKey>() != null);
+
+			return new XKey(_keys, keyName, keyValue);
+		}
 
 		/// <summary>
 		/// Checks that keys are equal.
 		/// </summary>
 		/// <param name="other">The other key.</param>
 		/// <returns><c>true</c> if keys are equal, otherwise <c>false</c>.</returns>
-		public abstract bool Equals(XKey other);
+		public bool Equals(XKey other)
+		{
+			if ( Object.ReferenceEquals(other, null) )
+			{
+				return false;
+			}
+
+			if ( Object.ReferenceEquals(other, this) )
+			{
+				return true;
+			}
+
+			if ( other._hashCode != _hashCode || other._keys.Length != _keys.Length )
+			{
+				return false;
+			}
+
+			for ( int i = 0; i < _keys.Length; i++ )
+			{
+				if ( other._keys[i].Key != _keys[i].Key || !Object.Equals(other._keys[i].Value, _keys[i].Value) )
+				{
+					return false;
+				}
+			}
+
+			return true;
+		}
 
 		/// <summary>
 		/// Checks that objects are equal.
@@ -77,7 +148,11 @@ namespace Digillect
 		/// <returns>
 		/// A hash code for this instance, suitable for use in hashing algorithms and data structures like a hash table. 
 		/// </returns>
-		public abstract override int GetHashCode();
+		public override int GetHashCode()
+		{
+			return _hashCode;
+		}
+		#endregion
 
 		#region Compare Operators
 		/// <summary>
@@ -159,95 +234,32 @@ namespace Digillect
 
 		#region Cast Operators
 		/// <summary>
-		/// Creates key froms the specified type and parent key.
+		/// Creates a key from the specified value.
 		/// </summary>
 		/// <typeparam name="T">Type of key value.</typeparam>
 		/// <param name="key">The value.</param>
-		/// <param name="parentKey">The parent key.</param>
+		/// <param name="keyName">The name of the value.</param>
 		/// <returns>Created key.</returns>
-		public static XKey From<T>(T key, XKey parentKey)
-			where T : IComparable<T>, IEquatable<T>
+		public static XKey From<T>(T key, string keyName = IdKeyName) where T : IEquatable<T>
 		{
 			Contract.Ensures(Contract.Result<XKey>() != null);
 
-			return new SimpleKey<T>(key, parentKey);
+			return Empty.WithKey(key, keyName);
 		}
-		#endregion
 
-		#region class SimpleKey`1
-		[DebuggerDisplay("Key Value = {_value}")]
-#if !(SILVERLIGHT || WINDOWS8)
-		[Serializable]
-#endif
-		private sealed class SimpleKey<T> : XKey, IEquatable<SimpleKey<T>>
-			where T: IComparable<T>, IEquatable<T>
+		public static explicit operator XKey(Guid key)
 		{
-			private T _value;
+			return From(key);
+		}
 
-			public SimpleKey(T value, XKey parentKey)
-				: base(parentKey)
-			{
-				this._value = value;
-			}
+		public static explicit operator XKey(int key)
+		{
+			return From(key);
+		}
 
-			public override int CompareTo(XKey other)
-			{
-				if ( other == null )
-				{
-					return 1;
-				}
-
-				SimpleKey<T> otherKey = other as SimpleKey<T>;
-
-				if ( otherKey == null )
-				{
-					throw new ArgumentException("Invalid key.", "other");
-				}
-
-				int result = Comparer<XKey>.Default.Compare(this._parentKey, other._parentKey);
-
-				if ( result == 0 )
-				{
-					result = Comparer<T>.Default.Compare(this._value, otherKey._value);
-				}
-
-				return result;
-			}
-
-			public bool Equals(SimpleKey<T> other)
-			{
-				if ( Object.ReferenceEquals(other, null) )
-				{
-					return false;
-				}
-
-				return Object.ReferenceEquals(this, other) || (EqualityComparer<T>.Default.Equals(this._value, other._value) && this._parentKey == other._parentKey);
-			}
-
-			public override bool Equals(XKey other)
-			{
-				return Equals(other as SimpleKey<T>);
-			}
-
-			public override int GetHashCode()
-			{
-				if ( !Object.ReferenceEquals(this._parentKey, null) )
-				{
-					return this._parentKey.GetHashCode() ^ this._value.GetHashCode();
-				}
-
-				return this._value.GetHashCode();
-			}
-
-			public override string ToString()
-			{
-				if ( !Object.ReferenceEquals(this._parentKey, null) )
-				{
-					return this._parentKey.ToString() + "+" + this._value.ToString();
-				}
-
-				return this._value.ToString();
-			}
+		public static explicit operator XKey(string key)
+		{
+			return From(key);
 		}
 		#endregion
 	}

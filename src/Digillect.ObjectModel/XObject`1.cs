@@ -77,12 +77,12 @@ namespace Digillect
 		{
 			Contract.Requires(type != null);
 #if !WINDOWS8
-			Contract.Requires(typeof(XObject).IsAssignableFrom(type));
+			Contract.Requires(typeof(XObject<TId>).IsAssignableFrom(type));
 #else
-			Contract.Requires(typeof(XObject).GetTypeInfo().IsAssignableFrom(type.GetTypeInfo()));
+			Contract.Requires(typeof(XObject<TId>).GetTypeInfo().IsAssignableFrom(type.GetTypeInfo()));
 #endif
 
-			return XKey.From( id, CreateKey( type ) );
+			return CreateKey(type).WithKey(id);
 		}
 		#endregion
 
@@ -95,7 +95,7 @@ namespace Digillect
 		/// </returns>
 		protected override XKey CreateKey()
 		{
-			return XKey.From( this.id, base.CreateKey() );
+			return base.CreateKey().WithKey(id);
 		}
 
 		/// <summary>

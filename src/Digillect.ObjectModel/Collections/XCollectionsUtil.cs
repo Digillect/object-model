@@ -260,7 +260,7 @@ namespace Digillect.Collections
 				}
 				else
 				{
-					XKey key = item == null ? NullMergeItemKey.Instance : item.GetKey();
+					XKey key = item == null ? XKey.Empty : item.GetKey();
 					List<MergeItem<T>> items;
 
 					if ( updateCandidates.ContainsKey(key) )
@@ -843,37 +843,6 @@ namespace Digillect.Collections
 		{
 			public T Item;
 			public int Index;
-		}
-		#endregion
-
-		#region class NullMergeItemKey
-		private sealed class NullMergeItemKey : XKey
-		{
-			public static readonly XKey Instance = new NullMergeItemKey();
-
-			private NullMergeItemKey()
-			{
-			}
-
-			public override int CompareTo(XKey other)
-			{
-				throw new NotImplementedException("Not intended to be compared with.");
-			}
-
-			public override bool Equals(XKey other)
-			{
-				return Object.ReferenceEquals(this, other);
-			}
-
-			public override int GetHashCode()
-			{
-				return 0;
-			}
-
-			public override string ToString()
-			{
-				return "Null";
-			}
 		}
 		#endregion
 	}
