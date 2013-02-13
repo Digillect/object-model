@@ -139,7 +139,7 @@ namespace Digillect
 		{
 			Contract.Ensures(Contract.Result<XKey>() != null);
 
-			return XKey.Empty.WithKey(GetType().AssemblyQualifiedName, "__type");
+			return XKey.Empty.WithKey("__type", GetType().AssemblyQualifiedName);
 		}
 
 		/// <summary>
@@ -166,7 +166,7 @@ namespace Digillect
 
 			Contract.Ensures( Contract.Result<XKey>() != null );
 
-			return XKey.Empty.WithKey(type.AssemblyQualifiedName, "__type");
+			return XKey.Empty.WithKey("__type", type.AssemblyQualifiedName);
 		}
 		#endregion
 

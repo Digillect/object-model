@@ -88,6 +88,7 @@
       <Link>Properties\AssemblyVersionInfo.cs</Link>
     </Compile>
     <Compile Include="XImmutableIdentifiedObjectTest.cs" />
+    <Compile Include="XKeyTest.cs" />
     <Compile Include="XQueryTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="XCacheTest.cs" />
