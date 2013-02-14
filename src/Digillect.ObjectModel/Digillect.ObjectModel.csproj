@@ -181,6 +181,7 @@
     <Compile Include="XImmutableIdentifiedObject.cs" />
     <Compile Include="XKey.cs" />
     <Compile Include="XKeyNotAvailableException.cs" />
+    <Compile Include="XKeySerializer.cs" />
     <Compile Include="XObject.cs" />
     <Compile Include="XObject`1.cs" />
     <Compile Include="XParameters.cs" />

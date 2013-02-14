@@ -99,7 +99,7 @@ namespace Digillect
 		}
 		#endregion
 
-		#region Public Methods
+		#region Equals/GetHashCode
 		/// <summary>
 		/// Checks that keys are equal.
 		/// </summary>
@@ -158,7 +158,9 @@ namespace Digillect
 		{
 			return _hashCode;
 		}
+		#endregion
 
+		#region Public Methods
 		/// <summary>
 		/// Returns a part of the key with the specified name.
 		/// </summary>
