@@ -29,7 +29,7 @@
     <DocumentationFile>..\..\target\Debug\bin\net45+wp8+win8\Digillect.ObjectModel.xml</DocumentationFile>
     <NoWarn>1591</NoWarn>
     <CodeAnalysisRuleSet>..\DigillectRules.ruleset</CodeAnalysisRuleSet>
-    <CodeContractsEnableRuntimeChecking>False</CodeContractsEnableRuntimeChecking>
+    <CodeContractsEnableRuntimeChecking>True</CodeContractsEnableRuntimeChecking>
     <CodeContractsRuntimeOnlyPublicSurface>False</CodeContractsRuntimeOnlyPublicSurface>
     <CodeContractsRuntimeThrowOnFailure>True</CodeContractsRuntimeThrowOnFailure>
     <CodeContractsRuntimeCallSiteRequires>False</CodeContractsRuntimeCallSiteRequires>
@@ -46,7 +46,7 @@
     <CodeContractsSuggestAssumptions>False</CodeContractsSuggestAssumptions>
     <CodeContractsSuggestRequires>True</CodeContractsSuggestRequires>
     <CodeContractsSuggestEnsures>False</CodeContractsSuggestEnsures>
-    <CodeContractsSuggestObjectInvariants>True</CodeContractsSuggestObjectInvariants>
+    <CodeContractsSuggestObjectInvariants>False</CodeContractsSuggestObjectInvariants>
     <CodeContractsRunInBackground>True</CodeContractsRunInBackground>
     <CodeContractsShowSquigglies>True</CodeContractsShowSquigglies>
     <CodeContractsUseBaseLine>False</CodeContractsUseBaseLine>
@@ -61,6 +61,9 @@
     <CodeContractsRuntimeCheckingLevel>Full</CodeContractsRuntimeCheckingLevel>
     <CodeContractsReferenceAssembly>Build</CodeContractsReferenceAssembly>
     <CodeContractsAnalysisWarningLevel>0</CodeContractsAnalysisWarningLevel>
+    <CodeContractsMissingPublicRequiresAsWarnings>True</CodeContractsMissingPublicRequiresAsWarnings>
+    <CodeContractsSQLServerOption />
+    <CodeContractsFailBuildOnWarnings>False</CodeContractsFailBuildOnWarnings>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -141,12 +144,15 @@
     <CodeContractsCustomRewriterClass />
     <CodeContractsLibPaths />
     <CodeContractsExtraRewriteOptions />
-    <CodeContractsExtraAnalysisOptions />
+    <CodeContractsExtraAnalysisOptions>-timeout 360</CodeContractsExtraAnalysisOptions>
     <CodeContractsBaseLineFile />
     <CodeContractsCacheAnalysisResults>True</CodeContractsCacheAnalysisResults>
     <CodeContractsRuntimeCheckingLevel>Full</CodeContractsRuntimeCheckingLevel>
     <CodeContractsReferenceAssembly>%28none%29</CodeContractsReferenceAssembly>
     <CodeContractsAnalysisWarningLevel>0</CodeContractsAnalysisWarningLevel>
+    <CodeContractsMissingPublicRequiresAsWarnings>True</CodeContractsMissingPublicRequiresAsWarnings>
+    <CodeContractsSQLServerOption />
+    <CodeContractsFailBuildOnWarnings>False</CodeContractsFailBuildOnWarnings>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="..\AssemblySharedInfo.cs">

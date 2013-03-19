@@ -116,11 +116,16 @@ namespace Digillect
 		[Pure]
 		protected static XKey CreateKey( TId id, Type type )
 		{
+			if ( id == null )
+			{
+				throw new ArgumentNullException("id");
+			}
+
 			Contract.Requires(type != null);
 #if !WINDOWS8
-			Contract.Requires(typeof(XImmutableIdentifiedObject<TId>).IsAssignableFrom(type));
+			Contract.Requires(typeof(XObject).IsAssignableFrom(type));
 #else
-			Contract.Requires(typeof(XImmutableIdentifiedObject<TId>).GetTypeInfo().IsAssignableFrom(type.GetTypeInfo()));
+			Contract.Requires(typeof(XObject).GetTypeInfo().IsAssignableFrom(type.GetTypeInfo()));
 #endif
 
 			return CreateKey(type).WithKey(XKey.IdKeyName, id);
@@ -176,7 +181,11 @@ namespace Digillect
 
 				if ( icl != null )
 				{
-					return (TId) icl.Clone();
+					TId cloned = (TId) icl.Clone();
+
+					Contract.Assume(cloned != null);
+
+					return cloned;
 				}
 				else
 #endif

@@ -165,6 +165,7 @@ namespace Digillect
 			}
 
 			Contract.Ensures( Contract.Result<XKey>() != null );
+			Contract.Assume(type.AssemblyQualifiedName != null);
 
 			return XKey.Empty.WithKey("__type", type.AssemblyQualifiedName);
 		}

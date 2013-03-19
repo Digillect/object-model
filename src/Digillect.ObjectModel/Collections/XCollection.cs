@@ -412,6 +412,7 @@ namespace Digillect.Collections
 			}
 		}
 
+		[ContractVerification(false)]
 		bool IXUpdatable<IXCollection<T>>.IsUpdateRequired(IXCollection<T> source)
 		{
 			return IsUpdateRequired(source, CollectionMergeOptions.Full);
@@ -420,20 +421,25 @@ namespace Digillect.Collections
 		/// <summary>
 		/// Determines whether the update operation is needed.
 		/// </summary>
-		/// <param name="source">Source <b>collection</b> to compare with.</param>
-		/// <param name="options">Update options.</param>
+		/// <param name="collection">Source <b>collection</b> to compare with.</param>
+		/// <param name="options">The desired update options.</param>
 		/// <returns>
 		/// <see langword="false"/> if two collections are the same (equal by reference) or <paramref name="options"/> are <see cref="CollectionMergeOptions.None"/>, otherwise, <see langword="true"/>.
 		/// </returns>
 		/// <seealso cref="IXUpdatable&lt;T&gt;"/>
-		public virtual bool IsUpdateRequired(IEnumerable<T> source, CollectionMergeOptions options)
+		public virtual bool IsUpdateRequired(IEnumerable<T> collection, CollectionMergeOptions options)
 		{
-			return !Object.ReferenceEquals(this, source) && options != CollectionMergeOptions.None;
+			if ( collection == null )
+			{
+				throw new ArgumentNullException("collection");
+			}
+
+			Contract.EndContractBlock();
+
+			return !Object.ReferenceEquals(this, collection) && options != CollectionMergeOptions.None;
 		}
 
-#if !NET45
-		[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Contracts", "Requires", Justification = "Can't restrict interface requirements")]
-#endif
+		[ContractVerification(false)]
 		void IXUpdatable<IXCollection<T>>.Update(IXCollection<T> source)
 		{
 			Update(source, CollectionMergeOptions.Full);

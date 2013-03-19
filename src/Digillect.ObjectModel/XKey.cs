@@ -18,10 +18,12 @@ namespace Digillect
 #if !(SILVERLIGHT || WINDOWS8)
 	[Serializable]
 #endif
+	[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1710:IdentifiersShouldHaveCorrectSuffix")]
 	public sealed class XKey : IEnumerable<KeyValuePair<string, object>>, IEquatable<XKey>
 	{
 		public const string IdKeyName = "ID";
 
+		[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA2104:DoNotDeclareReadOnlyMutableReferenceTypes")]
 		public static readonly XKey Empty = new XKey();
 
 		private readonly KeyValuePair<string, object>[] _keys;
@@ -35,6 +37,8 @@ namespace Digillect
 
 		private XKey(IDictionary<string, object> keys)
 		{
+			Contract.Requires(keys != null);
+
 			_keys = keys.ToArray();
 
 			Array.Sort(_keys, (x, y) => String.Compare(x.Key, y.Key, StringComparison.OrdinalIgnoreCase));
@@ -47,6 +51,8 @@ namespace Digillect
 
 		private XKey(KeyValuePair<string, object>[] baseKeys, string name, object value)
 		{
+			Contract.Requires(baseKeys != null);
+
 #if NET40 && SILVERLIGHT
 			int index = -1;
 
@@ -214,34 +220,6 @@ namespace Digillect
 		}
 		#endregion
 
-		#region Compare Operators
-		/// <summary>
-		/// Implements the operator &lt;.
-		/// </summary>
-		/// <param name="key1">The key1.</param>
-		/// <param name="key2">The key2.</param>
-		/// <returns>
-		/// The result of the operator.
-		/// </returns>
-		public static bool operator <(XKey key1, XKey key2)
-		{
-			return Comparer<XKey>.Default.Compare(key1, key2) < 0;
-		}
-
-		/// <summary>
-		/// Implements the operator &gt;.
-		/// </summary>
-		/// <param name="key1">The key1.</param>
-		/// <param name="key2">The key2.</param>
-		/// <returns>
-		/// The result of the operator.
-		/// </returns>
-		public static bool operator >(XKey key1, XKey key2)
-		{
-			return Comparer<XKey>.Default.Compare(key1, key2) > 0;
-		}
-		#endregion
-
 		#region Equality Operators
 		/// <summary>
 		/// Implements the operator ==.
@@ -302,6 +280,8 @@ namespace Digillect
 		/// <returns>Created key.</returns>
 		public static XKey From<T>(string keyName, T key) where T : IEquatable<T>
 		{
+			Contract.Requires(keyName != null);
+			Contract.Requires(key != null);
 			Contract.Ensures(Contract.Result<XKey>() != null);
 
 			return Empty.WithKey(keyName, key);
@@ -319,6 +299,8 @@ namespace Digillect
 
 		public static explicit operator XKey(string key)
 		{
+			Contract.Requires(key != null);
+
 			return From(IdKeyName, key);
 		}
 		#endregion
@@ -327,6 +309,8 @@ namespace Digillect
 		/// <summary>
 		/// <see cref="XKey"/> builder which allows mutation in a multistep fashion.
 		/// </summary>
+		[ContractVerification(false)]
+		[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1034:NestedTypesShouldNotBeVisible")]
 		public sealed class Builder
 		{
 			[DebuggerBrowsable(DebuggerBrowsableState.Never)]
@@ -377,6 +361,8 @@ namespace Digillect
 					{
 						_immutable = null;
 						_keys = new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase);
+
+						Contract.Assume(_keys.Count == 0);
 					}
 				}
 				else if ( _keys.Count != 0 )
@@ -431,6 +417,7 @@ namespace Digillect
 #if DEBUG || CONTRACTS_FULL
 			#region ObjectInvariant
 			[ContractInvariantMethod]
+			[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode", Justification = "Required by code contracts.")]
 			[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1822:MarkMembersAsStatic", Justification = "Required for code contracts.")]
 			private void ObjectInvariant()
 			{

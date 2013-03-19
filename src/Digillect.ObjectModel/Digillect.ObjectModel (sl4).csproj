@@ -151,7 +151,7 @@
     <CodeContractsSuggestObjectInvariants>False</CodeContractsSuggestObjectInvariants>
     <CodeContractsDisjunctiveRequires>True</CodeContractsDisjunctiveRequires>
     <CodeContractsRunInBackground>True</CodeContractsRunInBackground>
-    <CodeContractsShowSquigglies>False</CodeContractsShowSquigglies>
+    <CodeContractsShowSquigglies>True</CodeContractsShowSquigglies>
     <CodeContractsUseBaseLine>False</CodeContractsUseBaseLine>
     <CodeContractsEmitXMLDocs>False</CodeContractsEmitXMLDocs>
     <CodeContractsCustomRewriterAssembly />
@@ -164,6 +164,9 @@
     <CodeContractsRuntimeCheckingLevel>Full</CodeContractsRuntimeCheckingLevel>
     <CodeContractsReferenceAssembly>%28none%29</CodeContractsReferenceAssembly>
     <CodeContractsAnalysisWarningLevel>0</CodeContractsAnalysisWarningLevel>
+    <CodeContractsMissingPublicRequiresAsWarnings>True</CodeContractsMissingPublicRequiresAsWarnings>
+    <CodeContractsSQLServerOption />
+    <CodeContractsFailBuildOnWarnings>False</CodeContractsFailBuildOnWarnings>
   </PropertyGroup>
   <PropertyGroup>
     <SignAssembly>true</SignAssembly>

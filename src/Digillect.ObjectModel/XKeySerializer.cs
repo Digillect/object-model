@@ -35,6 +35,7 @@ namespace Digillect
 			String = 18
 		}
 
+		[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2202:Do not dispose objects multiple times", Justification = "It is safe to dispose MemoryStream multiple times")]
 		public static XKey Deserialize(string key)
 		{
 			if ( String.IsNullOrEmpty(key) )
@@ -42,7 +43,7 @@ namespace Digillect
 				throw new ArgumentNullException("key");
 			}
 
-			Contract.EndContractBlock();
+			Contract.Ensures(Contract.Result<XKey>() != null);
 
 			using ( MemoryStream stream = new MemoryStream(Convert.FromBase64String(key), false) )
 			{
@@ -50,7 +51,7 @@ namespace Digillect
 
 				using ( BinaryReader reader = new BinaryReader(stream) )
 				{
-					byte version = reader.ReadByte();
+					/*byte version =*/ reader.ReadByte();
 					int typeCode;
 
 					while ( (typeCode = reader.ReadInt32()) != 0 )
@@ -130,6 +131,7 @@ namespace Digillect
 			}
 		}
 
+		[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2202:Do not dispose objects multiple times", Justification = "It is safe to dispose MemoryStream multiple times")]
 		public static string Serialize(XKey key)
 		{
 			if ( key == null )
@@ -137,7 +139,7 @@ namespace Digillect
 				throw new ArgumentNullException("key");
 			}
 
-			Contract.EndContractBlock();
+			Contract.Ensures(Contract.Result<string>() != null);
 
 			using ( MemoryStream stream = new MemoryStream() )
 			{

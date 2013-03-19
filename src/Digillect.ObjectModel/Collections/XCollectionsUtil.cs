@@ -537,6 +537,7 @@ namespace Digillect.Collections
 		#endregion
 
 		[ContractArgumentValidator]
+		[Pure]
 		internal static void ValidateCollection<T>([ValidatedNotNull] IEnumerable<T> collection)
 		{
 			if ( collection == null )

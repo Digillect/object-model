@@ -39,7 +39,7 @@
     <CodeContractsArithmeticObligations>False</CodeContractsArithmeticObligations>
     <CodeContractsEnumObligations>False</CodeContractsEnumObligations>
     <CodeContractsRedundantAssumptions>False</CodeContractsRedundantAssumptions>
-    <CodeContractsInferRequires>True</CodeContractsInferRequires>
+    <CodeContractsInferRequires>False</CodeContractsInferRequires>
     <CodeContractsInferEnsures>False</CodeContractsInferEnsures>
     <CodeContractsInferObjectInvariants>False</CodeContractsInferObjectInvariants>
     <CodeContractsSuggestAssumptions>False</CodeContractsSuggestAssumptions>
@@ -61,6 +61,9 @@
     <CodeContractsRuntimeCheckingLevel>Full</CodeContractsRuntimeCheckingLevel>
     <CodeContractsReferenceAssembly>Build</CodeContractsReferenceAssembly>
     <CodeContractsAnalysisWarningLevel>0</CodeContractsAnalysisWarningLevel>
+    <CodeContractsMissingPublicRequiresAsWarnings>True</CodeContractsMissingPublicRequiresAsWarnings>
+    <CodeContractsSQLServerOption />
+    <CodeContractsFailBuildOnWarnings>False</CodeContractsFailBuildOnWarnings>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -134,7 +137,7 @@
     <CodeContractsSuggestObjectInvariants>False</CodeContractsSuggestObjectInvariants>
     <CodeContractsDisjunctiveRequires>True</CodeContractsDisjunctiveRequires>
     <CodeContractsRunInBackground>True</CodeContractsRunInBackground>
-    <CodeContractsShowSquigglies>False</CodeContractsShowSquigglies>
+    <CodeContractsShowSquigglies>True</CodeContractsShowSquigglies>
     <CodeContractsUseBaseLine>False</CodeContractsUseBaseLine>
     <CodeContractsEmitXMLDocs>False</CodeContractsEmitXMLDocs>
     <CodeContractsCustomRewriterAssembly />
@@ -148,6 +151,9 @@
     <CodeContractsReferenceAssembly>%28none%29</CodeContractsReferenceAssembly>
     <CodeContractsAnalysisWarningLevel>0</CodeContractsAnalysisWarningLevel>
     <RunCodeAnalysis>true</RunCodeAnalysis>
+    <CodeContractsMissingPublicRequiresAsWarnings>True</CodeContractsMissingPublicRequiresAsWarnings>
+    <CodeContractsSQLServerOption />
+    <CodeContractsFailBuildOnWarnings>False</CodeContractsFailBuildOnWarnings>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
