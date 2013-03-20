@@ -62,10 +62,5 @@ namespace Digillect.Tests
 
 			return ids;
 		}
-
-		public static XKey CreateKey( int id )
-		{
-			return XObject<int>.CreateKey( id, typeof( XIntegerObject ) );
-		}
 	}
 }

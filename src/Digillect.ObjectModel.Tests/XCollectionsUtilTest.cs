@@ -16,6 +16,8 @@ namespace Digillect.Tests
 	///</summary>
 	public class XCollectionsUtilTest
 	{
+		private const int Many = 3;
+
 		#region IsNullOrEmpty Tests
 		/// <summary>
 		/// A test for IsNullOrEmpty(ICollection)
@@ -77,6 +79,7 @@ namespace Digillect.Tests
 		#endregion
 
 		#region Merge Tests
+		#region Standard Tests
 		[Fact]
 		public void Merge_should_add_new_nulls_and_not_remove_existing()
 		{
@@ -117,11 +120,11 @@ namespace Digillect.Tests
 		public void Merge_should_not_change_anything_when_options_are_None()
 		{
 			// Setup
-			var data = XIntegerObject.CreateSeries(3);
+			var data = XIntegerObject.CreateSeries(Many);
 			var sut = new List<XObject>(data);
 
 			// Exercise
-			var result = sut.Merge(XIntegerObject.CreateSeries(3), CollectionMergeOptions.None);
+			var result = sut.Merge(XIntegerObject.CreateSeries(Many), CollectionMergeOptions.None);
 
 			// Verify
 			result.IsEmpty.ShouldBe(true);
@@ -229,6 +232,44 @@ namespace Digillect.Tests
 		}
 		#endregion
 
+		#region Special Cases
+		[Fact(DisplayName = "XCollectionsUtil.Merge should not perform excessive updates when the other collection contains duplicates")]
+		public void Merge_should_not_perform_excessive_updates_when_other_collection_contains_duplicates()
+		{
+			// Setup
+			var objs = XIntegerObject.CreateSeries(Many);
+			var sut = new List<XObject>(objs);
+			var other = objs.Select(x => x.Clone(true));
+
+			// Exercise
+			var result = sut.Merge(other.Concat(objs).Concat(other), CollectionMergeOptions.Full);
+
+			// Verify
+			result.Added.ShouldBe(Many * 2);
+			result.Removed.ShouldBe(0);
+			result.Updated.ShouldBe(Many);
+		}
+
+		[Fact(DisplayName = "XCollectionsUtil.Merge should differentiate objects with the same id but of different type")]
+		public void Merge_should_differentiate_objects_with_the_same_id_but_of_different_type()
+		{
+			// Setup
+			var objs = XIntegerObject.CreateSeries(Many);
+			var sut = new List<XObject>(objs);
+			var other = objs.Select(x => new XIntegerObject2(x.Id));
+
+			// Exercise
+			var result = sut.Merge(other, CollectionMergeOptions.Full);
+
+			// Verify
+			result.Added.ShouldBe(other.Count());
+			result.Removed.ShouldBe(objs.Length);
+			result.Updated.ShouldBe(0);
+			sut.SequenceEqual(other).ShouldBe(true);
+		}
+		#endregion
+		#endregion
+
 		#region RemoveAll Tests
 		/// <summary>
 		/// A test for RemoveAll`1(ICollection`1,Func`2)
@@ -237,7 +278,7 @@ namespace Digillect.Tests
 		public void RemoveAllByPredicate_should_return_false_when_nothing_removed()
 		{
 			// Setup
-			var data = XIntegerObject.CreateSeries(3);
+			var data = XIntegerObject.CreateSeries(Many);
 			ICollection<XObject> sut = new List<XObject>(data);
 
 			// Exercise
@@ -275,11 +316,11 @@ namespace Digillect.Tests
 		public void RemoveAllByObject_should_return_false_when_nothing_removed()
 		{
 			// Setup
-			var data = XIntegerObject.CreateSeries(3);
+			var data = XIntegerObject.CreateSeries(Many);
 			var sut = new List<XObject>(data);
 
 			// Exercise
-			bool result = sut.RemoveAll(XIntegerObject.CreateSeries(3));
+			bool result = sut.RemoveAll(XIntegerObject.CreateSeries(Many));
 
 			// Verify
 			result.ShouldBe(false);
@@ -293,9 +334,9 @@ namespace Digillect.Tests
 		public void RemoveAllByObject_should_return_true_when_something_removed()
 		{
 			// Setup
-			var data = XIntegerObject.CreateSeries(3);
+			var data = XIntegerObject.CreateSeries(Many);
 			var sut = new List<XObject>(data);
-			var toRemove = new[] { data[0].Clone(), data[2].Clone() };
+			var toRemove = new[] { data[0].Clone(), data[Many - 1].Clone() };
 
 			// Exercise
 			bool result = sut.RemoveAll(toRemove);
@@ -313,11 +354,11 @@ namespace Digillect.Tests
 		public void RemoveAllByKey_should_return_false_when_nothing_removed()
 		{
 			// Setup
-			var data = XIntegerObject.CreateSeries(3);
+			var data = XIntegerObject.CreateSeries(Many);
 			var sut = new XCollection<XObject>(data);
 
 			// Exercise
-			bool result = sut.RemoveAll(XIntegerObject.NewId(3).Select(x => XIntegerObject.CreateKey(x)));
+			bool result = sut.RemoveAll(XIntegerObject.NewId(Many).Select(x => XKey.From(XKey.IdKeyName, x)));
 
 			// Verify
 			result.ShouldBe(false);
@@ -331,9 +372,9 @@ namespace Digillect.Tests
 		public void RemoveAllByKey_should_return_true_when_something_removed()
 		{
 			// Setup
-			var data = XIntegerObject.CreateSeries(3);
+			var data = XIntegerObject.CreateSeries(Many);
 			var sut = new XCollection<XObject>(data);
-			var toRemove = new[] { data[0].Clone().GetKey(), data[2].Clone().GetKey() };
+			var toRemove = new[] { XKey.From(XKey.IdKeyName, data[0].Id), XKey.From(XKey.IdKeyName, data[Many - 1].Id) };
 
 			// Exercise
 			bool result = sut.RemoveAll(toRemove);
@@ -381,14 +422,27 @@ namespace Digillect.Tests
 		[Fact]
 		public void UnmodifiableList_should_equals_correctly()
 		{
-			var series = new XCollection<XIntegerObject>( XIntegerObject.CreateSeries( 5 ) );
+			var series = new XCollection<XObject>(XIntegerObject.CreateSeries(Many));
 			var seriesClone = series.Clone( true );
 			var sut = XCollectionsUtil.UnmodifiableList( series );
-			var obj = XCollectionsUtil.UnmodifiableList( seriesClone );
 
-			sut.ShouldBe( obj );
-			sut.ShouldBe( seriesClone );
+			sut.ShouldBe(series);
+			sut.ShouldBe(seriesClone);
+			sut.ShouldBe(XCollectionsUtil.UnmodifiableList(seriesClone));
 		}
 		#endregion
+
+		private class XIntegerObject2 : XImmutableIdentifiedObject<int>
+		{
+			public XIntegerObject2(int id)
+				: base(id)
+			{
+			}
+
+			public static XIntegerObject2 Create()
+			{
+				return new XIntegerObject2(XIntegerObject.NewId());
+			}
+		}
 	}
 }

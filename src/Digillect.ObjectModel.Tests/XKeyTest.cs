@@ -43,7 +43,7 @@ namespace Digillect.Tests
 		public void XKeyBuilderClearNonEmptyTest()
 		{
 			// Setup
-			var sut = XIntegerObject.CreateKey(XIntegerObject.NewId());
+			var sut = XKey.From(XKey.IdKeyName, XIntegerObject.NewId());
 
 			// Exercise
 			var result = sut.ToBuilder().AddKey("name", String.Empty).ClearKeys().ToImmutable();

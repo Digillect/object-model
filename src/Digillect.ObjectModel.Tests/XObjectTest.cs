@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
+using Shouldly;
+
 using Xunit;
 
 namespace Digillect.Tests
@@ -48,11 +50,14 @@ namespace Digillect.Tests
 		[Fact]
 		public void CreateKeyTest()
 		{
-			var originalObject = XIntegerObject.Create();
-			var originalKey = originalObject.GetKey();
-			var createdKey = XIntegerObject.CreateKey( originalObject.Id );
+			// Setup
+			var sut = XIntegerObject.Create();
 
-			Assert.Equal( originalKey, createdKey );
+			// Excercise
+			var result = sut.GetKey();
+
+			// Verify
+			result.ShouldBe(XKey.From(XKey.IdKeyName, sut.Id));
 		}
 	}
 }
