@@ -26,6 +26,9 @@ namespace Digillect
 		[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA2104:DoNotDeclareReadOnlyMutableReferenceTypes")]
 		public static readonly XKey Empty = new XKey();
 
+		[DebuggerBrowsable(DebuggerBrowsableState.Never)]
+		private static readonly StringComparer KeyNameComparer = StringComparer.OrdinalIgnoreCase;
+
 		private readonly KeyValuePair<string, object>[] _keys;
 		private readonly int _hashCode = 17;
 
@@ -41,11 +44,11 @@ namespace Digillect
 
 			_keys = keys.ToArray();
 
-			Array.Sort(_keys, (x, y) => String.Compare(x.Key, y.Key, StringComparison.OrdinalIgnoreCase));
+			Array.Sort(_keys, (x, y) => KeyNameComparer.Compare(x.Key, y.Key));
 
 			foreach ( var pair in _keys )
 			{
-				_hashCode = (_hashCode * 37 + StringComparer.OrdinalIgnoreCase.GetHashCode(pair.Key)) * 37 + pair.Value.GetHashCode();
+				_hashCode = (_hashCode * 37 + KeyNameComparer.GetHashCode(pair.Key)) * 37 + pair.Value.GetHashCode();
 			}
 		}
 
@@ -58,7 +61,7 @@ namespace Digillect
 
 			for ( int i = 0; i < baseKeys.Length; i++ )
 			{
-				if ( String.Equals(baseKeys[i].Key, name, StringComparison.OrdinalIgnoreCase) )
+				if ( KeyNameComparer.Equals(baseKeys[i].Key, name) )
 				{
 					index = i;
 
@@ -66,7 +69,7 @@ namespace Digillect
 				}
 			}
 #else
-			int index = Array.FindIndex(baseKeys, x => String.Equals(x.Key, name, StringComparison.OrdinalIgnoreCase));
+			int index = Array.FindIndex(baseKeys, x => KeyNameComparer.Equals(x.Key, name));
 #endif
 
 			if ( index == -1 )
@@ -75,7 +78,7 @@ namespace Digillect
 
 				Array.Copy(baseKeys, 0, _keys, 0, baseKeys.Length);
 				_keys[_keys.Length - 1] = new KeyValuePair<string, object>(name, value);
-				Array.Sort(_keys, (x, y) => String.Compare(x.Key, y.Key, StringComparison.OrdinalIgnoreCase));
+				Array.Sort(_keys, (x, y) => KeyNameComparer.Compare(x.Key, y.Key));
 			}
 			else
 			{
@@ -86,7 +89,7 @@ namespace Digillect
 
 			foreach ( var pair in _keys )
 			{
-				_hashCode = (_hashCode * 37 + StringComparer.OrdinalIgnoreCase.GetHashCode(pair.Key)) * 37 + pair.Value.GetHashCode();
+				_hashCode = (_hashCode * 37 + KeyNameComparer.GetHashCode(pair.Key)) * 37 + pair.Value.GetHashCode();
 			}
 		}
 		#endregion
@@ -130,7 +133,7 @@ namespace Digillect
 
 			for ( int i = 0; i < _keys.Length; i++ )
 			{
-				if ( !String.Equals(other._keys[i].Key, _keys[i].Key, StringComparison.OrdinalIgnoreCase) || !Object.Equals(other._keys[i].Value, _keys[i].Value) )
+				if ( !KeyNameComparer.Equals(other._keys[i].Key, _keys[i].Key) || !Object.Equals(other._keys[i].Value, _keys[i].Value) )
 				{
 					return false;
 				}
@@ -179,7 +182,7 @@ namespace Digillect
 #if NET40 && SILVERLIGHT
 			return (T) _keys.FirstOrDefault(x => String.Equals(x.Key, name, StringComparison.OrdinalIgnoreCase)).Value;
 #else
-			return (T) Array.Find(_keys, x => String.Equals(x.Key, name, StringComparison.OrdinalIgnoreCase)).Value;
+			return (T) Array.Find(_keys, x => KeyNameComparer.Equals(x.Key, name)).Value;
 #endif
 		}
 
@@ -309,17 +312,19 @@ namespace Digillect
 		/// <summary>
 		/// <see cref="XKey"/> builder which allows mutation in a multistep fashion.
 		/// </summary>
-		[ContractVerification(false)]
 		[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1034:NestedTypesShouldNotBeVisible")]
 		public sealed class Builder
 		{
 			[DebuggerBrowsable(DebuggerBrowsableState.Never)]
 			private XKey _immutable;
-			private IDictionary<string, object> _keys;
+			private readonly IDictionary<string, object> _keys;
 
 			internal Builder(XKey immutable)
 			{
+				Contract.Requires(immutable != null);
+
 				_immutable = immutable;
+				_keys = _immutable._keys.ToDictionary(x => x.Key, x => x.Value, KeyNameComparer);
 			}
 
 			public Builder AddKey<T>(string name, T value) where T : IEquatable<T>
@@ -334,39 +339,21 @@ namespace Digillect
 					throw new ArgumentNullException("value");
 				}
 
-				Contract.Ensures(_keys != null);
-				Contract.Ensures(Contract.OldValue(_keys) == null ? _keys.Count == 1 : _keys.Count >= Contract.OldValue(_keys.Count));
+				Contract.Ensures(_keys.Count >= Contract.OldValue(_keys.Count));
 
-				if ( _keys == null )
-				{
-					_keys = Interlocked.Exchange(ref _immutable, null)._keys.ToDictionary(x => x.Key, x => x.Value, StringComparer.OrdinalIgnoreCase);
-					_keys.Add(name, value);
-				}
-				else if ( !_keys.ContainsKey(name) || !_keys[name].Equals(value) )
-				{
-					_immutable = null;
-					_keys[name] = value;
-				}
+				_immutable = null;
+				_keys[name] = value;
 
 				return this;
 			}
 
 			public Builder ClearKeys()
 			{
-				Contract.Ensures(_keys == null || _keys.Count == 0);
+				Contract.Ensures(_keys.Count == 0);
 
-				if ( _keys == null )
+				if ( _keys.Count != 0 )
 				{
-					if ( _immutable._keys.Length != 0 )
-					{
-						_immutable = null;
-						_keys = new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase);
-
-						Contract.Assume(_keys.Count == 0);
-					}
-				}
-				else if ( _keys.Count != 0 )
-				{
+					_immutable = null;
 					_keys.Clear();
 				}
 
@@ -380,19 +367,11 @@ namespace Digillect
 					throw new ArgumentNullException("name");
 				}
 
-				Contract.Ensures(_keys == null || Contract.OldValue(_keys) != null && _keys.Count <= Contract.OldValue(_keys.Count));
+				Contract.Ensures(_keys.Count <= Contract.OldValue(_keys.Count));
 
-				if ( _keys == null )
+				if ( _keys.Remove(name) )
 				{
-					if ( _immutable._keys.Length != 0 )
-					{
-						_keys = Interlocked.Exchange(ref _immutable, null)._keys.ToDictionary(x => x.Key, x => x.Value, StringComparer.OrdinalIgnoreCase);
-						_keys.Remove(name);
-					}
-				}
-				else
-				{
-					_keys.Remove(name);
+					_immutable = null;
 				}
 
 				return this;
@@ -408,23 +387,11 @@ namespace Digillect
 
 				if ( _immutable == null )
 				{
-					_immutable = new XKey(_keys);
+					_immutable = _keys.Count == 0 ? Empty : new XKey(_keys);
 				}
 
 				return _immutable;
 			}
-
-#if DEBUG || CONTRACTS_FULL
-			#region ObjectInvariant
-			[ContractInvariantMethod]
-			[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode", Justification = "Required by code contracts.")]
-			[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1822:MarkMembersAsStatic", Justification = "Required for code contracts.")]
-			private void ObjectInvariant()
-			{
-				Contract.Invariant(_immutable != null || _keys != null);
-			}
-			#endregion
-#endif
 		}
 		#endregion
 	}
