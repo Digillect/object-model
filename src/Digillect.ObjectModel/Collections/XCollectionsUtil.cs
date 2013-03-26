@@ -352,7 +352,7 @@ namespace Digillect.Collections
 				}
 			}
 
-			return new CollectionMergeResults(added, updated, removed);
+			return CollectionMergeResults.Empty.With(added, removed, updated);
 		}
 
 		private static void MergeAddNewItem<T>(T item, IList<T> collection, bool preserveOrder, int index, IEnumerable<List<MergeItem<T>>> updateCandidates)

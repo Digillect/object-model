@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics.Contracts;
 
 namespace Digillect.Collections
 {
@@ -26,26 +27,26 @@ namespace Digillect.Collections
 		{
 		}
 
-		/// <summary>
-		/// Initializes a new instance of the <see cref="CollectionMergeResults"/> class.
-		/// </summary>
-		/// <param name="added">Number of added objects.</param>
-		/// <param name="updated">Number of updated objects.</param>
-		/// <param name="removed">Number of removed objects.</param>
-		public CollectionMergeResults(int added, int updated, int removed)
+		private CollectionMergeResults(int added, int removed, int updated)
 		{
-			this._added = added;
-			this._removed = removed;
-			this._updated = updated;
+			_added = added;
+			_removed = removed;
+			_updated = updated;
 		}
 		#endregion
 
+		#region Public Properties
 		/// <summary>
 		/// Gets the number of added objects.
 		/// </summary>
 		public int Added
 		{
-			get { return this._added; }
+			get
+			{
+				Contract.Ensures(Contract.Result<int>() >= 0);
+
+				return _added;
+			}
 		}
 
 		/// <summary>
@@ -53,7 +54,12 @@ namespace Digillect.Collections
 		/// </summary>
 		public int Removed
 		{
-			get { return this._removed; }
+			get
+			{
+				Contract.Ensures(Contract.Result<int>() >= 0);
+
+				return _removed;
+			}
 		}
 
 		/// <summary>
@@ -61,7 +67,12 @@ namespace Digillect.Collections
 		/// </summary>
 		public int Updated
 		{
-			get { return this._updated; }
+			get
+			{
+				Contract.Ensures(Contract.Result<int>() >= 0);
+
+				return _updated;
+			}
 		}
 
 		/// <summary>
@@ -72,7 +83,48 @@ namespace Digillect.Collections
 		/// </value>
 		public bool IsEmpty
 		{
-			get { return this._added == 0 && this._removed == 0 && this._updated == 0; }
+			get
+			{
+				Contract.Ensures(!Contract.Result<bool>() || this.Added == 0 && this.Removed == 0 && this.Updated == 0);
+
+				return _added == 0 && _removed == 0 && _updated == 0;
+			}
 		}
+		#endregion
+
+		#region Public Methods
+		/// <summary>
+		/// Returns a new instance of the <see cref="CollectionMergeResults"/> class with the <see cref="Added"/>, <see cref="Removed"/> and <see cref="Updated"/> counts set to the specified values.
+		/// </summary>
+		/// <param name="added">Number of added objects.</param>
+		/// <param name="updated">Number of updated objects.</param>
+		/// <param name="removed">Number of removed objects.</param>
+		public CollectionMergeResults With(int added, int removed, int updated)
+		{
+			if ( added < 0 )
+			{
+				throw new ArgumentOutOfRangeException("added");
+			}
+
+			if ( removed < 0 )
+			{
+				throw new ArgumentOutOfRangeException("removed");
+			}
+
+			if ( updated < 0 )
+			{
+				throw new ArgumentOutOfRangeException("updated");
+			}
+
+			Contract.Ensures(Contract.Result<CollectionMergeResults>() != null);
+
+			if ( added == _added && removed == _removed && updated == _updated )
+			{
+				return this;
+			}
+
+			return new CollectionMergeResults(added, removed, updated);
+		}
+		#endregion
 	}
 }
