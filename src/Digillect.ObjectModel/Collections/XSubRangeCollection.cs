@@ -20,7 +20,7 @@ namespace Digillect.Collections
 		private readonly int _maxCount;
 
 		private int _size;
-		private uint _updateCount;
+		private ushort _updateCount;
 #if CUSTOM_ENUMERATOR
 		private int _version;
 #endif

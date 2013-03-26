@@ -16,7 +16,7 @@ namespace Digillect.Collections
 		private readonly IList<IXList<T>> _collections;
 
 		private int _count = -1;
-		private uint _updateCount;
+		private ushort _updateCount;
 		private int _version;
 
 		#region Constructor/Disposer

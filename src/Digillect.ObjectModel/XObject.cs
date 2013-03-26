@@ -25,7 +25,7 @@ namespace Digillect
 #if !(SILVERLIGHT || WINDOWS8)
 		[NonSerialized]
 #endif
-		private ushort updateCount;
+		private ushort _updateCount;
 
 #if !(SILVERLIGHT || WINDOWS8)
 		[NonSerialized]
@@ -50,7 +50,7 @@ namespace Digillect
 		/// </value>
 		protected bool IsInUpdate
 		{
-			get { return this.updateCount > 0; }
+			get { return _updateCount > 0; }
 		}
 		#endregion
 
@@ -66,7 +66,7 @@ namespace Digillect
 		/// <param name="e">The <see cref="Digillect.ComponentModel.PropertyChangingEventArgs"/> instance containing the event data.</param>
 		protected override void OnPropertyChanging( Digillect.ComponentModel.PropertyChangingEventArgs e )
 		{
-			if( this.updateCount == 0 )
+			if ( _updateCount == 0 )
 				base.OnPropertyChanging( e );
 		}
 
@@ -76,7 +76,7 @@ namespace Digillect
 		/// <param name="e">The <see cref="System.ComponentModel.PropertyChangedEventArgs"/> instance containing the event data.</param>
 		protected override void OnPropertyChanged( PropertyChangedEventArgs e )
 		{
-			if( this.updateCount == 0 )
+			if ( _updateCount == 0 )
 				base.OnPropertyChanged( e );
 		}
 
@@ -86,7 +86,7 @@ namespace Digillect
 		/// <param name="e">The <see cref="System.EventArgs"/> instance containing the event data.</param>
 		protected virtual void OnUpdated( EventArgs e )
 		{
-			if( this.updateCount == 0 )
+			if ( _updateCount == 0 )
 			{
 				var handler = this.Updated;
 
@@ -285,7 +285,7 @@ namespace Digillect
 		/// </summary>
 		public void BeginUpdate()
 		{
-			++updateCount;
+			++_updateCount;
 		}
 
 		/// <summary>
@@ -293,9 +293,9 @@ namespace Digillect
 		/// </summary>
 		public void EndUpdate()
 		{
-			if( updateCount == 0 )
+			if ( _updateCount == 0 )
 				return;
-			if( --updateCount == 0 )
+			if ( --_updateCount == 0 )
 				OnUpdated( EventArgs.Empty );
 		}
 		#endregion

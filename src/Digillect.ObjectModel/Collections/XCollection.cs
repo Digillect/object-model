@@ -43,7 +43,7 @@ namespace Digillect.Collections
 #if !(SILVERLIGHT || WINDOWS8)
 		[NonSerialized]
 #endif
-		private ushort updateCount;
+		private ushort _updateCount;
 
 		#region Constructor
 		/// <summary>
@@ -91,7 +91,7 @@ namespace Digillect.Collections
 		/// </value>
 		protected bool IsInUpdate
 		{
-			get { return this.updateCount > 0; }
+			get { return _updateCount > 0; }
 		}
 		#endregion
 
@@ -109,7 +109,7 @@ namespace Digillect.Collections
 		/// <param name="e">The <see cref="EventArgs"/> instance containing the event data.</param>
 		protected virtual void OnUpdated(EventArgs e)
 		{
-			if ( this.updateCount == 0 )
+			if ( _updateCount == 0 )
 			{
 				if ( Updated != null )
 				{
@@ -126,7 +126,7 @@ namespace Digillect.Collections
 		/// <inheritdoc/>
 		protected override void OnCollectionChanged(NotifyCollectionChangedEventArgs e)
 		{
-			if ( this.updateCount == 0 )
+			if ( _updateCount == 0 )
 			{
 				base.OnCollectionChanged(e);
 			}
@@ -146,7 +146,7 @@ namespace Digillect.Collections
 		/// <param name="propertyName">The name of a property being changed.</param>
 		protected void OnPropertyChanged(string propertyName)
 		{
-			if ( this.updateCount == 0 )
+			if ( _updateCount == 0 )
 			{
 				OnPropertyChanged(new PropertyChangedEventArgs(propertyName));
 			}
@@ -155,7 +155,7 @@ namespace Digillect.Collections
 		/// <inheritdoc/>
 		protected override void OnPropertyChanged(PropertyChangedEventArgs e)
 		{
-			if ( this.updateCount == 0 )
+			if ( _updateCount == 0 )
 			{
 				base.OnPropertyChanged(e);
 			}
@@ -377,12 +377,7 @@ namespace Digillect.Collections
 		/// <seealso cref="IXUpdatable&lt;T&gt;"/>
 		public void BeginUpdate()
 		{
-			if ( this.Items.IsReadOnly )
-			{
-				throw new NotSupportedException(Errors.XCollectionReadOnlyException);
-			}
-
-			++this.updateCount;
+			++_updateCount;
 		}
 
 		/// <summary>
@@ -395,15 +390,10 @@ namespace Digillect.Collections
 		/// <seealso cref="IXUpdatable&lt;T&gt;"/>
 		public void EndUpdate()
 		{
-			if ( this.Items.IsReadOnly )
-			{
-				throw new NotSupportedException(Errors.XCollectionReadOnlyException);
-			}
-
-			if ( this.updateCount == 0 )
+			if ( _updateCount == 0 )
 				return;
 
-			if ( --this.updateCount == 0 )
+			if ( --_updateCount == 0 )
 			{
 				OnUpdated(EventArgs.Empty);
 				OnPropertyChanged(CountString);
