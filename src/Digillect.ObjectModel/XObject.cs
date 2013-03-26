@@ -139,35 +139,7 @@ namespace Digillect
 		{
 			Contract.Ensures(Contract.Result<XKey>() != null);
 
-			return XKey.Empty.WithKey("__type", GetType().AssemblyQualifiedName);
-		}
-
-		/// <summary>
-		/// Creates key for the specified type of the object.
-		/// </summary>
-		/// <param name="type">Object type.</param>
-		/// <returns>Created key.</returns>
-		[Pure]
-		protected static XKey CreateKey( Type type )
-		{
-			if ( type == null )
-			{
-				throw new ArgumentNullException("type");
-			}
-
-#if !WINDOWS8
-			if ( !typeof(XObject).IsAssignableFrom(type) )
-#else
-			if ( !typeof(XObject).GetTypeInfo().IsAssignableFrom(type.GetTypeInfo()) )
-#endif
-			{
-				throw new ArgumentException("Incompatible type.", "type");
-			}
-
-			Contract.Ensures( Contract.Result<XKey>() != null );
-			Contract.Assume(type.AssemblyQualifiedName != null);
-
-			return XKey.Empty.WithKey("__type", type.AssemblyQualifiedName);
+			return XKey.Empty;
 		}
 		#endregion
 

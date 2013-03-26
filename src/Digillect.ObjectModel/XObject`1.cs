@@ -13,14 +13,14 @@ namespace Digillect
 	/// </summary>
 	/// <typeparam name="TId">The type of the identifier.</typeparam>
 	[DataContract]
-	[DebuggerDisplay("Id = {id}")]
+	[DebuggerDisplay("Id = {_id}")]
 #if !(SILVERLIGHT || WINDOWS8)
 	[Serializable]
 #endif
 	public class XObject<TId> : XObject, IXIdentified<TId>
-		where TId : IComparable<TId>, IEquatable<TId>
+		where TId : IEquatable<TId>
 	{
-		private TId id;
+		private TId _id;
 
 		#region Constructor
 		/// <summary>
@@ -36,7 +36,7 @@ namespace Digillect
 		/// <param name="id">The id.</param>
 		protected XObject( TId id )
 		{
-			this.id = id;
+			_id = id;
 		}
 		#endregion
 
@@ -51,45 +51,17 @@ namespace Digillect
 		public TId Id
 		{
 			[DebuggerStepThrough]
-			get { return this.id; }
+			get { return _id; }
 			set
 			{
-				if ( !EqualityComparer<TId>.Default.Equals(this.id, value) )
+				if ( !EqualityComparer<TId>.Default.Equals(_id, value) )
 				{
-					OnPropertyChanging( "Id", this.id, value );
-					this.id = value;
+					OnPropertyChanging("Id", _id, value);
+					_id = value;
 					ResetKey();
 					OnPropertyChanged( "Id" );
 				}
 			}
-		}
-		#endregion
-
-		#region CreateKey
-		/// <summary>
-		/// Creates key for the specified identifier.
-		/// </summary>
-		/// <param name="id">Object identifier.</param>
-		/// <param name="type">Type of the target object.</param>
-		/// <returns>Created key.</returns>
-		[Pure]
-		protected static XKey CreateKey( TId id, Type type )
-		{
-			Contract.Requires(type != null);
-#if !WINDOWS8
-			Contract.Requires(typeof(XObject).IsAssignableFrom(type));
-#else
-			Contract.Requires(typeof(XObject).GetTypeInfo().IsAssignableFrom(type.GetTypeInfo()));
-#endif
-
-			var key = CreateKey(type);
-
-			if ( id != null )
-			{
-				key = key.WithKey(XKey.IdKeyName, id);
-			}
-
-			return key;
 		}
 		#endregion
 
@@ -104,9 +76,9 @@ namespace Digillect
 		{
 			var key = base.CreateKey();
 
-			if ( id != null )
+			if ( _id != null )
 			{
-				key = key.WithKey(XKey.IdKeyName, id);
+				key = key.WithKey(XKey.IdKeyName, _id);
 			}
 
 			return key;
@@ -131,18 +103,18 @@ namespace Digillect
 
 			XObject<TId> obj = (XObject<TId>) source;
 
-			if ( obj.id is ValueType || obj.id is string )
+			if ( obj._id is ValueType || obj._id is string )
 			{
-				this.id = obj.id;
+				_id = obj._id;
 			}
 			else if ( cloning )
 			{
 #if !(SILVERLIGHT || WINDOWS8)
-				ICloneable icl = obj.id as ICloneable;
+				ICloneable icl = obj._id as ICloneable;
 
 				if ( icl != null )
 				{
-					this.id = (TId) icl.Clone();
+					_id = (TId) icl.Clone();
 				}
 				else
 #endif
@@ -169,7 +141,7 @@ namespace Digillect
 
 			XObject<TId> other = (XObject<TId>) obj;
 
-			return EqualityComparer<TId>.Default.Equals(this.id, other.id);
+			return EqualityComparer<TId>.Default.Equals(_id, other._id);
 		}
 
 		/// <summary>
@@ -179,7 +151,7 @@ namespace Digillect
 		/// <remarks>See <see cref="Object.GetHashCode"/>.</remarks>
 		public override int GetHashCode()
 		{
-			return this.id == null ? 0 : this.id.GetHashCode();
+			return this._id == null ? 0 : _id.GetHashCode();
 		}
 		#endregion
 	}

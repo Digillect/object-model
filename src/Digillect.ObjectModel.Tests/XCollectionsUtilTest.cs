@@ -22,8 +22,8 @@ namespace Digillect.Tests
 		/// <summary>
 		/// A test for IsNullOrEmpty(ICollection)
 		///</summary>
-		[Fact(DisplayName = "XCollectionsUtil.IsNullOrEmpty should return true when ICollection is null or empty")]
-		public void IsNullOrEmpty_should_return_true_when_ICollection_is_null_or_empty()
+		[Fact(DisplayName = "XCU.IsNullOrEmpty should return true when ICollection is null or empty")]
+		public void IsNullOrEmptyICollectionTest()
 		{
 			IList sut = null;
 
@@ -41,8 +41,8 @@ namespace Digillect.Tests
 		/// <summary>
 		/// A test for IsNullOrEmpty`1(ICollection`1)
 		///</summary>
-		[Fact(DisplayName = "XCollectionsUtil.IsNullOrEmpty should return true when ICollection`1 is null or empty")]
-		public void IsNullOrEmpty_should_return_true_when_ICollection1_is_null_or_empty()
+		[Fact(DisplayName = "XCU.IsNullOrEmpty should return true when ICollection`1 is null or empty")]
+		public void IsNullOrEmptyICollection1Test()
 		{
 			ICollection<object> sut = null;
 
@@ -60,8 +60,8 @@ namespace Digillect.Tests
 		/// <summary>
 		/// A test for IsNullOrEmpty`1(IReadOnlyCollection`1)
 		///</summary>
-		[Fact(DisplayName = "XCollectionsUtil.IsNullOrEmpty should return true when IReadOnlyCollection`1 is null or empty")]
-		public void IsNullOrEmpty_should_return_true_when_IReadOnlyCollection1_is_null_or_empty()
+		[Fact(DisplayName = "XCU.IsNullOrEmpty should return true when IReadOnlyCollection`1 is null or empty")]
+		public void IsNullOrEmptyIReadOnlyCollection1Test()
 		{
 			IReadOnlyCollection<object> sut = null;
 
@@ -80,8 +80,8 @@ namespace Digillect.Tests
 
 		#region Merge Tests
 		#region Standard Tests
-		[Fact]
-		public void Merge_should_add_new_nulls_and_not_remove_existing()
+		[Fact(DisplayName = "XCU.Merge should add new nulls but not remove existing")]
+		public void MergeAddButNotRemoveNullsTest()
 		{
 			var rnd = new Random(Environment.TickCount);
 			var data = new XObject[rnd.Next(1, 10)];
@@ -98,8 +98,8 @@ namespace Digillect.Tests
 			sut.Count.ShouldBe(data.Length + other.Length);
 		}
 
-		[Fact]
-		public void Merge_should_not_add_new_nulls_and_remove_existing()
+		[Fact(DisplayName = "XCU.Merge should not add new nulls but remove existing")]
+		public void MergeNotAddButRemoveNullsTest()
 		{
 			var rnd = new Random(Environment.TickCount);
 			var data = new XObject[rnd.Next(1, 10)];
@@ -116,8 +116,8 @@ namespace Digillect.Tests
 			sut.Count.ShouldBe(0);
 		}
 
-		[Fact]
-		public void Merge_should_not_change_anything_when_options_are_None()
+		[Fact(DisplayName = "XCU.Merge should not change anything when options are None")]
+		public void MergeNoChangeTest()
 		{
 			// Setup
 			var data = XIntegerObject.CreateSeries(Many);
@@ -131,8 +131,8 @@ namespace Digillect.Tests
 			sut.SequenceEqual(data).ShouldBe(true);
 		}
 
-		[Fact]
-		public void Merge_should_only_add_new_items()
+		[Fact(DisplayName = "XCU.Merge should only add new items")]
+		public void MergeAddNewItemsTest()
 		{
 			// Setup
 			var objs = XIntegerObject.CreateSeries(3);
@@ -151,8 +151,8 @@ namespace Digillect.Tests
 			sut.ShouldContain(x => other.Contains(x));
 		}
 
-		[Fact]
-		public void Merge_should_only_remove_old_items()
+		[Fact(DisplayName = "XCU.Merge should only remove old items")]
+		public void MergeRemoveOldItemsTest()
 		{
 			// Setup
 			var objs = XIntegerObject.CreateSeries(3);
@@ -172,8 +172,8 @@ namespace Digillect.Tests
 			sut.ShouldNotContain((XObject) null);
 		}
 
-		[Fact]
-		public void Merge_should_only_update_existing_items()
+		[Fact(DisplayName = "XCU.Merge should only update existing items")]
+		public void MergeUpdateExistingItemsTest()
 		{
 			// Setup
 			var objs = XIntegerObject.CreateSeries(3);
@@ -192,8 +192,8 @@ namespace Digillect.Tests
 			sut.ShouldContain(x => other.Intersect(data).Contains(x));
 		}
 
-		[Fact]
-		public void Merge_should_add_remove_update()
+		[Fact(DisplayName = "XCU.Merge should add, remove and update")]
+		public void MergeAddRemoveUpdateTest()
 		{
 			// Setup
 			var objs = XIntegerObject.CreateSeries(3);
@@ -212,8 +212,8 @@ namespace Digillect.Tests
 			other.ShouldContain(x => sut.Contains(x));
 		}
 
-		[Fact]
-		public void Merge_should_do_full_merge()
+		[Fact(DisplayName = "XCU.Merge should do full merge")]
+		public void MergeFullTest()
 		{
 			// Setup
 			var objs = XIntegerObject.CreateSeries(3);
@@ -233,8 +233,8 @@ namespace Digillect.Tests
 		#endregion
 
 		#region Special Cases
-		[Fact(DisplayName = "XCollectionsUtil.Merge should not perform excessive updates when the other collection contains duplicates")]
-		public void Merge_should_not_perform_excessive_updates_when_other_collection_contains_duplicates()
+		[Fact(DisplayName = "XCU.Merge should not perform excessive updates when the other collection contains duplicates")]
+		public void MergeNoExcessiveUpdatesWithDuplicatesTest()
 		{
 			// Setup
 			var objs = XIntegerObject.CreateSeries(Many);
@@ -250,21 +250,21 @@ namespace Digillect.Tests
 			result.Updated.ShouldBe(Many);
 		}
 
-		[Fact(DisplayName = "XCollectionsUtil.Merge should differentiate objects with the same id but of different type")]
-		public void Merge_should_differentiate_objects_with_the_same_id_but_of_different_type()
+		[Fact(DisplayName = "XCU.Merge should differentiate objects with the same keys but of different type")]
+		public void MergeXKeyWeaknessTest()
 		{
 			// Setup
 			var objs = XIntegerObject.CreateSeries(Many);
 			var sut = new List<XObject>(objs);
-			var other = objs.Select(x => new XIntegerObject2(x.Id));
+			var other = ((IEnumerable<XObject>) objs.Select(x => new XIntegerObject2(x.Id)).Reverse()).Concat(Enumerable.Repeat(objs[0].Clone(), 1));
 
 			// Exercise
 			var result = sut.Merge(other, CollectionMergeOptions.Full);
 
 			// Verify
-			result.Added.ShouldBe(other.Count());
-			result.Removed.ShouldBe(objs.Length);
-			result.Updated.ShouldBe(0);
+			result.Added.ShouldBe(Many);
+			result.Removed.ShouldBe(Many - 1);
+			result.Updated.ShouldBe(1);
 			sut.SequenceEqual(other).ShouldBe(true);
 		}
 		#endregion
@@ -274,8 +274,8 @@ namespace Digillect.Tests
 		/// <summary>
 		/// A test for RemoveAll`1(ICollection`1,Func`2)
 		///</summary>
-		[Fact]
-		public void RemoveAllByPredicate_should_return_false_when_nothing_removed()
+		[Fact(DisplayName = "XCU.RemoveAll(Predicate) should return false when nothing removed")]
+		public void RemoveAllByPredicateNotModifiedTest()
 		{
 			// Setup
 			var data = XIntegerObject.CreateSeries(Many);
@@ -292,13 +292,13 @@ namespace Digillect.Tests
 		/// <summary>
 		/// A test for RemoveAll`1(ICollection`1,Func`2)
 		///</summary>
-		[Fact]
-		public void RemoveAllByPredicate_should_return_true_when_something_removed()
+		[Fact(DisplayName = "XCU.RemoveAll(Predicate) should return true when something removed")]
+		public void RemoveAllByPredicateModifiedTest()
 		{
 			// Setup
-			var data = XIntegerObject.CreateSeries(3);
+			var data = XIntegerObject.CreateSeries(Many);
 			ICollection<XObject> sut = new List<XObject>(data);
-			var toRemove = new[] { data[0].Clone(), data[2].Clone() };
+			var toRemove = new[] { data[0].Clone(), data[Many - 1].Clone() };
 
 			// Exercise
 			bool result = sut.RemoveAll(x => toRemove.Contains(x));
@@ -312,8 +312,8 @@ namespace Digillect.Tests
 		/// <summary>
 		/// A test for RemoveAll`1(ICollection`1,IEnumerable`1)
 		///</summary>
-		[Fact]
-		public void RemoveAllByObject_should_return_false_when_nothing_removed()
+		[Fact(DisplayName = "XCU.RemoveAll(Object) should return false when nothing removed")]
+		public void RemoveAllByObjectNotModifiedTest()
 		{
 			// Setup
 			var data = XIntegerObject.CreateSeries(Many);
@@ -330,8 +330,8 @@ namespace Digillect.Tests
 		/// <summary>
 		/// A test for RemoveAll`1(ICollection`1,IEnumerable`1)
 		///</summary>
-		[Fact]
-		public void RemoveAllByObject_should_return_true_when_something_removed()
+		[Fact(DisplayName = "XCU.RemoveAll(Object) should return true when something removed")]
+		public void RemoveAllByObjectModifiedTest()
 		{
 			// Setup
 			var data = XIntegerObject.CreateSeries(Many);
@@ -343,15 +343,15 @@ namespace Digillect.Tests
 
 			// Verify
 			result.ShouldBe(true);
-			sut.Count.ShouldBeLessThan(data.Length);
+			sut.Count.ShouldBe(data.Length - toRemove.Length);
 			sut.ShouldNotContain(x => toRemove.Contains(x));
 		}
 
 		/// <summary>
 		/// A test for RemoveAll`1(IXCollection`1,IEnumerable`1)
 		///</summary>
-		[Fact]
-		public void RemoveAllByKey_should_return_false_when_nothing_removed()
+		[Fact(DisplayName = "XCU.RemoveAll(Key) should return false when nothing removed")]
+		public void RemoveAllByKeyNotModifiedTest()
 		{
 			// Setup
 			var data = XIntegerObject.CreateSeries(Many);
@@ -368,8 +368,8 @@ namespace Digillect.Tests
 		/// <summary>
 		/// A test for RemoveAll`1(IXCollection`1,IEnumerable`1)
 		///</summary>
-		[Fact]
-		public void RemoveAllByKey_should_return_true_when_something_removed()
+		[Fact(DisplayName = "XCU.RemoveAll(Key) should return true when something removed")]
+		public void RemoveAllByKeyModifiedTest()
 		{
 			// Setup
 			var data = XIntegerObject.CreateSeries(Many);
@@ -387,8 +387,8 @@ namespace Digillect.Tests
 		#endregion
 
 		#region UnmodifiableXXX Tests
-		[Fact]
-		public void UnmodifiableCollection_should_return_ReadOnly_collection()
+		[Fact(DisplayName = "XCU.UnmodifiableCollection should return ReadOnly collection")]
+		public void UnmodifiableCollectionReadOnlyTest()
 		{
 			var sut = XCollectionsUtil.UnmodifiableCollection(new XCollection<XObject>());
 			var obj = XIntegerObject.Create();
@@ -402,8 +402,8 @@ namespace Digillect.Tests
 			Should.Throw<NotSupportedException>(() => sut.Update(new XCollection<XObject>()));
 		}
 
-		[Fact]
-		public void UnmodifiableList_should_return_ReadOnly_list()
+		[Fact(DisplayName = "XCU.UnmodifiableList should return ReadOnly list")]
+		public void UnmodifiableListReadOnlyTest()
 		{
 			var sut = XCollectionsUtil.UnmodifiableList(new XCollection<XObject>() { XIntegerObject.Create() });
 			var obj = XIntegerObject.Create();
@@ -419,8 +419,8 @@ namespace Digillect.Tests
 			Should.Throw<NotSupportedException>(() => sut.Update(new XCollection<XObject>()));
 		}
 
-		[Fact]
-		public void UnmodifiableList_should_equals_correctly()
+		[Fact(DisplayName = "XCU.UnmodifiableList should equals correctly")]
+		public void UnmodifiableListEqualsTest()
 		{
 			var series = new XCollection<XObject>(XIntegerObject.CreateSeries(Many));
 			var seriesClone = series.Clone( true );

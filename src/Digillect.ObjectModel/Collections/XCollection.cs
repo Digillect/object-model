@@ -491,7 +491,13 @@ namespace Digillect.Collections
 				return CollectionMergeResults.Empty;
 			}
 
-			var results = this.Items.Merge(collection.Distinct(ReferenceComparer), options);
+			collection = collection.Distinct(ReferenceComparer);
+
+#if NET45
+			Contract.Assume(collection != null);
+#endif
+
+			var results = this.Items.Merge(collection, options);
 
 			if ( !results.IsEmpty )
 			{

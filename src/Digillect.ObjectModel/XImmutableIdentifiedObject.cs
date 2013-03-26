@@ -20,7 +20,7 @@ namespace Digillect
 	[Serializable]
 #endif
 	public abstract class XImmutableIdentifiedObject<TId> : XObject, IXIdentified<TId>
-		where TId : IComparable<TId>, IEquatable<TId>
+		where TId : IEquatable<TId>
 	{
 		[DataMember(Name = "Id", IsRequired = true)]
 		private readonly TId _id;
@@ -106,37 +106,11 @@ namespace Digillect
 		}
 		#endregion
 
-		#region CreateKey
-		/// <summary>
-		/// Creates key for the specified identifier.
-		/// </summary>
-		/// <param name="id">Object identifier.</param>
-		/// <param name="type">Type of the target object.</param>
-		/// <returns>Created key.</returns>
-		[Pure]
-		protected static XKey CreateKey( TId id, Type type )
-		{
-			if ( id == null )
-			{
-				throw new ArgumentNullException("id");
-			}
-
-			Contract.Requires(type != null);
-#if !WINDOWS8
-			Contract.Requires(typeof(XObject).IsAssignableFrom(type));
-#else
-			Contract.Requires(typeof(XObject).GetTypeInfo().IsAssignableFrom(type.GetTypeInfo()));
-#endif
-
-			return CreateKey(type).WithKey(XKey.IdKeyName, id);
-		}
-		#endregion
-
 		#region Protected Methods
 		/// <inheritdoc/>
 		protected override XKey CreateKey()
 		{
-			return base.CreateKey().WithKey(XKey.IdKeyName, _id);
+			return XKey.From(XKey.IdKeyName, _id);
 		}
 
 		/// <inheritdoc/>

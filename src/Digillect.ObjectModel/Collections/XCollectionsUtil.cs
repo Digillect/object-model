@@ -215,7 +215,7 @@ namespace Digillect.Collections
 		/// Be careful to not use this method on objects implementing the <see cref="INotifyCollectionChanged"/> interface unless you don't care about events being raised.
 		/// Specifically, in cases of <see cref="IXCollection&lt;T&gt;"/> or <see cref="XCollection&lt;T&gt;"/> use theirs <b>Update</b> methods.
 		/// </remarks>
-		[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Maintainability", "CA1502:AvoidExcessiveComplexity", Justification = "God knows how to make is simplier.")]
+		[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Maintainability", "CA1502:AvoidExcessiveComplexity", Justification = "God knows how to make it simplier.")]
 		public static CollectionMergeResults Merge<T>(this IList<T> source, IEnumerable<T> collection, CollectionMergeOptions options)
 			where T : XObject
 		{
@@ -245,6 +245,11 @@ namespace Digillect.Collections
 			int updated = 0;
 			int removed = 0;
 
+			bool optAddNew = (options & CollectionMergeOptions.AddNew) == CollectionMergeOptions.AddNew;
+			bool optUpdateExisting = (options & CollectionMergeOptions.UpdateExisting) == CollectionMergeOptions.UpdateExisting;
+			bool optRemoveOld = (options & CollectionMergeOptions.RemoveOld) == CollectionMergeOptions.RemoveOld;
+			bool optPreserveSourceOrder = (options & CollectionMergeOptions.PreserveSourceOrder) == CollectionMergeOptions.PreserveSourceOrder;
+
 			var updateCandidates = new Dictionary<XKey, List<MergeItem<T>>>();
 
 			int index = 0;
@@ -253,7 +258,7 @@ namespace Digillect.Collections
 			{
 				T item = source[index];
 
-				if ( item == null && (options & CollectionMergeOptions.RemoveOld) == CollectionMergeOptions.RemoveOld )
+				if ( item == null && optRemoveOld )
 				{
 					source.RemoveAt(index);
 					removed++;
@@ -292,80 +297,37 @@ namespace Digillect.Collections
 					Contract.Assume(existing != null);
 					Contract.Assume(existing.Count > 0);
 
-					if ( (options & CollectionMergeOptions.UpdateExisting) == CollectionMergeOptions.UpdateExisting )
+					// Take first item to update
+					var existing0 = existing[0];
+
+					if ( existing0.Item.IsObjectCompatible(item) )
 					{
-						// Take first item to update
-						var existing0 = existing[0];
-
-						existing0.Item.Update(item);
-						updated++;
-
-						if ( (options & CollectionMergeOptions.PreserveSourceOrder) == CollectionMergeOptions.PreserveSourceOrder )
+						if ( optUpdateExisting )
 						{
-							Contract.Assert(index <= existing0.Index);
-							Contract.Assume(existing0.Index < source.Count);
+							MergeUpdateExistingItem(existing0, item, source, optPreserveSourceOrder, index, updateCandidates.Values);
 
-							// Move the updated item to the current (source) position
-							// HACK: instead of remove-then-insert we will change indexes of all affected items
-
-							// Move range [index..existing0.Index) one element up
-							for ( int i = existing0.Index; i > index; i-- )
-							{
-								source[i] = source[i - 1];
-							}
-
-							// Set updated item at the corect (source) position
-							source[index] = existing0.Item;
-
-							// Recalculate original indexes upon moving
-							foreach ( var items in updateCandidates.Values )
-							{
-								for ( int i = 0; i < items.Count; i++ )
-								{
-									var x = items[i];
-
-									if ( index <= x.Index && x.Index < existing0.Index )
-									{
-										x.Index++;
-									}
-								}
-							}
+							updated++;
 						}
-					}
 
-					// Remove updated item form candidates
-					existing.RemoveAt(0);
+						// Remove the updated item from the candidates collection
+						existing.RemoveAt(0);
 
-					if ( existing.Count == 0 )
-					{
-						// No more candidates exist for the given key
-						updateCandidates.Remove(key);
-					}
-				}
-				else if ( (options & CollectionMergeOptions.AddNew) == CollectionMergeOptions.AddNew )
-				{
-					if ( (options & CollectionMergeOptions.PreserveSourceOrder) == CollectionMergeOptions.PreserveSourceOrder )
-					{
-						source.Insert(index, item);
-
-						// Recalculate original indexes upon insertion
-						foreach ( var items in updateCandidates.Values )
+						if ( existing.Count == 0 )
 						{
-							for ( int i = 0; i < items.Count; i++ )
-							{
-								var x = items[i];
-
-								if ( x.Index >= index )
-								{
-									x.Index++;
-								}
-							}
+							// No more candidates exist for the given key
+							updateCandidates.Remove(key);
 						}
 					}
 					else
 					{
-						source.Add(item);
+						MergeAddNewItem(item, source, optPreserveSourceOrder, index, updateCandidates.Values);
+
+						added++;
 					}
+				}
+				else if ( optAddNew )
+				{
+					MergeAddNewItem(item, source, optPreserveSourceOrder, index, updateCandidates.Values);
 
 					added++;
 				}
@@ -373,7 +335,7 @@ namespace Digillect.Collections
 				index++;
 			}
 
-			if ( (options & CollectionMergeOptions.RemoveOld) == CollectionMergeOptions.RemoveOld )
+			if ( optRemoveOld )
 			{
 				// Тут нужна сортировка по индексу в порядке убывания, чтобы не вылететь за границы коллекции
 				var indexes = from mi in updateCandidates.SelectMany(x => x.Value)
@@ -391,6 +353,77 @@ namespace Digillect.Collections
 			}
 
 			return new CollectionMergeResults(added, updated, removed);
+		}
+
+		private static void MergeAddNewItem<T>(T item, IList<T> collection, bool preserveOrder, int index, IEnumerable<List<MergeItem<T>>> updateCandidates)
+		{
+			if ( preserveOrder )
+			{
+				Contract.Assume(index >= 0);
+
+				collection.Insert(index, item);
+
+				// Recalculate original indexes upon insertion
+				foreach ( var items in updateCandidates )
+				{
+					for ( int i = 0; i < items.Count; i++ )
+					{
+						var x = items[i];
+
+						if ( x.Index >= index )
+						{
+							x.Index++;
+						}
+					}
+				}
+			}
+			else
+			{
+				collection.Add(item);
+			}
+		}
+
+		private static void MergeUpdateExistingItem<T>(MergeItem<T> exisitingItem, T otherItem, IList<T> collection, bool preserveOrder, int index, IEnumerable<List<MergeItem<T>>> updateCandidates)
+			where T : XObject
+		{
+			Contract.Assume(otherItem != null);
+
+			exisitingItem.Item.Update(otherItem);
+
+			if ( preserveOrder )
+			{
+				Contract.Assert(index <= exisitingItem.Index);
+				Contract.Assume(exisitingItem.Index < collection.Count);
+
+				if ( index < exisitingItem.Index )
+				{
+					// Reorder the updated item in the source collection to match the current position in the other collection
+					// HACK: instead of remove-then-insert we will change indexes of all affected items
+
+					// Move range [index..existing0.Index) one element up
+					for ( int i = exisitingItem.Index; i > index; i-- )
+					{
+						collection[i] = collection[i - 1];
+					}
+
+					// Set updated item at the correct (source) position
+					collection[index] = exisitingItem.Item;
+
+					// Recalculate original indexes upon moving
+					foreach ( var items in updateCandidates )
+					{
+						for ( int i = 0; i < items.Count; i++ )
+						{
+							var x = items[i];
+
+							if ( index <= x.Index && x.Index < exisitingItem.Index )
+							{
+								x.Index++;
+							}
+						}
+					}
+				}
+			}
 		}
 		#endregion
 
