@@ -11,9 +11,7 @@ using System.Reflection;
 
 namespace Digillect.Collections
 {
-#if DEBUG || CONTRACTS_FULL
 	[ContractClass(typeof(XBasedCollectionContract<>))]
-#endif
 #if !(SILVERLIGHT || WINDOWS8)
 	[Serializable]
 #endif
@@ -428,7 +426,6 @@ namespace Digillect.Collections
 	}
 
 	#region XBasedCollection`1 contract binding
-#if DEBUG || CONTRACTS_FULL
 	[ContractClassFor(typeof(XBasedCollection<>))]
 	abstract class XBasedCollectionContract<T> : XBasedCollection<T>
 		where T : XObject
@@ -451,6 +448,5 @@ namespace Digillect.Collections
 			return null;
 		}
 	}
-#endif
 	#endregion
 }

@@ -640,7 +640,6 @@ namespace Digillect.Collections
 		}
 		#endregion
 
-#if DEBUG || CONTRACTS_FULL
 		#region ObjectInvariant
 		[ContractInvariantMethod]
 		[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1822:MarkMembersAsStatic", Justification = "Required for code contracts.")]
@@ -649,7 +648,6 @@ namespace Digillect.Collections
 			Contract.Invariant(this.Items != null);
 		}
 		#endregion
-#endif
 
 		#region class ReferenceEqualityComparer
 		private sealed class ReferenceEqualityComparer : IEqualityComparer<T>

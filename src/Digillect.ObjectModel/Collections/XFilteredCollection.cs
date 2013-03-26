@@ -8,9 +8,7 @@ using System.Threading;
 
 namespace Digillect.Collections
 {
-#if DEBUG || CONTRACTS_FULL
 	[ContractClass(typeof(XFilteredCollectionContract<>))]
-#endif
 #if !(SILVERLIGHT || WINDOWS8)
 	[Serializable]
 #endif
@@ -384,7 +382,6 @@ namespace Digillect.Collections
 		}
 		#endregion
 
-#if DEBUG || CONTRACTS_FULL
 		#region ObjectInvariant
 		[ContractInvariantMethod]
 		[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1822:MarkMembersAsStatic", Justification = "Required for code contracts.")]
@@ -393,12 +390,10 @@ namespace Digillect.Collections
 			Contract.Invariant(_count >= -1);
 		}
 		#endregion
-#endif
 
 	}
 
 	#region XFilteredCollection`1 contract binding
-#if DEBUG || CONTRACTS_FULL
 	[ContractClassFor(typeof(XFilteredCollection<>))]
 	abstract class XFilteredCollectionContract<T> : XFilteredCollection<T>
 		where T : XObject
@@ -415,6 +410,5 @@ namespace Digillect.Collections
 			return null;
 		}
 	}
-#endif
 	#endregion
 }
