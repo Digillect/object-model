@@ -1,14 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="BuildAndPackage" InitialTargets="CheckForBuildTools;UpdateAssemblyVersion" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-	<Target Name="CheckForBuildTools" Condition="!Exists('packages\Digillect.Build.Tools.1.1.1\tools\Build.targets')">
+	<PropertyGroup>
+		<BuildToolsVersion>1.2.0</BuildToolsVersion>
+		<Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+	</PropertyGroup>
+
+	<Target Name="CheckForBuildTools" Condition="!Exists('packages\Digillect.Build.Tools.$(BuildToolsVersion)\tools\Build.targets')">
 		<Error Text="Project requires Digillect.Build.Tools package to run."/>
 	</Target>
 	
-	<Import Project="packages\Digillect.Build.Tools.1.1.1\tools\Build.targets" Condition="Exists('packages\Digillect.Build.Tools.1.1.1\tools\Build.targets')"/>
-
-	<PropertyGroup>
-		<Configuration Condition="'$(Configuration)' == ''">Debug</Configuration>
-	</PropertyGroup>
+	<Import Project="packages\Digillect.Build.Tools.$(BuildToolsVersion)\tools\Build.targets" Condition="Exists('packages\Digillect.Build.Tools.$(BuildToolsVersion)\tools\Build.targets')"/>
 
 	<ItemGroup>
 		<ProjectReference Include="src\Digillect.ObjectModel\Digillect.ObjectModel (net40).csproj"/>
