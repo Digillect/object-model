@@ -5,13 +5,14 @@ using System.Linq;
 using Xunit;
 using Shouldly;
 
-using Digillect;
 using Digillect.Collections;
 
 namespace Digillect.Tests
 {
 	public class XCacheTest
 	{
+		private const int Many = 3;
+
 		[Fact]
 		public void cache_should_return_object_by_id()
 		{
@@ -45,9 +46,9 @@ namespace Digillect.Tests
 		{
 			var cache = new XCache<XIntegerObject>();
 			var query = new XQuery<XIntegerObject>();
-			var original = new XCollection<XIntegerObject>( XIntegerObject.CreateSeries( 3 ) );
+			var original = new XCollection<XIntegerObject>( XIntegerObject.CreateSeries( Many ) );
 
-			cache.Cache( query, original, this );
+			cache.Cache(original, query, this);
 
 			var cached = cache.Get( query );
 
@@ -59,9 +60,9 @@ namespace Digillect.Tests
 		{
 			var cache = new XCache<XIntegerObject>();
 			var query = new XQuery<XIntegerObject>( "hello" );
-			var original = new XCollection<XIntegerObject>( XIntegerObject.CreateSeries( 3 ) );
+			var original = new XCollection<XIntegerObject>( XIntegerObject.CreateSeries( Many ) );
 
-			var response = cache.Cache( query, original, this );
+			var response = cache.Cache(original, query, this);
 
 			var cached = cache.Get( new XQuery<XIntegerObject>( "hello" ) );
 
@@ -82,7 +83,7 @@ namespace Digillect.Tests
 			queryForOdd.MatchFunction = o => o.Id % 2 != 0;
 			queryForEven.MatchFunction = o => o.Id % 2 == 0;
 
-			cache.Cache( queryForAll, original, this );
+			cache.Cache(original, queryForAll, this);
 
 			var odd = cache.Get( queryForOdd, this );
 			var even = cache.Get( queryForEven, this );
@@ -96,7 +97,35 @@ namespace Digillect.Tests
 			even.All( o => o.Id % 2 == 0 ).ShouldBe( true );
 		}
 
-		class IntegerQuery : XQuery<XIntegerObject>
+		[Fact(DisplayName = "XCache.Cleanup should remove all GC'd objects")]
+		public void CleanupTest()
+		{
+			// Setup
+			var objs = XIntegerObject.CreateSeries(Many);
+			var sut = new XCacheTestStubSubclass<XObject>();
+			sut.Cache(objs);
+			sut.Cache(XIntegerObject.CreateSeries(Many));
+			sut.Count.ShouldBe(Many * 2);
+
+			// Exercise
+			GC.Collect();
+			sut.Cleanup();
+
+			// Verify
+			sut.Count.ShouldBe(Many);
+			sut.ShouldContain(x => objs.Contains(x));
+		}
+
+		private class XCacheTestStubSubclass<T> : XCache<T>
+			where T : XObject
+		{
+			public int Count
+			{
+				get { return this.ObjectCache.Count; }
+			}
+		}
+
+		private class IntegerQuery : XQuery<XIntegerObject>
 		{
 			#region Constructors/Disposer
 			public IntegerQuery()
