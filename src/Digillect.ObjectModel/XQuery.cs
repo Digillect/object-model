@@ -1,3 +1,24 @@
+п»ї#region Copyright (c) 2002-2013 Gregory Nickonov and Andrew Nefedkin (ActisВ® Wunderman)
+// Copyright (c) 2002-2013 Gregory Nickonov and Andrew Nefedkin (ActisВ® Wunderman).
+// 
+// Permission is hereby granted, free of charge, to any person obtaining a copy of this
+// software and associated documentation files (the "Software"), to deal in the Software
+// without restriction, including without limitation the rights to use, copy, modify, merge,
+// publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons
+// to whom the Software is furnished to do so, subject to the following conditions:
+// 
+// The above copyright notice and this permission notice shall be included in all copies or
+// substantial portions of the Software.
+// 
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
+// THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
+// IN THE SOFTWARE.
+#endregion
+
 using System;
 using System.Diagnostics.Contracts;
 using System.Runtime.Serialization;
@@ -5,7 +26,7 @@ using System.Runtime.Serialization;
 namespace Digillect
 {
 	/// <summary>
-	/// Базовый класс для запросов, возвращающих коллекции объектов.
+	/// Р‘Р°Р·РѕРІС‹Р№ РєР»Р°СЃСЃ РґР»СЏ Р·Р°РїСЂРѕСЃРѕРІ, РІРѕР·РІСЂР°С‰Р°СЋС‰РёС… РєРѕР»Р»РµРєС†РёРё РѕР±СЉРµРєС‚РѕРІ.
 	/// </summary>
 #if !(SILVERLIGHT || WINDOWS8)
 	[Serializable]
@@ -57,7 +78,7 @@ namespace Digillect
 		}
 
 		/// <summary>
-		/// Возвращает <c>true</c>, если данный запрос поддерживает вызов <see cref="Match"/>.
+		/// Р’РѕР·РІСЂР°С‰Р°РµС‚ <c>true</c>, РµСЃР»Рё РґР°РЅРЅС‹Р№ Р·Р°РїСЂРѕСЃ РїРѕРґРґРµСЂР¶РёРІР°РµС‚ РІС‹Р·РѕРІ <see cref="Match"/>.
 		/// </summary>
 		/// <value>
 		/// <c>false</c>.
@@ -70,10 +91,10 @@ namespace Digillect
 
 		#region Public Methods
 		/// <summary>
-		/// Данный метод проверяет соответствие указанного объекта данному запросу.
+		/// Р”Р°РЅРЅС‹Р№ РјРµС‚РѕРґ РїСЂРѕРІРµСЂСЏРµС‚ СЃРѕРѕС‚РІРµС‚СЃС‚РІРёРµ СѓРєР°Р·Р°РЅРЅРѕРіРѕ РѕР±СЉРµРєС‚Р° РґР°РЅРЅРѕРјСѓ Р·Р°РїСЂРѕСЃСѓ.
 		/// </summary>
-		/// <param name="value">Объект для проверки.</param>
-		/// <returns><see langword="true"/> в случае соответствия, иначе <see langword="false"/>.</returns>
+		/// <param name="value">РћР±СЉРµРєС‚ РґР»СЏ РїСЂРѕРІРµСЂРєРё.</param>
+		/// <returns><see langword="true"/> РІ СЃР»СѓС‡Р°Рµ СЃРѕРѕС‚РІРµС‚СЃС‚РІРёСЏ, РёРЅР°С‡Рµ <see langword="false"/>.</returns>
 		[Pure]
 		public virtual bool Match( T value )
 		{
@@ -81,13 +102,13 @@ namespace Digillect
 		}
 
 		/// <summary>
-		/// Данный метод должен вернуть <c>true</c>, если из результатов текущего запроса
-		/// путем применения метода <see cref="Match"/> можно получить результаты указанного запроса.
+		/// Р”Р°РЅРЅС‹Р№ РјРµС‚РѕРґ РґРѕР»Р¶РµРЅ РІРµСЂРЅСѓС‚СЊ <c>true</c>, РµСЃР»Рё РёР· СЂРµР·СѓР»СЊС‚Р°С‚РѕРІ С‚РµРєСѓС‰РµРіРѕ Р·Р°РїСЂРѕСЃР°
+		/// РїСѓС‚РµРј РїСЂРёРјРµРЅРµРЅРёСЏ РјРµС‚РѕРґР° <see cref="Match"/> РјРѕР¶РЅРѕ РїРѕР»СѓС‡РёС‚СЊ СЂРµР·СѓР»СЊС‚Р°С‚С‹ СѓРєР°Р·Р°РЅРЅРѕРіРѕ Р·Р°РїСЂРѕСЃР°.
 		/// </summary>
-		/// <param name="query">Запрос для сравнения</param>
-		/// <returns><see langword="true"/> если результаты запроса можно преобразовать, иначе <see langword="false"/>.</returns>
+		/// <param name="query">Р—Р°РїСЂРѕСЃ РґР»СЏ СЃСЂР°РІРЅРµРЅРёСЏ</param>
+		/// <returns><see langword="true"/> РµСЃР»Рё СЂРµР·СѓР»СЊС‚Р°С‚С‹ Р·Р°РїСЂРѕСЃР° РјРѕР¶РЅРѕ РїСЂРµРѕР±СЂР°Р·РѕРІР°С‚СЊ, РёРЅР°С‡Рµ <see langword="false"/>.</returns>
 		/// <remarks>
-		/// Данная реализация использует метод <see cref="Equals"/> для определения возможности преобразования.
+		/// Р”Р°РЅРЅР°СЏ СЂРµР°Р»РёР·Р°С†РёСЏ РёСЃРїРѕР»СЊР·СѓРµС‚ РјРµС‚РѕРґ <see cref="Equals"/> РґР»СЏ РѕРїСЂРµРґРµР»РµРЅРёСЏ РІРѕР·РјРѕР¶РЅРѕСЃС‚Рё РїСЂРµРѕР±СЂР°Р·РѕРІР°РЅРёСЏ.
 		/// </remarks>
 		[Pure]
 		public virtual bool CanConvertTo( XQuery<T> query )

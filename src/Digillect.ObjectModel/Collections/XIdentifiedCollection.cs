@@ -1,3 +1,24 @@
+п»ї#region Copyright (c) 2002-2013 Gregory Nickonov and Andrew Nefedkin (ActisВ® Wunderman)
+// Copyright (c) 2002-2013 Gregory Nickonov and Andrew Nefedkin (ActisВ® Wunderman).
+// 
+// Permission is hereby granted, free of charge, to any person obtaining a copy of this
+// software and associated documentation files (the "Software"), to deal in the Software
+// without restriction, including without limitation the rights to use, copy, modify, merge,
+// publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons
+// to whom the Software is furnished to do so, subject to the following conditions:
+// 
+// The above copyright notice and this permission notice shall be included in all copies or
+// substantial portions of the Software.
+// 
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
+// THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
+// IN THE SOFTWARE.
+#endregion
+
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -150,10 +171,10 @@ namespace Digillect.Collections
 
 		#region Update Methods
 		/// <summary>
-		/// Обновляет текущую коллекцию на основе другой коллекции.
+		/// РћР±РЅРѕРІР»СЏРµС‚ С‚РµРєСѓС‰СѓСЋ РєРѕР»Р»РµРєС†РёСЋ РЅР° РѕСЃРЅРѕРІРµ РґСЂСѓРіРѕР№ РєРѕР»Р»РµРєС†РёРё.
 		/// </summary>
-		/// <param name="collection">Источник изменений.</param>
-		/// <param name="options">Операции, которые надо произвести с объектами, находящимися в данной коллекции.</param>
+		/// <param name="collection">РСЃС‚РѕС‡РЅРёРє РёР·РјРµРЅРµРЅРёР№.</param>
+		/// <param name="options">РћРїРµСЂР°С†РёРё, РєРѕС‚РѕСЂС‹Рµ РЅР°РґРѕ РїСЂРѕРёР·РІРµСЃС‚Рё СЃ РѕР±СЉРµРєС‚Р°РјРё, РЅР°С…РѕРґСЏС‰РёРјРёСЃСЏ РІ РґР°РЅРЅРѕР№ РєРѕР»Р»РµРєС†РёРё.</param>
 		/// <returns>The <see cref="CollectionMergeResults">results</see> of the operation.</returns>
 		/// <seealso cref="IXUpdatable&lt;T&gt;"/>
 		/// <seealso cref="XCollectionsUtil.Merge"/>

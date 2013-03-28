@@ -1,3 +1,24 @@
+п»ї#region Copyright (c) 2002-2013 Gregory Nickonov and Andrew Nefedkin (ActisВ® Wunderman)
+// Copyright (c) 2002-2013 Gregory Nickonov and Andrew Nefedkin (ActisВ® Wunderman).
+// 
+// Permission is hereby granted, free of charge, to any person obtaining a copy of this
+// software and associated documentation files (the "Software"), to deal in the Software
+// without restriction, including without limitation the rights to use, copy, modify, merge,
+// publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons
+// to whom the Software is furnished to do so, subject to the following conditions:
+// 
+// The above copyright notice and this permission notice shall be included in all copies or
+// substantial portions of the Software.
+// 
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
+// THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
+// IN THE SOFTWARE.
+#endregion
+
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -368,11 +389,11 @@ namespace Digillect.Collections
 
 		#region Update Methods
 		/// <summary>
-		/// Начинает операцию глобального изменения содержимого коллекции.
+		/// РќР°С‡РёРЅР°РµС‚ РѕРїРµСЂР°С†РёСЋ РіР»РѕР±Р°Р»СЊРЅРѕРіРѕ РёР·РјРµРЅРµРЅРёСЏ СЃРѕРґРµСЂР¶РёРјРѕРіРѕ РєРѕР»Р»РµРєС†РёРё.
 		/// </summary>
 		/// <remarks>
-		/// В процессе операции ни одно из событий не возбуждается.
-		/// Не забудьте вызвать метод <see cref="EndUpdate()"/> столько раз, сколько раз вызывался метод <b>BeginUpdate()</b>.
+		/// Р’ РїСЂРѕС†РµСЃСЃРµ РѕРїРµСЂР°С†РёРё РЅРё РѕРґРЅРѕ РёР· СЃРѕР±С‹С‚РёР№ РЅРµ РІРѕР·Р±СѓР¶РґР°РµС‚СЃСЏ.
+		/// РќРµ Р·Р°Р±СѓРґСЊС‚Рµ РІС‹Р·РІР°С‚СЊ РјРµС‚РѕРґ <see cref="EndUpdate()"/> СЃС‚РѕР»СЊРєРѕ СЂР°Р·, СЃРєРѕР»СЊРєРѕ СЂР°Р· РІС‹Р·С‹РІР°Р»СЃСЏ РјРµС‚РѕРґ <b>BeginUpdate()</b>.
 		/// </remarks>
 		/// <seealso cref="IXUpdatable&lt;T&gt;"/>
 		public void BeginUpdate()
@@ -381,11 +402,11 @@ namespace Digillect.Collections
 		}
 
 		/// <summary>
-		/// Завершает операцию глобального изменения содержимого коллекции.
+		/// Р—Р°РІРµСЂС€Р°РµС‚ РѕРїРµСЂР°С†РёСЋ РіР»РѕР±Р°Р»СЊРЅРѕРіРѕ РёР·РјРµРЅРµРЅРёСЏ СЃРѕРґРµСЂР¶РёРјРѕРіРѕ РєРѕР»Р»РµРєС†РёРё.
 		/// </summary>
 		/// <remarks>
-		/// Как только будет вызван последний метод <b>EndUpdate()</b>, соответствующий первому вызванному методу <see cref="BeginUpdate()"/>,
-		/// будет возбуждено событие <see cref="ObservableCollection&lt;T&gt;.CollectionChanged"/> с типом операции <see cref="NotifyCollectionChangedAction.Reset"/>.
+		/// РљР°Рє С‚РѕР»СЊРєРѕ Р±СѓРґРµС‚ РІС‹Р·РІР°РЅ РїРѕСЃР»РµРґРЅРёР№ РјРµС‚РѕРґ <b>EndUpdate()</b>, СЃРѕРѕС‚РІРµС‚СЃС‚РІСѓСЋС‰РёР№ РїРµСЂРІРѕРјСѓ РІС‹Р·РІР°РЅРЅРѕРјСѓ РјРµС‚РѕРґСѓ <see cref="BeginUpdate()"/>,
+		/// Р±СѓРґРµС‚ РІРѕР·Р±СѓР¶РґРµРЅРѕ СЃРѕР±С‹С‚РёРµ <see cref="ObservableCollection&lt;T&gt;.CollectionChanged"/> СЃ С‚РёРїРѕРј РѕРїРµСЂР°С†РёРё <see cref="NotifyCollectionChangedAction.Reset"/>.
 		/// </remarks>
 		/// <seealso cref="IXUpdatable&lt;T&gt;"/>
 		public void EndUpdate()
@@ -436,12 +457,12 @@ namespace Digillect.Collections
 		}
 
 		/// <summary>
-		/// Обновляет текущую коллекцию на основе другой коллекции.
+		/// РћР±РЅРѕРІР»СЏРµС‚ С‚РµРєСѓС‰СѓСЋ РєРѕР»Р»РµРєС†РёСЋ РЅР° РѕСЃРЅРѕРІРµ РґСЂСѓРіРѕР№ РєРѕР»Р»РµРєС†РёРё.
 		/// </summary>
-		/// <param name="collection">Источник изменений.</param>
+		/// <param name="collection">РСЃС‚РѕС‡РЅРёРє РёР·РјРµРЅРµРЅРёР№.</param>
 		/// <returns>The <see cref="CollectionMergeResults">results</see> of the operation.</returns>
 		/// <remarks>
-		/// Вызов данного метода эквивалентен вызову метода <see cref="Update(IEnumerable&lt;T&gt;,CollectionMergeOptions)"/> со вторым параметром, равным <see cref="CollectionMergeOptions.Full"/>.
+		/// Р’С‹Р·РѕРІ РґР°РЅРЅРѕРіРѕ РјРµС‚РѕРґР° СЌРєРІРёРІР°Р»РµРЅС‚РµРЅ РІС‹Р·РѕРІСѓ РјРµС‚РѕРґР° <see cref="Update(IEnumerable&lt;T&gt;,CollectionMergeOptions)"/> СЃРѕ РІС‚РѕСЂС‹Рј РїР°СЂР°РјРµС‚СЂРѕРј, СЂР°РІРЅС‹Рј <see cref="CollectionMergeOptions.Full"/>.
 		/// </remarks>
 		/// <seealso cref="IXUpdatable&lt;T&gt;"/>
 		public CollectionMergeResults Update(IEnumerable<T> collection)
@@ -454,10 +475,10 @@ namespace Digillect.Collections
 		}
 
 		/// <summary>
-		/// Обновляет текущую коллекцию на основе другой коллекции.
+		/// РћР±РЅРѕРІР»СЏРµС‚ С‚РµРєСѓС‰СѓСЋ РєРѕР»Р»РµРєС†РёСЋ РЅР° РѕСЃРЅРѕРІРµ РґСЂСѓРіРѕР№ РєРѕР»Р»РµРєС†РёРё.
 		/// </summary>
-		/// <param name="collection">Источник изменений.</param>
-		/// <param name="options">Операции, которые надо произвести с объектами, находящимися в данной коллекции.</param>
+		/// <param name="collection">РСЃС‚РѕС‡РЅРёРє РёР·РјРµРЅРµРЅРёР№.</param>
+		/// <param name="options">РћРїРµСЂР°С†РёРё, РєРѕС‚РѕСЂС‹Рµ РЅР°РґРѕ РїСЂРѕРёР·РІРµСЃС‚Рё СЃ РѕР±СЉРµРєС‚Р°РјРё, РЅР°С…РѕРґСЏС‰РёРјРёСЃСЏ РІ РґР°РЅРЅРѕР№ РєРѕР»Р»РµРєС†РёРё.</param>
 		/// <returns>The <see cref="CollectionMergeResults">results</see> of the operation.</returns>
 		/// <seealso cref="IXUpdatable&lt;T&gt;"/>
 		/// <seealso cref="XCollectionsUtil.Merge"/>

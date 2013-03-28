@@ -1,3 +1,24 @@
+п»ї#region Copyright (c) 2002-2013 Gregory Nickonov and Andrew Nefedkin (ActisВ® Wunderman)
+// Copyright (c) 2002-2013 Gregory Nickonov and Andrew Nefedkin (ActisВ® Wunderman).
+// 
+// Permission is hereby granted, free of charge, to any person obtaining a copy of this
+// software and associated documentation files (the "Software"), to deal in the Software
+// without restriction, including without limitation the rights to use, copy, modify, merge,
+// publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons
+// to whom the Software is furnished to do so, subject to the following conditions:
+// 
+// The above copyright notice and this permission notice shall be included in all copies or
+// substantial portions of the Software.
+// 
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
+// THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
+// IN THE SOFTWARE.
+#endregion
+
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -250,10 +271,10 @@ namespace Digillect
 		}
 
 		/// <summary>
-		/// Кеширует переданный список и (если <paramref name="cookie"/> не равен <see langword="null"/>) создает
-		/// <see cref="XCachedQuery"/> или добавляет <paramref name="cookie"/> к уже существующему.
+		/// РљРµС€РёСЂСѓРµС‚ РїРµСЂРµРґР°РЅРЅС‹Р№ СЃРїРёСЃРѕРє Рё (РµСЃР»Рё <paramref name="cookie"/> РЅРµ СЂР°РІРµРЅ <see langword="null"/>) СЃРѕР·РґР°РµС‚
+		/// <see cref="XCachedQuery"/> РёР»Рё РґРѕР±Р°РІР»СЏРµС‚ <paramref name="cookie"/> Рє СѓР¶Рµ СЃСѓС‰РµСЃС‚РІСѓСЋС‰РµРјСѓ.
 		/// </summary>
-		/// <returns>Возвращает список объектов.</returns>
+		/// <returns>Р’РѕР·РІСЂР°С‰Р°РµС‚ СЃРїРёСЃРѕРє РѕР±СЉРµРєС‚РѕРІ.</returns>
 		public IEnumerable<T> Cache(IEnumerable<T> collection, XQuery<T> query, object cookie)
 		{
 			if ( collection == null )

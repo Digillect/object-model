@@ -4,13 +4,13 @@
 	<metadata>
 		<id>Digillect.ObjectModel</id>
 		<version>4.0.0.0</version>
-		<authors>Andrew Nefedkin, Gregory Nickonov</authors>
-		<owners>Andrew Nefedkin, Gregory Nickonov</owners>
+		<authors>Gregory Nickonov, Andrew Nefedkin</authors>
+		<owners>Gregory Nickonov, Andrew Nefedkin</owners>
 		<requireLicenseAcceptance>false</requireLicenseAcceptance>
-		<description>Digillect Common Libraries: Core</description>
+		<description>Digillect Object Model Framework</description>
 		<releaseNotes>Initial release.</releaseNotes>
-		<copyright>Copyright © 2002-2013 Actis Systems. All rights reserved.</copyright>
-		<tags>digillect common core</tags>
+		<copyright>Copyright © 2002-2013 Gregory Nickonov and Andrew Nefedkin (Actis® Wunderman). All rights reserved.</copyright>
+		<tags>digillect objectmodel</tags>
 		<references>
 			<reference file="Digillect.ObjectModel.dll"/>
 		</references>
