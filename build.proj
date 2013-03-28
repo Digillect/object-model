@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="BuildAndPackage" InitialTargets="CheckForBuildTools;UpdateAssemblyVersion" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+	<PropertyGroup>
+		<BuildToolsVersion>1.2.0</BuildToolsVersion>
+		<Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+	</PropertyGroup>
+
+	<Target Name="CheckForBuildTools" Condition="!Exists('packages\Digillect.Build.Tools.$(BuildToolsVersion)\tools\Build.targets')">
+		<Error Text="Project requires Digillect.Build.Tools package to run."/>
+	</Target>
+	
+	<Import Project="packages\Digillect.Build.Tools.$(BuildToolsVersion)\tools\Build.targets" Condition="Exists('packages\Digillect.Build.Tools.$(BuildToolsVersion)\tools\Build.targets')"/>
+
+	<ItemGroup>
+		<ProjectReference Include="src\Digillect.ObjectModel\Digillect.ObjectModel (net40).csproj"/>
+		<ProjectReference Include="src\Digillect.ObjectModel\Digillect.ObjectModel (sl4).csproj"/>
+		<ProjectReference Include="src\Digillect.ObjectModel\Digillect.ObjectModel (wp71).csproj"/>
+		<ProjectReference Include="src\Digillect.ObjectModel\Digillect.ObjectModel.csproj"/>
+		<ProjectReference Include="src\Digillect.ObjectModel.Tests\Digillect.ObjectModel.Tests.csproj"/>
+	</ItemGroup>
+
+	<ItemGroup>
+		<PackagingProjectReference Include="Digillect.ObjectModel.nuproj"/>
+	</ItemGroup>
+
+	<Target Name="UpdateAssemblyVersion" Condition="'$(BuildNumber)' != ''">
+		<FileUpdate Files="src\AssemblyVersionInfo.cs" Regex='BuildNumber = "\d+"' ReplacementText='BuildNumber = "$(BuildNumber)"'/>
+	</Target>
+
+	<Target Name="BuildAndPackage" DependsOnTargets="Build;Package"/>
+</Project>

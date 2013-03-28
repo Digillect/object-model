@@ -1,0 +1,7 @@
+/packages/
+/target/
+/[Tt]est[Rr]esults/
+
+*.suo
+*.DotSettings
+*.user
