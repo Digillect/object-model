@@ -91,7 +91,6 @@ namespace Digillect.Collections
 		/// <returns><c>true</c> if any items were removed; otherwise, <c>false</c>.</returns>
 		/// <exception cref="ArgumentNullException">The <paramref name="source"/> parameter cannot be null.</exception>
 		public static bool RemoveAll<T>(this ICollection<T> source, Func<T, bool> predicate)
-			where T : XObject
 		{
 			Contract.Requires(source != null);
 			Contract.Requires(predicate != null);
@@ -104,7 +103,7 @@ namespace Digillect.Collections
 		/// </summary>
 		/// <typeparam name="T">The type of the collection's members.</typeparam>
 		/// <param name="source">The source collection.</param>
-		/// <param name="collection">The collection which contains the items to remove.</param>
+		/// <param name="collection">The collection which contains the items to remove. The value can be <c>null</c> in which case no operation is performed and the returned value will be <c>false</c>.</param>
 		/// <returns><c>true</c> if any items were removed; otherwise, <c>false</c>.</returns>
 		/// <exception cref="ArgumentNullException">The <paramref name="source"/> parameter cannot be null.</exception>
 		public static bool RemoveAll<T>(this ICollection<T> source, IEnumerable<T> collection)
@@ -122,7 +121,7 @@ namespace Digillect.Collections
 			{
 				foreach ( T item in collection )
 				{
-					if ( source.Remove(item) )
+					while ( source.Remove(item) )
 					{
 						modified = true;
 					}
@@ -137,11 +136,10 @@ namespace Digillect.Collections
 		/// </summary>
 		/// <typeparam name="T">The type of the collection's members.</typeparam>
 		/// <param name="source">The source collection.</param>
-		/// <param name="collection">The collection which contains the keys to remove.</param>
+		/// <param name="collection">The collection which contains the keys to remove. The value can be <c>null</c> in which case no operation is performed and the returned value will be <c>false</c>.</param>
 		/// <returns><c>true</c> if any items were removed; otherwise, <c>false</c>.</returns>
 		/// <exception cref="ArgumentNullException">The <paramref name="source"/> parameter cannot be null.</exception>
 		public static bool RemoveAll<T>(this IXCollection<T> source, IEnumerable<XKey> collection)
-			where T : XObject
 		{
 			if ( source == null )
 			{
@@ -156,7 +154,7 @@ namespace Digillect.Collections
 			{
 				foreach ( XKey item in collection )
 				{
-					if ( source.Remove(item) )
+					while ( source.Remove(item) )
 					{
 						modified = true;
 					}

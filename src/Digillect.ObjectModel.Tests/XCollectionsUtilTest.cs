@@ -335,7 +335,7 @@ namespace Digillect.Tests
 		{
 			// Setup
 			var data = XIntegerObject.CreateSeries(Many);
-			var sut = new List<XObject>(data);
+			var sut = new List<XObject>(data.Concat(data));
 			var toRemove = new[] { data[0].Clone(), data[Many - 1].Clone() };
 
 			// Exercise
@@ -343,7 +343,7 @@ namespace Digillect.Tests
 
 			// Verify
 			result.ShouldBe(true);
-			sut.Count.ShouldBe(data.Length - toRemove.Length);
+			sut.Count.ShouldBe((data.Length - toRemove.Length) * 2);
 			sut.ShouldNotContain(x => toRemove.Contains(x));
 		}
 
@@ -373,7 +373,7 @@ namespace Digillect.Tests
 		{
 			// Setup
 			var data = XIntegerObject.CreateSeries(Many);
-			var sut = new XCollection<XObject>(data);
+			var sut = new XCollection<XObject>(data.Concat(data.Select(x => x.Clone())));
 			var toRemove = new[] { XKey.From(XKey.IdKeyName, data[0].Id), XKey.From(XKey.IdKeyName, data[Many - 1].Id) };
 
 			// Exercise
