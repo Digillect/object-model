@@ -27,7 +27,7 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <DocumentationFile>..\..\target\Debug\bin\net45+wp8+win8\Digillect.ObjectModel.xml</DocumentationFile>
-    <NoWarn>1591</NoWarn>
+    <NoWarn>1591,1607</NoWarn>
     <CodeAnalysisRuleSet>..\DigillectRules.ruleset</CodeAnalysisRuleSet>
     <CodeContractsEnableRuntimeChecking>True</CodeContractsEnableRuntimeChecking>
     <CodeContractsRuntimeOnlyPublicSurface>False</CodeContractsRuntimeOnlyPublicSurface>
@@ -72,7 +72,7 @@
     <DefineConstants>TRACE;NET45;SILVERLIGHT;WINDOWS_PHONE;WINDOWS_PHONE_8;WINDOWS_PHONE_80;WINDOWS8</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <NoWarn>1591</NoWarn>
+    <NoWarn>1591,1607</NoWarn>
     <DocumentationFile>..\..\target\Release\bin\net45+wp8+win8\Digillect.ObjectModel.xml</DocumentationFile>
     <CodeAnalysisRuleSet>..\DigillectRules.ruleset</CodeAnalysisRuleSet>
     <CodeContractsEnableRuntimeChecking>True</CodeContractsEnableRuntimeChecking>
@@ -115,7 +115,7 @@
     <DebugSymbols>true</DebugSymbols>
     <OutputPath>obj\CodeAnalysis\</OutputPath>
     <DefineConstants>TRACE;DEBUG;NET45;SILVERLIGHT;WINDOWS_PHONE;WINDOWS_PHONE_8;WINDOWS_PHONE_80;WINDOWS8</DefineConstants>
-    <NoWarn>1591</NoWarn>
+    <NoWarn>1591,1607</NoWarn>
     <DebugType>full</DebugType>
     <PlatformTarget>AnyCPU</PlatformTarget>
     <ErrorReport>prompt</ErrorReport>

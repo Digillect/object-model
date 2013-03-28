@@ -26,7 +26,7 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <DocumentationFile>..\..\target\Debug\bin\net40\Digillect.ObjectModel.xml</DocumentationFile>
-    <NoWarn>1591</NoWarn>
+    <NoWarn>1591,1607</NoWarn>
     <CodeAnalysisRuleSet>..\DigillectRules.ruleset</CodeAnalysisRuleSet>
     <CodeContractsEnableRuntimeChecking>True</CodeContractsEnableRuntimeChecking>
     <CodeContractsRuntimeOnlyPublicSurface>False</CodeContractsRuntimeOnlyPublicSurface>
@@ -72,7 +72,7 @@
     <DefineConstants>TRACE;NET40</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <NoWarn>1591</NoWarn>
+    <NoWarn>1591,1607</NoWarn>
     <DocumentationFile>..\..\target\Release\bin\net40\Digillect.ObjectModel.xml</DocumentationFile>
     <CodeAnalysisRuleSet>..\DigillectRules.ruleset</CodeAnalysisRuleSet>
     <CodeContractsEnableRuntimeChecking>True</CodeContractsEnableRuntimeChecking>
@@ -116,7 +116,7 @@
     <DebugSymbols>true</DebugSymbols>
     <OutputPath>obj\net40\CodeAnalysis\</OutputPath>
     <DefineConstants>TRACE;DEBUG;NET40</DefineConstants>
-    <NoWarn>1591</NoWarn>
+    <NoWarn>1591,1607</NoWarn>
     <DebugType>full</DebugType>
     <ErrorReport>prompt</ErrorReport>
     <CodeAnalysisRuleSet>..\DigillectRules.ruleset</CodeAnalysisRuleSet>

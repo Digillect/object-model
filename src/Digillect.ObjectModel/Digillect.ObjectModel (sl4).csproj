@@ -39,7 +39,7 @@
     <WarningLevel>4</WarningLevel>
     <CodeAnalysisRuleSet>..\DigillectRules.ruleset</CodeAnalysisRuleSet>
     <DocumentationFile>..\..\target\Debug\bin\sl4\Digillect.ObjectModel.xml</DocumentationFile>
-    <NoWarn>1591</NoWarn>
+    <NoWarn>1591,1607</NoWarn>
     <CodeContractsEnableRuntimeChecking>True</CodeContractsEnableRuntimeChecking>
     <CodeContractsRuntimeOnlyPublicSurface>False</CodeContractsRuntimeOnlyPublicSurface>
     <CodeContractsRuntimeThrowOnFailure>True</CodeContractsRuntimeThrowOnFailure>
@@ -85,7 +85,7 @@
     <WarningLevel>4</WarningLevel>
     <CodeAnalysisRuleSet>..\DigillectRules.ruleset</CodeAnalysisRuleSet>
     <DocumentationFile>..\..\target\Release\bin\sl4\Digillect.ObjectModel.xml</DocumentationFile>
-    <NoWarn>1591</NoWarn>
+    <NoWarn>1591,1607</NoWarn>
     <CodeContractsEnableRuntimeChecking>True</CodeContractsEnableRuntimeChecking>
     <CodeContractsRuntimeOnlyPublicSurface>False</CodeContractsRuntimeOnlyPublicSurface>
     <CodeContractsRuntimeThrowOnFailure>True</CodeContractsRuntimeThrowOnFailure>
@@ -127,7 +127,7 @@
     <DebugSymbols>true</DebugSymbols>
     <OutputPath>obj\sl4\CodeAnalysis\</OutputPath>
     <DefineConstants>TRACE;DEBUG;NET40;SILVERLIGHT</DefineConstants>
-    <NoWarn>1591</NoWarn>
+    <NoWarn>1591,1607</NoWarn>
     <NoStdLib>true</NoStdLib>
     <DebugType>full</DebugType>
     <ErrorReport>prompt</ErrorReport>
