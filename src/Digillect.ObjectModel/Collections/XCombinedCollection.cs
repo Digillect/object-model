@@ -28,7 +28,6 @@ namespace Digillect.Collections
 			Contract.Requires(Contract.ForAll(collections, item => item != null));
 		}
 
-		[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures")]
 		public XCombinedCollection(IEnumerable<IXList<T>> collections)
 		{
 			if ( collections == null )
