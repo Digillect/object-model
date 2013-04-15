@@ -115,6 +115,7 @@ namespace Digillect.Collections
 		{
 			Contract.Requires(source != null);
 			Contract.Requires(predicate != null);
+			Contract.Ensures(!Contract.Result<bool>() || source.Count < Contract.OldValue(source.Count));
 
 			return source.RemoveAll(source.Where(predicate).ToArray());
 		}
@@ -127,6 +128,7 @@ namespace Digillect.Collections
 		/// <param name="collection">The collection which contains the items to remove. The value can be <c>null</c> in which case no operation is performed and the returned value will be <c>false</c>.</param>
 		/// <returns><c>true</c> if any items were removed; otherwise, <c>false</c>.</returns>
 		/// <exception cref="ArgumentNullException">The <paramref name="source"/> parameter cannot be null.</exception>
+		[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Contracts", "Ensures")]
 		public static bool RemoveAll<T>(this ICollection<T> source, IEnumerable<T> collection)
 		{
 			if ( source == null )
@@ -134,7 +136,7 @@ namespace Digillect.Collections
 				throw new ArgumentNullException("source");
 			}
 
-			Contract.EndContractBlock();
+			Contract.Ensures(!Contract.Result<bool>() || source.Count < Contract.OldValue(source.Count));
 
 			bool modified = false;
 
@@ -160,6 +162,7 @@ namespace Digillect.Collections
 		/// <param name="collection">The collection which contains the keys to remove. The value can be <c>null</c> in which case no operation is performed and the returned value will be <c>false</c>.</param>
 		/// <returns><c>true</c> if any items were removed; otherwise, <c>false</c>.</returns>
 		/// <exception cref="ArgumentNullException">The <paramref name="source"/> parameter cannot be null.</exception>
+		[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Contracts", "Ensures")]
 		public static bool RemoveAll<T>(this IXCollection<T> source, IEnumerable<XKey> collection)
 		{
 			if ( source == null )
@@ -167,7 +170,7 @@ namespace Digillect.Collections
 				throw new ArgumentNullException("source");
 			}
 
-			Contract.EndContractBlock();
+			Contract.Ensures(!Contract.Result<bool>() || source.Count < Contract.OldValue(source.Count));
 
 			bool modified = false;
 
@@ -470,6 +473,7 @@ namespace Digillect.Collections
 		///	}
 		/// </code>
 		/// </example>
+		[Pure]
 		public static XCollectionDifference<T> Difference<T>(this IXCollection<T> source, IEnumerable<T> target)
 			where T : XObject
 		{
@@ -535,6 +539,7 @@ namespace Digillect.Collections
 		/// <returns>
 		/// Unmodifiable (<see cref="ICollection&lt;T&gt;.IsReadOnly"/> == <c>true</c>) wrapper around the original collection.
 		/// </returns>
+		[Pure]
 		public static IXCollection<T> UnmodifiableCollection<T>(IXCollection<T> collection)
 		{
 			Contract.Requires( collection != null );
@@ -550,6 +555,7 @@ namespace Digillect.Collections
 		/// <returns>
 		/// Unmodifiable (<see cref="ICollection&lt;T&gt;.IsReadOnly"/> == <c>true</c>) wrapper around the original collection.
 		/// </returns>
+		[Pure]
 		public static IXList<T> UnmodifiableList<T>(IXList<T> collection)
 		{
 			Contract.Requires(collection != null);
@@ -578,6 +584,7 @@ namespace Digillect.Collections
 		/// <param name="collection">Source collection.</param>
 		/// <param name="filter">A function which performs actual filtering.</param>
 		/// <returns></returns>
+		[Pure]
 		public static XFilteredCollection<T> FilteredList<T>(IXList<T> collection, Func<T, bool> filter)
 			where T : XObject
 		{
@@ -873,7 +880,6 @@ namespace Digillect.Collections
 #if !(SILVERLIGHT || WINDOWS8)
 				Func<T, bool> filter = (Func<T, bool>) this._filter.Clone();
 #else
-				Contract.Assume(this._filter != null);
 				Func<T, bool> filter = this._filter;
 #endif
 
