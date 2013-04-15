@@ -284,18 +284,11 @@ namespace Digillect
 		/// <returns>A new object which has exactly the same type as this instance.</returns>
 		[EditorBrowsable( EditorBrowsableState.Advanced )]
 		[Pure]
-#if false // !(SILVERLIGHT || WINDOWS8)
-		[System.Security.Permissions.ReflectionPermission(System.Security.Permissions.SecurityAction.Demand, RestrictedMemberAccess = true)]
-#endif
 		protected virtual XObject CreateInstanceOfSameType()
 		{
 			Contract.Ensures( Contract.Result<XObject>() != null );
 
-#if WINDOWS8
 			return (XObject) Activator.CreateInstance(GetType());
-#else
-			return (XObject) Activator.CreateInstance(GetType(), true);
-#endif
 		}
 		#endregion
 
