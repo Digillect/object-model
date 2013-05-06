@@ -392,7 +392,28 @@ namespace Digillect.Collections
 
 		#region INotifyCollectionChanged Members
 		/// <inheritdoc/>
-		public abstract event NotifyCollectionChangedEventHandler CollectionChanged;
+		public event NotifyCollectionChangedEventHandler CollectionChanged;
+
+		/// <summary>
+		/// Raises the <see cref="CollectionChanged"/> event.
+		/// </summary>
+		/// <param name="e">The <see cref="NotifyCollectionChangedEventArgs"/> instance containing the event data.</param>
+		[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly", MessageId = "e")]
+		protected virtual void OnCollectionChanged(Func<NotifyCollectionChangedEventArgs> e)
+		{
+			if ( CollectionChanged != null )
+			{
+				CollectionChanged(this, e == null ? null : e());
+			}
+		}
+
+		/// <summary>
+		/// Raises the <see cref="CollectionChanged"/> event with the <see cref="NotifyCollectionChangedAction.Reset"/> action.
+		/// </summary>
+		protected void OnCollectionReset()
+		{
+			OnCollectionChanged(() => new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset));
+		}
 		#endregion
 
 		#region INotifyPropertyChanged Members

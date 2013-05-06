@@ -104,20 +104,11 @@ namespace Digillect.Collections
 
 		#region Events
 		/// <inheritdoc/>
-#if !(SILVERLIGHT || WINDOWS8)
-		[field: NonSerialized]
-#endif
-		public override event NotifyCollectionChangedEventHandler CollectionChanged;
-
-		/// <summary>
-		/// Raises the <see cref="CollectionChanged" /> event.
-		/// </summary>
-		/// <param name="e">The <see cref="NotifyCollectionChangedEventArgs" /> instance containing the event data.</param>
-		protected virtual void OnCollectionChanged(NotifyCollectionChangedEventArgs e)
+		protected override void OnCollectionChanged(Func<NotifyCollectionChangedEventArgs> e)
 		{
-			if ( _updateCount == 0 && CollectionChanged != null )
+			if ( _updateCount == 0 )
 			{
-				CollectionChanged(this, e);
+				base.OnCollectionChanged(e);
 			}
 		}
 
@@ -163,33 +154,38 @@ namespace Digillect.Collections
 					throw new ArgumentNullException("value");
 				}
 
-				if ( _underlyingCollection != null )
+				Contract.EndContractBlock();
+
+				if ( _underlyingCollection != value )
 				{
-					_underlyingCollection.CollectionChanged -= UnderlyingCollection_CollectionChanged;
-
-					uint updateCount = _updateCount;
-
-					for ( uint i = updateCount; i != 0; i-- )
+					if ( _underlyingCollection != null )
 					{
-						_underlyingCollection.EndUpdate();
+						_underlyingCollection.CollectionChanged -= UnderlyingCollection_CollectionChanged;
+
+						uint updateCount = _updateCount;
+
+						for ( uint i = updateCount; i != 0; i-- )
+						{
+							_underlyingCollection.EndUpdate();
+						}
 					}
+
+					_underlyingCollection = value;
+
+					uint updateCount2 = _updateCount;
+
+					for ( uint i = 0; i < updateCount2; i++ )
+					{
+						_underlyingCollection.BeginUpdate();
+					}
+
+					_underlyingCollection.CollectionChanged += UnderlyingCollection_CollectionChanged;
+
+					_size = CalculateCollectionSize();
+
+					OnPropertyChanged((string) null);
+					OnCollectionReset();
 				}
-
-				_underlyingCollection = value;
-
-				uint updateCount2 = _updateCount;
-
-				for ( uint i = 0 ; i < updateCount2; i++ )
-				{
-					_underlyingCollection.BeginUpdate();
-				}
-
-				_underlyingCollection.CollectionChanged += UnderlyingCollection_CollectionChanged;
-
-				_size = CalculateCollectionSize();
-
-				OnPropertyChanged((string) null);
-				OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset));
 			}
 		}
 		#endregion
@@ -257,7 +253,7 @@ namespace Digillect.Collections
 			if ( --_updateCount == 0 )
 			{
 				OnPropertyChanged((string) null);
-				OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset));
+				OnCollectionReset();
 			}
 		}
 
@@ -386,7 +382,7 @@ namespace Digillect.Collections
 					}
 
 					OnPropertyChanged(IndexerName);
-					OnCollectionChanged(new NotifyCollectionChangedEventArgs(e.Action, e.NewItems[0], e.NewStartingIndex - _startIndex));
+					OnCollectionChanged(() => new NotifyCollectionChangedEventArgs(e.Action, e.NewItems[0], e.NewStartingIndex - _startIndex));
 
 					break;
 
@@ -403,7 +399,7 @@ namespace Digillect.Collections
 					}
 
 					OnPropertyChanged(IndexerName);
-					OnCollectionChanged(new NotifyCollectionChangedEventArgs(e.Action, e.OldItems[0], e.OldStartingIndex - _startIndex));
+					OnCollectionChanged(() => new NotifyCollectionChangedEventArgs(e.Action, e.OldItems[0], e.OldStartingIndex - _startIndex));
 
 					break;
 
@@ -416,7 +412,7 @@ namespace Digillect.Collections
 					}
 
 					OnPropertyChanged(IndexerName);
-					OnCollectionChanged(new NotifyCollectionChangedEventArgs(e.Action, e.NewItems[0], e.OldItems[0], e.NewStartingIndex - _startIndex));
+					OnCollectionChanged(() => new NotifyCollectionChangedEventArgs(e.Action, e.NewItems[0], e.OldItems[0], e.NewStartingIndex - _startIndex));
 
 					break;
 #else
@@ -434,10 +430,9 @@ namespace Digillect.Collections
 
 					OnPropertyChanged(IndexerName);
 
-					IList newItems;
+					OnCollectionChanged(() => {
+						IList newItems;
 
-					if ( CollectionChanged != null )
-					{
 						if ( e.NewStartingIndex + e.NewItems.Count <= _startIndex + _size )
 						{
 							newItems = e.NewItems;
@@ -449,8 +444,8 @@ namespace Digillect.Collections
 							newItems = e.NewItems.Cast<T>().Take(count).ToList();
 						}
 
-						CollectionChanged(this, new NotifyCollectionChangedEventArgs(e.Action, newItems, e.NewStartingIndex - _startIndex));
-					}
+						return new NotifyCollectionChangedEventArgs(e.Action, newItems, e.NewStartingIndex - _startIndex);
+					});
 
 					break;
 
@@ -468,10 +463,9 @@ namespace Digillect.Collections
 
 					OnPropertyChanged(IndexerName);
 
-					IList oldItems;
+					OnCollectionChanged(() => {
+						IList oldItems;
 
-					if ( CollectionChanged != null )
-					{
 						if ( e.OldStartingIndex + e.OldItems.Count <= _startIndex + _size )
 						{
 							oldItems = e.OldItems;
@@ -483,8 +477,8 @@ namespace Digillect.Collections
 							oldItems = e.OldItems.Cast<T>().Take(count).ToList();
 						}
 
-						CollectionChanged(this, new NotifyCollectionChangedEventArgs(e.Action, oldItems, e.OldStartingIndex - _startIndex));
-					}
+						return new NotifyCollectionChangedEventArgs(e.Action, oldItems, e.OldStartingIndex - _startIndex);
+					});
 
 					break;
 
@@ -510,8 +504,9 @@ namespace Digillect.Collections
 
 					OnPropertyChanged(IndexerName);
 
-					if ( CollectionChanged != null )
-					{
+					OnCollectionChanged(() => {
+						IList newItems;
+						IList oldItems;
 						int newStartingIndex;
 
 						if ( e.NewStartingIndex >= _startIndex )
@@ -543,14 +538,14 @@ namespace Digillect.Collections
 							newStartingIndex = 0;
 						}
 
-						CollectionChanged(this, new NotifyCollectionChangedEventArgs(e.Action, newItems, oldItems, newStartingIndex));
-					}
+						return new NotifyCollectionChangedEventArgs(e.Action, newItems, oldItems, newStartingIndex);
+					});
 
 					break;
 #endif
 				case NotifyCollectionChangedAction.Reset:
 					OnPropertyChanged(IndexerName);
-					OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset));
+					OnCollectionReset();
 
 					break;
 

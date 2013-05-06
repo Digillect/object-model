@@ -193,6 +193,7 @@
     <Compile Include="Collections\XCombinedCollection.cs" />
     <Compile Include="Collections\XFilteredCollection.cs" />
     <Compile Include="Collections\XIdentifiedCollection.cs" />
+    <Compile Include="Collections\XSortedCollection.cs" />
     <Compile Include="Collections\XSubRangeCollection.cs" />
     <Compile Include="Collections\XUniqueCollection.cs" />
     <Compile Include="ComponentModel\PropertyChangingEventArgs.cs" />

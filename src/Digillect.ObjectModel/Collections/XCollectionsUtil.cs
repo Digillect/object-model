@@ -102,6 +102,24 @@ namespace Digillect.Collections
 #endif
 		#endregion
 
+		#region ToXCollection`1 Extension
+		/// <summary>
+		/// Creates a <see cref="XCollection{T}"/> from an <see cref="IEnumerable{T}"/>.
+		/// </summary>
+		/// <typeparam name="T">The type of the elements of <paramref name="source"/>.</typeparam>
+		/// <param name="source">The <see cref="IEnumerable{T}"/> to create a <see cref="XCollection{T}"/> from.</param>
+		/// <returns>A <see cref="XCollection{T}"/> that contains elements from the input sequence.</returns>
+		/// <exception cref="ArgumentNullException"><paramref name="source"/> is null.</exception>
+		public static XCollection<T> ToXCollection<T>(this IEnumerable<T> source)
+			where T : XObject
+		{
+			Contract.Requires(source != null);
+			Contract.Requires(Contract.ForAll(source, item => item != null));
+
+			return new XCollection<T>(source);
+		}
+		#endregion
+
 		#region RemoveAll`1 Extension
 		/// <summary>
 		/// Removes all items from the <paramref name="source"/> collection which match the <paramref name="predicate"/>.
@@ -611,6 +629,57 @@ namespace Digillect.Collections
 
 			Contract.EndContractBlock();
 		}
+
+		#region Compatibility Extensions
+#if NET40 && SILVERLIGHT
+		internal static int FindIndex<T>(this List<T> collection, Predicate<T> match)
+		{
+			if ( collection == null )
+			{
+				throw new ArgumentNullException("collection");
+			}
+
+			if ( match == null )
+			{
+				throw new ArgumentNullException("match");
+			}
+
+			Contract.EndContractBlock();
+
+			for ( int i = 0; i < collection.Count; i++ )
+			{
+				if ( match(collection[i]) )
+				{
+					return i;
+				}
+			}
+
+			return -1;
+		}
+#endif
+
+#if WINDOWS8
+		internal static void ForEach<T>(this List<T> collection, Action<T> action)
+		{
+			if ( collection == null )
+			{
+				throw new ArgumentNullException("collection");
+			}
+
+			if ( action == null )
+			{
+				throw new ArgumentNullException("action");
+			}
+
+			Contract.EndContractBlock();
+
+			foreach ( var item in collection )
+			{
+				action(item);
+			}
+		}
+#endif
+		#endregion
 
 		#region class ReadOnlyXCollection`1
 #if !(SILVERLIGHT || WINDOWS8)

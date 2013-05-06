@@ -175,6 +175,7 @@
     <Compile Include="Collections\IXCollectionContract.cs" />
     <Compile Include="Collections\XBasedCollection.cs" />
     <Compile Include="Collections\XCombinedCollection.cs" />
+    <Compile Include="Collections\XSortedCollection.cs" />
     <Compile Include="Collections\XSubRangeCollection.cs" />
     <Compile Include="ContractExtensions.cs" />
     <Compile Include="Errors.cs" />

@@ -97,20 +97,11 @@ namespace Digillect.Collections
 
 		#region Events
 		/// <inheritdoc/>
-#if !(SILVERLIGHT || WINDOWS8)
-		[field: NonSerialized]
-#endif
-		public override event NotifyCollectionChangedEventHandler CollectionChanged;
-
-		/// <summary>
-		/// Raises the <see cref="CollectionChanged" /> event.
-		/// </summary>
-		/// <param name="e">The <see cref="NotifyCollectionChangedEventArgs" /> instance containing the event data.</param>
-		protected virtual void OnCollectionChanged(NotifyCollectionChangedEventArgs e)
+		protected override void OnCollectionChanged(Func<NotifyCollectionChangedEventArgs> e)
 		{
-			if ( _updateCount == 0 && CollectionChanged != null )
+			if ( _updateCount == 0 )
 			{
-				CollectionChanged(this, e);
+				base.OnCollectionChanged(e);
 			}
 		}
 
@@ -176,21 +167,7 @@ namespace Digillect.Collections
 		/// <inheritdoc/>
 		public override XBasedCollection<T> Clone(bool deep)
 		{
-			IList<IXList<T>> collections;
-
-			if ( deep )
-			{
-				collections = new List<IXList<T>>();
-
-				for ( int i = 0; i < _collections.Count; i++ )
-				{
-					collections.Add((IXList<T>) _collections[i].Clone(deep));
-				}
-			}
-			else
-			{
-				collections = _collections;
-			}
+			IEnumerable<IXList<T>> collections = deep ? _collections.Select(x => (IXList<T>) x.Clone(deep)) : _collections;
 
 			return (XBasedCollection<T>) Activator.CreateInstance(GetType(), collections);
 		}
@@ -236,7 +213,7 @@ namespace Digillect.Collections
 			if ( --_updateCount == 0 )
 			{
 				OnPropertyChanged((string) null);
-				OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset));
+				OnCollectionReset();
 			}
 		}
 
@@ -319,6 +296,7 @@ namespace Digillect.Collections
 			}
 
 			Contract.Requires(index >= 0);
+			//Contract.Requires(index <= _collections.Count);
 
 			_collections.Insert(index, item);
 
@@ -336,7 +314,7 @@ namespace Digillect.Collections
 				OnPropertyChanged(CountString);
 				OnPropertyChanged(IndexerName);
 				// WPF is known to not support range operations so we can not issue Add with all of the items at a time
-				OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset));
+				OnCollectionReset();
 			}
 		}
 
@@ -368,7 +346,7 @@ namespace Digillect.Collections
 				OnPropertyChanged(CountString);
 				OnPropertyChanged(IndexerName);
 				// WPF is known to not support range operations so we can not issue Remove with all of the items at a time
-				OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset));
+				OnCollectionReset();
 			}
 
 			return true;
@@ -419,50 +397,44 @@ namespace Digillect.Collections
 
 			OnPropertyChanged(IndexerName);
 
-			if ( CollectionChanged != null )
+			IXList<T> collection = (IXList<T>) sender;
+
+			Contract.Assume(collection != null);
+
+			switch ( e.Action )
 			{
-				Contract.Assume(sender != null);
-
-				IXList<T> collection = (IXList<T>) sender;
-				NotifyCollectionChangedEventArgs args;
-
-				switch ( e.Action )
-				{
 #if NET40 && SILVERLIGHT
-					case NotifyCollectionChangedAction.Add:
-						args = new NotifyCollectionChangedEventArgs(e.Action, e.NewItems[0], CalculateCombinedIndex(collection, e.NewStartingIndex));
-						break;
-					case NotifyCollectionChangedAction.Remove:
-						args = new NotifyCollectionChangedEventArgs(e.Action, e.OldItems[0], CalculateCombinedIndex(collection, e.OldStartingIndex));
-						break;
-					case NotifyCollectionChangedAction.Replace:
-						// e.NewStartingIndex == e.OldStartingIndex
-						args = new NotifyCollectionChangedEventArgs(e.Action, e.NewItems[0], e.OldItems[0], CalculateCombinedIndex(collection, e.NewStartingIndex));
-						break;
+				case NotifyCollectionChangedAction.Add:
+					OnCollectionChanged(() => new NotifyCollectionChangedEventArgs(e.Action, e.NewItems[0], CalculateCombinedIndex(collection, e.NewStartingIndex)));
+					break;
+				case NotifyCollectionChangedAction.Remove:
+					OnCollectionChanged(() => new NotifyCollectionChangedEventArgs(e.Action, e.OldItems[0], CalculateCombinedIndex(collection, e.OldStartingIndex)));
+					break;
+				case NotifyCollectionChangedAction.Replace:
+					// e.NewStartingIndex == e.OldStartingIndex
+					OnCollectionChanged(() => new NotifyCollectionChangedEventArgs(e.Action, e.NewItems[0], e.OldItems[0], CalculateCombinedIndex(collection, e.NewStartingIndex)));
+					break;
 #else
-					case NotifyCollectionChangedAction.Add:
-						args = new NotifyCollectionChangedEventArgs(e.Action, e.NewItems, CalculateCombinedIndex(collection, e.NewStartingIndex));
-						break;
-					case NotifyCollectionChangedAction.Remove:
-						args = new NotifyCollectionChangedEventArgs(e.Action, e.OldItems, CalculateCombinedIndex(collection, e.OldStartingIndex));
-						break;
-					case NotifyCollectionChangedAction.Move:
-						// e.NewItems and e.OldItems have the same content
-						args = new NotifyCollectionChangedEventArgs(e.Action, e.NewItems, CalculateCombinedIndex(collection, e.NewStartingIndex), CalculateCombinedIndex(collection, e.OldStartingIndex));
-						break;
-					case NotifyCollectionChangedAction.Replace:
-						// e.NewStartingIndex == e.OldStartingIndex
-						args = new NotifyCollectionChangedEventArgs(e.Action, e.NewItems, e.OldItems, CalculateCombinedIndex(collection, e.NewStartingIndex));
-						break;
+				case NotifyCollectionChangedAction.Add:
+					OnCollectionChanged(() => new NotifyCollectionChangedEventArgs(e.Action, e.NewItems, CalculateCombinedIndex(collection, e.NewStartingIndex)));
+					break;
+				case NotifyCollectionChangedAction.Remove:
+					OnCollectionChanged(() => new NotifyCollectionChangedEventArgs(e.Action, e.OldItems, CalculateCombinedIndex(collection, e.OldStartingIndex)));
+					break;
+				case NotifyCollectionChangedAction.Move:
+					// e.NewItems and e.OldItems have the same content
+					OnCollectionChanged(() => new NotifyCollectionChangedEventArgs(e.Action, e.NewItems, CalculateCombinedIndex(collection, e.NewStartingIndex), CalculateCombinedIndex(collection, e.OldStartingIndex)));
+					break;
+				case NotifyCollectionChangedAction.Replace:
+					// e.NewStartingIndex == e.OldStartingIndex
+					OnCollectionChanged(() => new NotifyCollectionChangedEventArgs(e.Action, e.NewItems, e.OldItems, CalculateCombinedIndex(collection, e.NewStartingIndex)));
+					break;
 #endif
-					case NotifyCollectionChangedAction.Reset:
-						args = new NotifyCollectionChangedEventArgs(e.Action);
-						break;
-					default:
-						throw new ArgumentException(e.Action.ToString(), "e");
-				}
-
-				CollectionChanged(this, args);
+				case NotifyCollectionChangedAction.Reset:
+					OnCollectionReset();
+					break;
+				default:
+					throw new ArgumentException(e.Action.ToString(), "e");
 			}
 		}
 		#endregion
