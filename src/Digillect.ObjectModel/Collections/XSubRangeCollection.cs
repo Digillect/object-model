@@ -23,6 +23,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Specialized;
+using System.ComponentModel;
 using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Threading;
@@ -74,7 +75,6 @@ namespace Digillect.Collections
 			_underlyingCollection = collection;
 
 			_underlyingCollection.CollectionChanged += UnderlyingCollection_CollectionChanged;
-			_underlyingCollection.Updated += UnderlyingCollection_Updated;
 
 			_size = CalculateCollectionSize();
 		}
@@ -87,7 +87,6 @@ namespace Digillect.Collections
 				if ( _underlyingCollection != null )
 				{
 					_underlyingCollection.CollectionChanged -= UnderlyingCollection_CollectionChanged;
-					_underlyingCollection.Updated -= UnderlyingCollection_Updated;
 
 					for ( uint i = _updateCount; i != 0; i-- )
 					{
@@ -105,6 +104,9 @@ namespace Digillect.Collections
 
 		#region Events
 		/// <inheritdoc/>
+#if !(SILVERLIGHT || WINDOWS8)
+		[field: NonSerialized]
+#endif
 		public override event NotifyCollectionChangedEventHandler CollectionChanged;
 
 		/// <summary>
@@ -120,20 +122,11 @@ namespace Digillect.Collections
 		}
 
 		/// <inheritdoc/>
-		protected override void OnPropertyChanged(System.ComponentModel.PropertyChangedEventArgs e)
+		protected override void OnPropertyChanged(PropertyChangedEventArgs e)
 		{
 			if ( _updateCount == 0 )
 			{
 				base.OnPropertyChanged(e);
-			}
-		}
-
-		/// <inheritdoc/>
-		protected override void OnUpdated(EventArgs e)
-		{
-			if ( _updateCount == 0 )
-			{
-				base.OnUpdated(e);
 			}
 		}
 		#endregion
@@ -173,7 +166,6 @@ namespace Digillect.Collections
 				if ( _underlyingCollection != null )
 				{
 					_underlyingCollection.CollectionChanged -= UnderlyingCollection_CollectionChanged;
-					_underlyingCollection.Updated -= UnderlyingCollection_Updated;
 
 					uint updateCount = _updateCount;
 
@@ -193,14 +185,11 @@ namespace Digillect.Collections
 				}
 
 				_underlyingCollection.CollectionChanged += UnderlyingCollection_CollectionChanged;
-				_underlyingCollection.Updated += UnderlyingCollection_Updated;
 
 				_size = CalculateCollectionSize();
 
-				OnPropertyChanged(CountString);
-				OnPropertyChanged(IndexerName);
+				OnPropertyChanged((string) null);
 				OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset));
-				OnUpdated(EventArgs.Empty);
 			}
 		}
 		#endregion
@@ -267,9 +256,7 @@ namespace Digillect.Collections
 
 			if ( --_updateCount == 0 )
 			{
-				OnUpdated(EventArgs.Empty);
-				OnPropertyChanged(CountString);
-				OnPropertyChanged(IndexerName);
+				OnPropertyChanged((string) null);
 				OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset));
 			}
 		}
@@ -399,11 +386,7 @@ namespace Digillect.Collections
 					}
 
 					OnPropertyChanged(IndexerName);
-
-					if ( CollectionChanged != null )
-					{
-						CollectionChanged(this, new NotifyCollectionChangedEventArgs(e.Action, e.NewItems[0], e.NewStartingIndex - _startIndex));
-					}
+					OnCollectionChanged(new NotifyCollectionChangedEventArgs(e.Action, e.NewItems[0], e.NewStartingIndex - _startIndex));
 
 					break;
 
@@ -420,11 +403,7 @@ namespace Digillect.Collections
 					}
 
 					OnPropertyChanged(IndexerName);
-
-					if ( CollectionChanged != null )
-					{
-						CollectionChanged(this, new NotifyCollectionChangedEventArgs(e.Action, e.OldItems[0], e.OldStartingIndex - _startIndex));
-					}
+					OnCollectionChanged(new NotifyCollectionChangedEventArgs(e.Action, e.OldItems[0], e.OldStartingIndex - _startIndex));
 
 					break;
 
@@ -437,11 +416,7 @@ namespace Digillect.Collections
 					}
 
 					OnPropertyChanged(IndexerName);
-
-					if ( CollectionChanged != null )
-					{
-						CollectionChanged(this, new NotifyCollectionChangedEventArgs(e.Action, e.NewItems[0], e.OldItems[0], e.NewStartingIndex - _startIndex));
-					}
+					OnCollectionChanged(new NotifyCollectionChangedEventArgs(e.Action, e.NewItems[0], e.OldItems[0], e.NewStartingIndex - _startIndex));
 
 					break;
 #else
@@ -575,32 +550,12 @@ namespace Digillect.Collections
 #endif
 				case NotifyCollectionChangedAction.Reset:
 					OnPropertyChanged(IndexerName);
-
-					if ( CollectionChanged != null )
-					{
-						CollectionChanged(this, new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset));
-					}
+					OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset));
 
 					break;
 
 				default:
 					throw new ArgumentException(e.Action.ToString(), "e");
-			}
-		}
-
-		private void UnderlyingCollection_Updated(object sender, EventArgs e)
-		{
-			Contract.Assume(_underlyingCollection != null);
-
-#if CUSTOM_ENUMERATOR
-			_version++;
-#endif
-
-			Interlocked.Exchange(ref _size, CalculateCollectionSize());
-
-			if ( _updateCount == 0 )
-			{
-				OnUpdated(EventArgs.Empty);
 			}
 		}
 		#endregion

@@ -23,6 +23,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Specialized;
+using System.ComponentModel;
 using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Threading;
@@ -56,7 +57,6 @@ namespace Digillect.Collections
 			this._originalCollection = originalCollection;
 
 			this._originalCollection.CollectionChanged += OriginalCollection_CollectionChanged;
-			_originalCollection.Updated += OriginalCollection_Updated;
 		}
 
 		/// <inheritdoc/>
@@ -65,7 +65,6 @@ namespace Digillect.Collections
 			if ( disposing )
 			{
 				this._originalCollection.CollectionChanged -= OriginalCollection_CollectionChanged;
-				_originalCollection.Updated -= OriginalCollection_Updated;
 			}
 
 			base.Dispose(disposing);
@@ -89,6 +88,9 @@ namespace Digillect.Collections
 
 		#region IXCollection`1 Members
 		/// <inheritdoc/>
+#if !(SILVERLIGHT || WINDOWS8)
+		[field: NonSerialized]
+#endif
 		public override event NotifyCollectionChangedEventHandler CollectionChanged;
 
 		/// <inheritdoc/>
@@ -391,16 +393,6 @@ namespace Digillect.Collections
 					throw new ArgumentException(e.Action.ToString(), "e");
 			}
 		}
-
-		private void OriginalCollection_Updated(object sender, EventArgs e)
-		{
-#if CUSTOM_ENUMERATOR
-			_version++;
-#endif
-			_count = -1;
-
-			OnUpdated(EventArgs.Empty);
-		}
 		#endregion
 
 		#region ObjectInvariant
@@ -411,7 +403,6 @@ namespace Digillect.Collections
 			Contract.Invariant(_count >= -1);
 		}
 		#endregion
-
 	}
 
 	#region XFilteredCollection`1 contract binding

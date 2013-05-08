@@ -20,6 +20,7 @@
 #endregion
 
 using System;
+using System.ComponentModel;
 using System.Diagnostics.Contracts;
 
 namespace Digillect
@@ -29,14 +30,9 @@ namespace Digillect
 	/// </summary>
 	/// <typeparam name="T"></typeparam>
 	[ContractClass( typeof( IXUpdatableContract<> ) )]
-	public interface IXUpdatable<T>
+	public interface IXUpdatable<T> : INotifyPropertyChanged
 		where T : IXUpdatable<T>
 	{
-		/// <summary>
-		/// Occurs when this instance is updated using the <see cref="Update"/> method or as a result of the <see cref="EndUpdate"/> method.
-		/// </summary>
-		event EventHandler Updated;
-
 		/// <summary>
 		/// Creates a new object that is a copy of the current instance.
 		/// </summary>
@@ -50,7 +46,7 @@ namespace Digillect
 		/// </summary>
 		/// <remarks>
 		/// This method can be called multiple times.
-		/// Until the last corresponding <see cref="EndUpdate"/> method is called none of the <see cref="Updated"/> events are raised.
+		/// Until the last corresponding <see cref="EndUpdate"/> method is called none of the <see cref="INotifyPropertyChanged.PropertyChanged"/> events are raised.
 		/// </remarks>
 		void BeginUpdate();
 
@@ -59,7 +55,7 @@ namespace Digillect
 		/// </summary>
 		/// <remarks>
 		/// Do not forget to call this method for each corresponding <see cref="BeginUpdate"/> method you've called.
-		/// Until the last corresponding <see cref="EndUpdate()"/> method is called none of the <see cref="Updated"/> events are raised.
+		/// Until the last corresponding <see cref="EndUpdate()"/> method is called none of the <see cref="INotifyPropertyChanged.PropertyChanged"/> events are raised.
 		/// </remarks>
 		void EndUpdate();
 
@@ -76,8 +72,9 @@ namespace Digillect
 		/// </summary>
 		/// <param name="source">Source object.</param>
 		/// <remarks>
-		/// At the end of update <see cref="Updated"/> event is raised if not blocked by call to <see cref="BeginUpdate"/>.
-		/// In the later scenario <see cref="Updated"/> event will be raised upon the call to <see cref="EndUpdate"/>.
+		/// At the end of the update the <see cref="INotifyPropertyChanged.PropertyChanged"/> event is raised if not blocked by a previous call to the <see cref="BeginUpdate"/> method.
+		/// Otherwise the <see cref="INotifyPropertyChanged.PropertyChanged"/> event will be raised upon the call to the last nested <see cref="EndUpdate"/> method.
+		/// The corresponding <see cref="PropertyChangedEventArgs.PropertyName"/> equals <c>null</c> in both cases.
 		/// </remarks>
 		void Update(T source);
 	}
