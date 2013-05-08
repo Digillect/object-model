@@ -21,59 +21,111 @@
 
 using System;
 using System.Collections.Generic;
+using System.Collections.Specialized;
+using System.ComponentModel;
 using System.Linq;
 using System.Text;
 
-using Xunit;
-
 using Digillect.Collections;
+
+using Shouldly;
+
+using Xunit;
 
 namespace Digillect.Tests
 {
 	public class XCollectionTest
 	{
-		[Fact]
+		[Fact(DisplayName = "XC.ctor should not allow null members")]
 		public void CtorNullMemberTest()
 		{
-			Assert.Throws<ArgumentException>(() => new XCollection<XObject>(new XIntegerObject[] { null }));
+			// Excercise & Verify
+			Should.Throw<ArgumentException>(() => new XCollection<XObject>(new XObject[] { null }));
 		}
 
-		[Fact]
+		[Fact(DisplayName = "XC.Add should not allow null items")]
 		public void AddNullItemTest()
 		{
-			Assert.Throws<ArgumentNullException>(() => new XCollection<XObject>().Add(null));
+			// Setup
+			var sut = new XCollection<XObject>();
+
+			// Excercise & Verify
+			Should.Throw<ArgumentNullException>(() => sut.Add(null));
 		}
 
-		[Fact]
+		[Fact(DisplayName = "XC.Add should not allow duplicate by reference items")]
 		public void AddDupsByReferenceTest()
 		{
-			var coll = new XCollection<XObject>();
+			// Setup
 			var obj = XIntegerObject.Create();
+			var sut = new XCollection<XObject> { obj };
 
-			coll.Add(obj);
-			Assert.Throws<ArgumentException>(() => coll.Add(obj));
+			// Excercise & Verify
+			Should.Throw<ArgumentException>(() => sut.Add(obj));
 		}
 
-		[Fact]
+		[Fact(DisplayName = "XC.Add should allow differenet items with the same key")]
 		public void AddDupsByKeyTest()
 		{
-			var coll = new XCollection<XObject>();
+			// Setup
 			var obj = XIntegerObject.Create();
+			var sut = new XCollection<XObject> { obj };
 
-			coll.Add(obj);
-			coll.Add(obj.Clone());
+			// Excercise
+			sut.Add(obj.Clone());
 
-			Assert.True(coll.Count == 2);
+			// Verify
+			sut.Count.ShouldBe(2);
 		}
 
-		[Fact]
+		[Fact(DisplayName = "XC.BeginUpdate should block events and raise them after the EndUpdate call")]
+		public void BeginEndUpdateEventsTest()
+		{
+			// Setup
+			bool eventsBlocked = false;
+			var expectedCollectionChanged = false;
+			var expectedPropertyChanged = false;
+			var sut = new XCollection<XObject>();
+
+			sut.CollectionChanged += (sender, e) => {
+				Assert.False(eventsBlocked, "CollectionChanged with " + e.Action);
+				expectedCollectionChanged.ShouldNotBe(true);
+				e.Action.ShouldBe(NotifyCollectionChangedAction.Reset);
+				expectedCollectionChanged = true;
+			};
+			((INotifyPropertyChanged) sut).PropertyChanged += (sender, e) => {
+				Assert.False(eventsBlocked, "PropertyChanged with " + e.PropertyName);
+				expectedPropertyChanged.ShouldNotBe(true);
+				e.PropertyName.ShouldBe(null);
+				expectedPropertyChanged = true;
+			};
+
+			// Exercise
+			sut.BeginUpdate();
+			eventsBlocked = true;
+			sut.Update(XIntegerObject.CreateSeries(3));
+			sut.Insert(0, XIntegerObject.Create());
+			sut.RemoveAt(0);
+			eventsBlocked = false;
+			sut.EndUpdate();
+
+			// Verify
+			expectedCollectionChanged.ShouldBe(true);
+			expectedPropertyChanged.ShouldBe(true);
+		}
+
+		[Fact(DisplayName = "XC.Clone should result in an equivalent collection")]
 		public void CloneTest()
 		{
-			var coll = new XCollection<XObject>();
+			// Setup
+			var sut = new XCollection<XObject>();
+			sut.AddRange(XIntegerObject.CreateSeries(3));
 
-			coll.AddRange(XIntegerObject.CreateSeries(3));
+			// Excercise
+			var result = sut.Clone(true);
 
-			Assert.Equal(coll, coll.Clone(true));
+			// Verify
+			result.ShouldBe(sut);
 		}
 	}
 }

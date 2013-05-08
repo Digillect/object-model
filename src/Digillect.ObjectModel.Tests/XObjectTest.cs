@@ -32,43 +32,88 @@ namespace Digillect.Tests
 {
 	public class XObjectTest
 	{
-		[Fact]
+		[Fact(DisplayName = "XO.Id.set should correctly assign new identifier")]
 		public void IdTest()
 		{
+			// Setup
 			var id = XIntegerObject.NewId();
-			var obj = XIntegerObject.Create();
+			var sut = XIntegerObject.Create();
 
-			Assert.NotEqual(obj.Id, id);
+			sut.Id.ShouldNotBe(id);
 
-			obj.Id = id;
+			// Excercise
+			sut.Id = id;
 
-			Assert.Equal(obj.Id, id);
+			// Verify
+			sut.Id.ShouldBe(id);
 		}
 
-		[Fact]
+		[Fact(DisplayName = "XO.BeginUpdate should block events and raise them after the EndUpdate call")]
+		public void BeginEndUpdateEventsTest()
+		{
+			// Setup
+			var eventsBlocked = false;
+			var expectedPropertyChanged = false;
+			var sut = XIntegerObject.Create();
+
+			sut.PropertyChanged += (sender, e) => {
+				Assert.False(eventsBlocked, "PropertyChanged with " + e.PropertyName);
+				expectedPropertyChanged.ShouldNotBe(true);
+				e.PropertyName.ShouldBe(null);
+				expectedPropertyChanged = true;
+			};
+
+			// Exercise
+			sut.BeginUpdate();
+			eventsBlocked = true;
+			sut.Update(XIntegerObject.Create());
+			eventsBlocked = false;
+			sut.EndUpdate();
+
+			// Verify
+			expectedPropertyChanged.ShouldBe(true);
+		}
+
+
+		[Fact(DisplayName = "XO.Clone should result in an equal object")]
 		public void CloneTest()
 		{
-			var obj = XIntegerObject.Create();
-			var actual = obj.Clone();
+			// Setup
+			var sut = XIntegerObject.Create();
 
-			Assert.Equal(obj, actual);
-			Assert.Equal(obj.GetKey(), actual.GetKey());
+			// Excercise
+			var result = sut.Clone();
+
+			// Verify
+			result.ShouldBe(sut);
+			result.GetKey().ShouldBe(sut.GetKey());
 		}
 
-		[Fact]
+		[Fact(DisplayName = "XO.Update should correctly update an object and raise an event")]
 		public void UpdateTest()
 		{
+			// Setup
+			var expectedPropertyChanged = false;
 			var obj = XIntegerObject.Create();
-			var actual = XIntegerObject.Create();
+			var sut = XIntegerObject.Create();
 
-			Assert.NotEqual(obj, actual);
+			sut.PropertyChanged += (sender, e) => {
+				expectedPropertyChanged.ShouldNotBe(true);
+				e.PropertyName.ShouldBe(null);
+				expectedPropertyChanged = true;
+			};
 
-			actual.Update(obj);
+			sut.ShouldNotBe(obj);
 
-			Assert.Equal(obj, actual);
+			// Excercise
+			sut.Update(obj);
+
+			// Verify
+			sut.ShouldBe(obj);
+			expectedPropertyChanged.ShouldBe(true);
 		}
 
-		[Fact]
+		[Fact(DisplayName = "XO.GetKey should produce proper key")]
 		public void CreateKeyTest()
 		{
 			// Setup

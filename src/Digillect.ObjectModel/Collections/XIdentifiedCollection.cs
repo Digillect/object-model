@@ -207,14 +207,8 @@ namespace Digillect.Collections
 			if ( !results.IsEmpty )
 			{
 				RestoreDictionaryState();
-				OnUpdated(EventArgs.Empty);
 
-				if ( results.Added != results.Removed )
-				{
-					OnPropertyChanged(CountString);
-				}
-
-				OnPropertyChanged(IndexerName);
+				OnPropertyChanged(null);
 				OnCollectionReset();
 			}
 

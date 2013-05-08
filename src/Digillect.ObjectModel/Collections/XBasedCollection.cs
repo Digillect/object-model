@@ -99,21 +99,6 @@ namespace Digillect.Collections
 		#endregion
 
 		#region IXUpdatable`1 Members
-		/// <inheritdoc/>
-		public event EventHandler Updated;
-
-		/// <summary>
-		/// Raises the <see cref="Updated" /> event.
-		/// </summary>
-		/// <param name="e">The <see cref="EventArgs" /> instance containing the event data.</param>
-		protected virtual void OnUpdated(EventArgs e)
-		{
-			if ( Updated != null )
-			{
-				Updated(this, e);
-			}
-		}
-
 		IXCollection<T> IXUpdatable<IXCollection<T>>.Clone(bool deep)
 		{
 			return Clone(deep);
@@ -412,6 +397,9 @@ namespace Digillect.Collections
 
 		#region INotifyPropertyChanged Members
 		/// <inheritdoc/>
+#if !(SILVERLIGHT || WINDOWS8)
+		[field: NonSerialized]
+#endif
 		public event PropertyChangedEventHandler PropertyChanged;
 
 		/// <summary>

@@ -660,12 +660,6 @@ namespace Digillect.Collections
 			#endregion
 
 			#region IXUpdatable`1 Members
-			event EventHandler IXUpdatable<IXCollection<T>>.Updated
-			{
-				add { this.collection.Updated += value; }
-				remove { this.collection.Updated -= value; }
-			}
-
 			void IXUpdatable<IXCollection<T>>.BeginUpdate()
 			{
 				collection.BeginUpdate();
@@ -750,6 +744,14 @@ namespace Digillect.Collections
 			{
 				add { this.collection.CollectionChanged += value; }
 				remove { this.collection.CollectionChanged -= value; }
+			}
+			#endregion
+
+			#region INotifyPropertyChanged Members
+			event PropertyChangedEventHandler INotifyPropertyChanged.PropertyChanged
+			{
+				add { collection.PropertyChanged += value; }
+				remove { collection.PropertyChanged -= value; }
 			}
 			#endregion
 

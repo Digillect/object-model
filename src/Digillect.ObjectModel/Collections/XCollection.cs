@@ -117,33 +117,6 @@ namespace Digillect.Collections
 		#endregion
 
 		#region Events and Event Raisers
-		/// <summary>
-		/// Occurs when the collection is updated using the <see cref="Update(IEnumerable&lt;T&gt;,CollectionMergeOptions)"/> method
-		/// or as a result of the <see cref="EndUpdate"/> method.
-		/// </summary>
-		/// <seealso cref="IXUpdatable&lt;T&gt;"/>
-		public event EventHandler Updated;
-
-		/// <summary>
-		/// Raises the <see cref="Updated"/> event.
-		/// </summary>
-		/// <param name="e">The <see cref="EventArgs"/> instance containing the event data.</param>
-		protected virtual void OnUpdated(EventArgs e)
-		{
-			if ( _updateCount == 0 )
-			{
-				if ( Updated != null )
-				{
-#if !SILVERLIGHT
-					using ( BlockReentrancy() )
-#endif
-					{
-						Updated(this, e);
-					}
-				}
-			}
-		}
-
 		/// <inheritdoc/>
 		protected override void OnCollectionChanged(NotifyCollectionChangedEventArgs e)
 		{
@@ -162,7 +135,7 @@ namespace Digillect.Collections
 		}
 
 		/// <summary>
-		/// Raises the <see cref="ObservableCollection&lt;T&gt;.PropertyChanged"/> event with the provided arguments.
+		/// Raises the <see cref="ObservableCollection&lt;T&gt;.PropertyChanged"/> event with the specified name of a property.
 		/// </summary>
 		/// <param name="propertyName">The name of a property being changed.</param>
 		protected void OnPropertyChanged(string propertyName)
@@ -416,9 +389,7 @@ namespace Digillect.Collections
 
 			if ( --_updateCount == 0 )
 			{
-				OnUpdated(EventArgs.Empty);
-				OnPropertyChanged(CountString);
-				OnPropertyChanged(IndexerName);
+				OnPropertyChanged(null);
 				OnCollectionReset();
 			}
 		}
@@ -512,14 +483,7 @@ namespace Digillect.Collections
 
 			if ( !results.IsEmpty )
 			{
-				OnUpdated(EventArgs.Empty);
-
-				if ( results.Added != results.Removed )
-				{
-					OnPropertyChanged(CountString);
-				}
-
-				OnPropertyChanged(IndexerName);
+				OnPropertyChanged(null);
 				OnCollectionReset();
 			}
 

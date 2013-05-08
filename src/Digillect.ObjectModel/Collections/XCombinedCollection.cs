@@ -22,6 +22,7 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
+using System.ComponentModel;
 using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Threading;
@@ -68,7 +69,6 @@ namespace Digillect.Collections
 			foreach ( var item in _collections )
 			{
 				item.CollectionChanged += UnderlyingCollection_CollectionChanged;
-				item.Updated += UnderlyingCollection_Updated;
 			}
 		}
 
@@ -80,7 +80,6 @@ namespace Digillect.Collections
 				foreach ( var item in _collections )
 				{
 					item.CollectionChanged -= UnderlyingCollection_CollectionChanged;
-					item.Updated -= UnderlyingCollection_Updated;
 
 					for ( uint i = _updateCount; i != 0; i-- )
 					{
@@ -98,6 +97,9 @@ namespace Digillect.Collections
 
 		#region Events
 		/// <inheritdoc/>
+#if !(SILVERLIGHT || WINDOWS8)
+		[field: NonSerialized]
+#endif
 		public override event NotifyCollectionChangedEventHandler CollectionChanged;
 
 		/// <summary>
@@ -113,20 +115,11 @@ namespace Digillect.Collections
 		}
 
 		/// <inheritdoc/>
-		protected override void OnPropertyChanged(System.ComponentModel.PropertyChangedEventArgs e)
+		protected override void OnPropertyChanged(PropertyChangedEventArgs e)
 		{
 			if ( _updateCount == 0 )
 			{
 				base.OnPropertyChanged(e);
-			}
-		}
-
-		/// <inheritdoc/>
-		protected override void OnUpdated(EventArgs e)
-		{
-			if ( _updateCount == 0 )
-			{
-				base.OnUpdated(e);
 			}
 		}
 		#endregion
@@ -242,9 +235,7 @@ namespace Digillect.Collections
 
 			if ( --_updateCount == 0 )
 			{
-				OnUpdated(EventArgs.Empty);
-				OnPropertyChanged(CountString);
-				OnPropertyChanged(IndexerName);
+				OnPropertyChanged((string) null);
 				OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset));
 			}
 		}
@@ -315,33 +306,9 @@ namespace Digillect.Collections
 		#region Collections Manipulations
 		public void AddCollection(IXList<T> item)
 		{
-			if ( item == null )
-			{
-				throw new ArgumentNullException("item");
-			}
+			Contract.Requires(item != null);
 
-			Contract.EndContractBlock();
-
-			_collections.Add(item);
-
-			item.CollectionChanged += UnderlyingCollection_CollectionChanged;
-			item.Updated += UnderlyingCollection_Updated;
-
-			if ( _updateCount != 0 )
-			{
-				for ( uint i = 0; i < _updateCount; i++ )
-				{
-					item.BeginUpdate();
-				}
-			}
-			else if ( item.Count != 0 )
-			{
-				OnUpdated(EventArgs.Empty);
-				OnPropertyChanged(CountString);
-				OnPropertyChanged(IndexerName);
-				// WPF is known to not support range operations so we can not issue Add with all of the items at a time
-				OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset));
-			}
+			InsertCollection(_collections.Count, item);
 		}
 
 		public void InsertCollection(int index, IXList<T> item)
@@ -356,7 +323,6 @@ namespace Digillect.Collections
 			_collections.Insert(index, item);
 
 			item.CollectionChanged += UnderlyingCollection_CollectionChanged;
-			item.Updated += UnderlyingCollection_Updated;
 
 			if ( _updateCount != 0 )
 			{
@@ -367,7 +333,6 @@ namespace Digillect.Collections
 			}
 			else if ( item.Count != 0 )
 			{
-				OnUpdated(EventArgs.Empty);
 				OnPropertyChanged(CountString);
 				OnPropertyChanged(IndexerName);
 				// WPF is known to not support range operations so we can not issue Add with all of the items at a time
@@ -390,7 +355,6 @@ namespace Digillect.Collections
 			}
 
 			item.CollectionChanged -= UnderlyingCollection_CollectionChanged;
-			item.Updated -= UnderlyingCollection_Updated;
 
 			if ( _updateCount != 0 )
 			{
@@ -401,7 +365,6 @@ namespace Digillect.Collections
 			}
 			else if ( item.Count != 0 )
 			{
-				OnUpdated(EventArgs.Empty);
 				OnPropertyChanged(CountString);
 				OnPropertyChanged(IndexerName);
 				// WPF is known to not support range operations so we can not issue Remove with all of the items at a time
@@ -446,10 +409,7 @@ namespace Digillect.Collections
 			{
 				_count = -1;
 
-				if ( _updateCount == 0 )
-				{
-					OnPropertyChanged(CountString);
-				}
+				OnPropertyChanged(CountString);
 			}
 
 			if ( _updateCount != 0 )
@@ -503,17 +463,6 @@ namespace Digillect.Collections
 				}
 
 				CollectionChanged(this, args);
-			}
-		}
-
-		private void UnderlyingCollection_Updated(object sender, EventArgs e)
-		{
-			_version++;
-			_count = -1;
-
-			if ( _updateCount == 0 )
-			{
-				OnUpdated(EventArgs.Empty);
 			}
 		}
 		#endregion

@@ -77,11 +77,6 @@ namespace Digillect
 
 		#region Events
 		/// <summary>
-		/// Occurs when object has been updated.
-		/// </summary>
-		public event EventHandler Updated;
-
-		/// <summary>
 		/// Raises the <see cref="E:PropertyChanging"/> event if object is not updating.
 		/// </summary>
 		/// <param name="e">The <see cref="Digillect.ComponentModel.PropertyChangingEventArgs"/> instance containing the event data.</param>
@@ -99,21 +94,6 @@ namespace Digillect
 		{
 			if ( _updateCount == 0 )
 				base.OnPropertyChanged( e );
-		}
-
-		/// <summary>
-		/// Raises the <see cref="E:Updated"/> event.
-		/// </summary>
-		/// <param name="e">The <see cref="System.EventArgs"/> instance containing the event data.</param>
-		protected virtual void OnUpdated( EventArgs e )
-		{
-			if ( _updateCount == 0 )
-			{
-				var handler = this.Updated;
-
-				if( handler != null )
-					handler( this, e );
-			}
 		}
 		#endregion
 
@@ -222,7 +202,7 @@ namespace Digillect
 			{
 				ProcessCopy( source, false, false );
 
-				OnUpdated( EventArgs.Empty );
+				OnPropertyChanged((string) null);
 			}
 		}
 
@@ -294,8 +274,8 @@ namespace Digillect
 
 		#region BeginUpdate/EndUpdate
 		/// <summary>
-		/// Begins the update, preventing <see cref="E:Digillect.ObservableObject.PropertyChanging"/> and <see cref="E:Digillect.ObservableObject.PropertyChanged"/> events
-		/// from being raised until <see cref="EndUpdate"/> methos is called.
+		/// Begins the mass update operation, preventing <b>PropertyChanging</b> and <see cref="INotifyPropertyChanged.PropertyChanged"/> events
+		/// from being raised until the <see cref="EndUpdate"/> method is called.
 		/// </summary>
 		public void BeginUpdate()
 		{
@@ -303,14 +283,14 @@ namespace Digillect
 		}
 
 		/// <summary>
-		/// Marks the end of update scope. If this was the last scope of update, then <see cref="Updated"/> event will be raised.
+		/// Marks the end of update scope. If this was the last scope of update, then the <see cref="INotifyPropertyChanged.PropertyChanged"/> event will be raised.
 		/// </summary>
 		public void EndUpdate()
 		{
 			if ( _updateCount == 0 )
 				return;
 			if ( --_updateCount == 0 )
-				OnUpdated( EventArgs.Empty );
+				OnPropertyChanged((string) null);
 		}
 		#endregion
 	}

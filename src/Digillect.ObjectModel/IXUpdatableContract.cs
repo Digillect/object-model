@@ -20,6 +20,7 @@
 #endregion
 
 using System;
+using System.ComponentModel;
 using System.Diagnostics.Contracts;
 
 namespace Digillect
@@ -31,8 +32,6 @@ namespace Digillect
 		protected IXUpdatableContract()
 		{
 		}
-
-		public abstract event EventHandler Updated;
 
 		public T Clone(bool deep)
 		{
@@ -55,5 +54,13 @@ namespace Digillect
 		{
 			Contract.Requires<ArgumentNullException>(source != null, "source");
 		}
+
+		#region INotifyPropertyChanged Members
+		event PropertyChangedEventHandler INotifyPropertyChanged.PropertyChanged
+		{
+			add { }
+			remove { }
+		}
+		#endregion
 	}
 }
