@@ -102,6 +102,24 @@ namespace Digillect.Collections
 #endif
 		#endregion
 
+		#region ToXCollection`1 Extension
+		/// <summary>
+		/// Creates a <see cref="XCollection{T}"/> from an <see cref="IEnumerable{T}"/>.
+		/// </summary>
+		/// <typeparam name="T">The type of the elements of <paramref name="source"/>.</typeparam>
+		/// <param name="source">The <see cref="IEnumerable{T}"/> to create a <see cref="XCollection{T}"/> from.</param>
+		/// <returns>A <see cref="XCollection{T}"/> that contains elements from the input sequence.</returns>
+		/// <exception cref="ArgumentNullException"><paramref name="source"/> is null.</exception>
+		public static XCollection<T> ToXCollection<T>(this IEnumerable<T> source)
+			where T : XObject
+		{
+			Contract.Requires(source != null);
+			Contract.Requires(Contract.ForAll(source, item => item != null));
+
+			return new XCollection<T>(source);
+		}
+		#endregion
+
 		#region RemoveAll`1 Extension
 		/// <summary>
 		/// Removes all items from the <paramref name="source"/> collection which match the <paramref name="predicate"/>.
@@ -578,7 +596,7 @@ namespace Digillect.Collections
 
 		#region FilteredList
 		/// <summary>
-		/// Creates a <see cref="FilteredList&lt;T&gt;"/> instance using the <paramref name="filter"/> as a filter.
+		/// Creates a <see cref="XFilteredCollection&lt;T&gt;"/> instance using the <paramref name="filter"/> as a filter.
 		/// </summary>
 		/// <typeparam name="T">Type of the collection's members.</typeparam>
 		/// <param name="collection">Source collection.</param>
@@ -611,6 +629,57 @@ namespace Digillect.Collections
 
 			Contract.EndContractBlock();
 		}
+
+		#region Compatibility Extensions
+#if NET40 && SILVERLIGHT
+		internal static int FindIndex<T>(this List<T> collection, Predicate<T> match)
+		{
+			if ( collection == null )
+			{
+				throw new ArgumentNullException("collection");
+			}
+
+			if ( match == null )
+			{
+				throw new ArgumentNullException("match");
+			}
+
+			Contract.EndContractBlock();
+
+			for ( int i = 0; i < collection.Count; i++ )
+			{
+				if ( match(collection[i]) )
+				{
+					return i;
+				}
+			}
+
+			return -1;
+		}
+#endif
+
+#if WINDOWS8
+		internal static void ForEach<T>(this List<T> collection, Action<T> action)
+		{
+			if ( collection == null )
+			{
+				throw new ArgumentNullException("collection");
+			}
+
+			if ( action == null )
+			{
+				throw new ArgumentNullException("action");
+			}
+
+			Contract.EndContractBlock();
+
+			foreach ( var item in collection )
+			{
+				action(item);
+			}
+		}
+#endif
+		#endregion
 
 		#region class ReadOnlyXCollection`1
 #if !(SILVERLIGHT || WINDOWS8)
@@ -859,38 +928,38 @@ namespace Digillect.Collections
 		#endregion
 
 		#region class FuncFilteredCollection`1
-		private class FuncFilteredCollection<T> : XFilteredCollection<T>
+		private sealed class FuncFilteredCollection<T> : XFilteredCollection<T>
 			where T : XObject
 		{
 			private readonly Func<T, bool> _filter;
 
-			public FuncFilteredCollection(IXList<T> originalCollection, Func<T, bool> filter)
-				: base(originalCollection)
+			public FuncFilteredCollection(IXList<T> collection, Func<T, bool> filter)
+				: base(collection)
 			{
 				if ( filter == null )
 				{
 					throw new ArgumentNullException("filter");
 				}
 
-				Contract.Requires(originalCollection != null);
+				Contract.Requires(collection != null);
 
-				this._filter = filter;
+				_filter = filter;
 			}
 
-			protected override XFilteredCollection<T> CreateInstanceOfSameType(IXList<T> originalCollection)
+			protected override XFilteredCollection<T> CreateInstanceOfSameType(IXList<T> collection)
 			{
 #if !(SILVERLIGHT || WINDOWS8)
-				Func<T, bool> filter = (Func<T, bool>) this._filter.Clone();
+				Func<T, bool> filter = (Func<T, bool>) _filter.Clone();
 #else
-				Func<T, bool> filter = this._filter;
+				Func<T, bool> filter = _filter;
 #endif
 
-				return new FuncFilteredCollection<T>(originalCollection, filter);
+				return new FuncFilteredCollection<T>(collection, filter);
 			}
 
 			protected override bool Filter(T obj)
 			{
-				return this._filter(obj);
+				return _filter(obj);
 			}
 		} 
 		#endregion

@@ -98,6 +98,7 @@
     <Compile Include="XCollectionsUtilTest.cs" />
     <Compile Include="XCollectionTest.cs" />
     <Compile Include="XObjectTest.cs" />
+    <Compile Include="XSortedCollectionTest.cs" />
     <Compile Include="XSubRangeCollectionTest.cs" />
   </ItemGroup>
   <ItemGroup>

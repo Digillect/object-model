@@ -39,36 +39,6 @@ namespace Digillect.Tests
 		private const int TooMany = 6;
 		private const string IndexerName = "Item[]";
 
-		#region Delayed Collection Assignment Test
-		[Fact(DisplayName = "XSRC.UC.set should raise CollectionChanged(Reset) and PropertyChanged(null) events")]
-		public void ChangeUnderlyingCollectionEventsTest()
-		{
-			// Setup
-			var expectedCollectionChanged = false;
-			var expectedPropertyChanged = false;
-			var sut = new XSubRangeCollection<XObject>(1, 1);
-
-			sut.CollectionChanged += (sender, e) => {
-				expectedCollectionChanged.ShouldNotBe(true);
-				e.Action.ShouldBe(NotifyCollectionChangedAction.Reset);
-				expectedCollectionChanged = true;
-			};
-
-			sut.PropertyChanged += (sender, e) => {
-				expectedPropertyChanged.ShouldNotBe(true);
-				e.PropertyName.ShouldBe(null);
-				expectedPropertyChanged = true;
-			};
-
-			// Exercise
-			sut.UnderlyingCollection = CreateSourceCollection(Many);
-
-			// Verify
-			expectedCollectionChanged.ShouldBe(true);
-			expectedPropertyChanged.ShouldBe(true);
-		}
-		#endregion
-
 		#region Properties Tests
 		[Fact(DisplayName = "XSRC.Count should return zero with total elements below start index")]
 		public void CountWithTotalElementsBelowStartIndexTest()
@@ -128,7 +98,7 @@ namespace Digillect.Tests
 			const int startIndex = 1;
 			const int testIndex = 1;
 			var sut = CreateTestCollection(TooMany, startIndex, Many);
-			XObject expectedResult = sut.UnderlyingCollection[startIndex + testIndex];
+			XObject expectedResult = sut.BaseCollection[startIndex + testIndex];
 
 			// Excercise
 			XObject result = sut[testIndex];
@@ -161,9 +131,9 @@ namespace Digillect.Tests
 			// Exercise
 			sut.BeginUpdate();
 			eventsBlocked = true;
-			sut.UnderlyingCollection.Update(CreateSourceCollection(TooMany));
-			sut.UnderlyingCollection.Insert(0, XIntegerObject.Create());
-			sut.UnderlyingCollection.RemoveAt(0);
+			sut.BaseCollection.Update(CreateSourceCollection(TooMany));
+			sut.BaseCollection.Insert(0, XIntegerObject.Create());
+			sut.BaseCollection.RemoveAt(0);
 			eventsBlocked = false;
 			sut.EndUpdate();
 
@@ -177,7 +147,7 @@ namespace Digillect.Tests
 		{
 			// Setup
 			var sut = CreateTestCollection(TooMany, 1, 2);
-			XObject item = sut.UnderlyingCollection[2];
+			XObject item = sut.BaseCollection[2];
 
 			// Excercise
 
@@ -190,7 +160,7 @@ namespace Digillect.Tests
 		{
 			// Setup
 			var sut = CreateTestCollection(TooMany, 1, 2);
-			XObject item = sut.UnderlyingCollection[0];
+			XObject item = sut.BaseCollection[0];
 
 			// Excercise
 
@@ -203,7 +173,7 @@ namespace Digillect.Tests
 		{
 			// Setup
 			var sut = CreateTestCollection(TooMany, 0, TooMany - 1);
-			XObject item = sut.UnderlyingCollection[sut.Count];
+			XObject item = sut.BaseCollection[sut.Count];
 
 			// Excercise
 
@@ -216,7 +186,7 @@ namespace Digillect.Tests
 		{
 			// Setup
 			var sut = CreateTestCollection(TooMany, 1, 2);
-			XKey key = sut.UnderlyingCollection[2].GetKey();
+			XKey key = sut.BaseCollection[2].GetKey();
 
 			// Excercise
 
@@ -229,7 +199,7 @@ namespace Digillect.Tests
 		{
 			// Setup
 			var sut = CreateTestCollection(TooMany, 1, 2);
-			XKey key = sut.UnderlyingCollection[0].GetKey();
+			XKey key = sut.BaseCollection[0].GetKey();
 
 			// Excercise
 
@@ -242,7 +212,7 @@ namespace Digillect.Tests
 		{
 			// Setup
 			var sut = CreateTestCollection(TooMany, 0, TooMany - 1);
-			XKey key = sut.UnderlyingCollection[sut.Count].GetKey();
+			XKey key = sut.BaseCollection[sut.Count].GetKey();
 
 			// Excercise
 
@@ -276,7 +246,7 @@ namespace Digillect.Tests
 			// Exercise
 			result = sut.GetEnumerator();
 			result.MoveNext().ShouldBe(true);
-			sut.UnderlyingCollection.Insert(0, XIntegerObject.Create());
+			sut.BaseCollection.Insert(0, XIntegerObject.Create());
 
 			// Verify
 			Should.Throw<InvalidOperationException>(() => result.MoveNext());
@@ -284,7 +254,7 @@ namespace Digillect.Tests
 			// Exercise 2
 			result = sut.GetEnumerator();
 			result.MoveNext().ShouldBe(true);
-			sut.UnderlyingCollection.Insert(2, XIntegerObject.Create());
+			sut.BaseCollection.Insert(2, XIntegerObject.Create());
 
 			// Verify 2
 			Should.Throw<InvalidOperationException>(() => result.MoveNext());
@@ -292,7 +262,7 @@ namespace Digillect.Tests
 			// Exercise 3
 			result = sut.GetEnumerator();
 			result.MoveNext().ShouldBe(true);
-			sut.UnderlyingCollection.Add(XIntegerObject.Create());
+			sut.BaseCollection.Add(XIntegerObject.Create());
 
 			// Verify 3
 			Should.Throw<InvalidOperationException>(() => result.MoveNext());
@@ -300,7 +270,7 @@ namespace Digillect.Tests
 			// Exercise 4
 			result = sut.GetEnumerator();
 			result.MoveNext().ShouldBe(true);
-			sut.UnderlyingCollection.RemoveAt(0);
+			sut.BaseCollection.RemoveAt(0);
 
 			// Verify 4
 			Should.Throw<InvalidOperationException>(() => result.MoveNext());
@@ -312,7 +282,7 @@ namespace Digillect.Tests
 			// Setup
 			const int expectedResult = 1;
 			var sut = CreateTestCollection(TooMany, 1, 2);
-			XObject item = sut.UnderlyingCollection[2];
+			XObject item = sut.BaseCollection[2];
 
 			// Excercise
 			int result = sut.IndexOf(item);
@@ -327,7 +297,7 @@ namespace Digillect.Tests
 			// Setup
 			const int expectedResult = -1;
 			var sut = CreateTestCollection(TooMany, 1, 2);
-			XObject item = sut.UnderlyingCollection[0];
+			XObject item = sut.BaseCollection[0];
 
 			// Excercise
 			int result = sut.IndexOf(item);
@@ -342,7 +312,7 @@ namespace Digillect.Tests
 			// Setup
 			const int expectedResult = -1;
 			var sut = CreateTestCollection(TooMany, 0, TooMany - 1);
-			XObject item = sut.UnderlyingCollection[sut.Count];
+			XObject item = sut.BaseCollection[sut.Count];
 
 			// Excercise
 			int result = sut.IndexOf(item);
@@ -357,7 +327,7 @@ namespace Digillect.Tests
 			// Setup
 			const int expectedResult = 1;
 			var sut = CreateTestCollection(TooMany, 1, 2);
-			XKey key = sut.UnderlyingCollection[2].GetKey();
+			XKey key = sut.BaseCollection[2].GetKey();
 
 			// Excercise
 			int result = sut.IndexOf(key);
@@ -372,7 +342,7 @@ namespace Digillect.Tests
 			// Setup
 			const int expectedResult = -1;
 			var sut = CreateTestCollection(TooMany, 1, 2);
-			XKey key = sut.UnderlyingCollection[0].GetKey();
+			XKey key = sut.BaseCollection[0].GetKey();
 
 			// Excercise
 			int result = sut.IndexOf(key);
@@ -387,7 +357,7 @@ namespace Digillect.Tests
 			// Setup
 			const int expectedResult = -1;
 			var sut = CreateTestCollection(TooMany, 0, TooMany - 1);
-			XKey key = sut.UnderlyingCollection[sut.Count].GetKey();
+			XKey key = sut.BaseCollection[sut.Count].GetKey();
 
 			// Excercise
 			int result = sut.IndexOf(key);
@@ -398,7 +368,7 @@ namespace Digillect.Tests
 		#endregion
 
 		#region Event Handling Tests
-		[Fact(DisplayName = "XSRC.UC.Insert should raise CollectionChanged(Reset) when item added below")]
+		[Fact(DisplayName = "XSRC.Base.Insert should raise CollectionChanged(Reset) when item added below")]
 		public void InsertItemBelowEventsTest()
 		{
 			// Setup
@@ -415,14 +385,14 @@ namespace Digillect.Tests
 			});
 
 			// Exercise
-			sut.UnderlyingCollection.Insert(0, XIntegerObject.Create());
+			sut.BaseCollection.Insert(0, XIntegerObject.Create());
 
 			// Verify
 			expectedCollectionChanged.ShouldBe(true);
 			expectedPropertyChanged.ShouldBe(true);
 		}
 
-		[Fact(DisplayName = "XSRC.UC.Insert should raise CollectionChanged(Reset) when item added inside full")]
+		[Fact(DisplayName = "XSRC.Base.Insert should raise CollectionChanged(Reset) when item added inside full")]
 		public void InsertItemInsideFullEventsTest()
 		{
 			// Setup
@@ -439,14 +409,14 @@ namespace Digillect.Tests
 			});
 
 			// Exercise
-			sut.UnderlyingCollection.Insert(2, XIntegerObject.Create());
+			sut.BaseCollection.Insert(2, XIntegerObject.Create());
 
 			// Verify
 			expectedCollectionChanged.ShouldBe(true);
 			expectedPropertyChanged.ShouldBe(true);
 		}
 
-		[Fact(DisplayName = "XSRC.UC.Add should raise CollectionChanged(Add) when item added inside non-full")]
+		[Fact(DisplayName = "XSRC.Base.Add should raise CollectionChanged(Add) when item added inside non-full")]
 		public void AddItemInsideNonFullEventsTest()
 		{
 			var expectedCollectionChanged = false;
@@ -463,7 +433,7 @@ namespace Digillect.Tests
 			int expectedCount = sut.Count + 1;
 
 			// Exercise
-			sut.UnderlyingCollection.Add(XIntegerObject.Create());
+			sut.BaseCollection.Add(XIntegerObject.Create());
 
 			// Verify
 			sut.Count.ShouldBe(expectedCount);
@@ -471,7 +441,7 @@ namespace Digillect.Tests
 			expectedPropertyChanged.ShouldBe(2);
 		}
 
-		[Fact(DisplayName = "XSRC.UC.Add should not raise events when item added beyond")]
+		[Fact(DisplayName = "XSRC.Base.Add should not raise events when item added beyond")]
 		public void AddItemBeyondEventsTest()
 		{
 			// Setup
@@ -482,12 +452,12 @@ namespace Digillect.Tests
 			});
 
 			// Exercise
-			sut.UnderlyingCollection.Add(XIntegerObject.Create());
+			sut.BaseCollection.Add(XIntegerObject.Create());
 
 			// Verify
 		}
 
-		[Fact(DisplayName = "XSRC.UC.Remove should raise CollectionChanged(Reset) when item removed below")]
+		[Fact(DisplayName = "XSRC.Base.Remove should raise CollectionChanged(Reset) when item removed below")]
 		public void RemoveItemBelowEventsTest()
 		{
 			// Setup
@@ -504,14 +474,14 @@ namespace Digillect.Tests
 			});
 
 			// Exercise
-			sut.UnderlyingCollection.RemoveAt(0);
+			sut.BaseCollection.RemoveAt(0);
 
 			// Verify
 			expectedCollectionChanged.ShouldBe(true);
 			expectedPropertyChanged.ShouldBe(true);
 		}
 
-		[Fact(DisplayName = "XSRC.UC.Remove should raise CollectionChanged(Reset) when item removed inside full with spare elements")]
+		[Fact(DisplayName = "XSRC.Base.Remove should raise CollectionChanged(Reset) when item removed inside full with spare elements")]
 		public void RemoveItemInsideFullWithSpareEventsTest()
 		{
 			// Setup
@@ -528,14 +498,14 @@ namespace Digillect.Tests
 			});
 
 			// Exercise
-			sut.UnderlyingCollection.RemoveAt(2);
+			sut.BaseCollection.RemoveAt(2);
 
 			// Verify
 			expectedCollectionChanged.ShouldBe(true);
 			expectedPropertyChanged.ShouldBe(true);
 		}
 
-		[Fact(DisplayName = "XSRC.UC.Remove should raise CollectionChanged(Reset) when item removed inside full without spare elements")]
+		[Fact(DisplayName = "XSRC.Base.Remove should raise CollectionChanged(Reset) when item removed inside full without spare elements")]
 		public void RemoveItemInsideFullWithoutSpareEventsTest()
 		{
 			// Setup
@@ -552,7 +522,7 @@ namespace Digillect.Tests
 			int expectedCount = sut.Count - 1;
 
 			// Exercise
-			sut.UnderlyingCollection.RemoveAt(2);
+			sut.BaseCollection.RemoveAt(2);
 
 			// Verify
 			sut.Count.ShouldBe(expectedCount);
@@ -560,7 +530,7 @@ namespace Digillect.Tests
 			expectedPropertyChanged.ShouldBe(2);
 		}
 
-		[Fact(DisplayName = "XSRC.UC.Remove should raise CollectionChanged(Remove) when item removed inside non-full")]
+		[Fact(DisplayName = "XSRC.Base.Remove should raise CollectionChanged(Remove) when item removed inside non-full")]
 		public void RemoveItemInsideNonFullEventsTest()
 		{
 			// Setup
@@ -580,7 +550,7 @@ namespace Digillect.Tests
 			int expectedCount = sut.Count - 1;
 
 			// Exercise
-			sut.UnderlyingCollection.RemoveAt(removeIndex);
+			sut.BaseCollection.RemoveAt(removeIndex);
 
 			// Verify
 			sut.Count.ShouldBe(expectedCount);
@@ -588,7 +558,7 @@ namespace Digillect.Tests
 			expectedPropertyChanged.ShouldBe(2);
 		}
 
-		[Fact(DisplayName = "XSRC.UC.Remove should not raise events when item removed beyond")]
+		[Fact(DisplayName = "XSRC.Base.Remove should not raise events when item removed beyond")]
 		public void RemoveItemBeyondEventsTest()
 		{
 			// Setup
@@ -599,12 +569,12 @@ namespace Digillect.Tests
 			});
 
 			// Exercise
-			sut.UnderlyingCollection.RemoveAt(2);
+			sut.BaseCollection.RemoveAt(2);
 
 			// Verify
 		}
 
-		[Fact(DisplayName = "XSRC.UC.Move should raise CollectionChanged(Reset) when item move affects inside")]
+		[Fact(DisplayName = "XSRC.Base.Move should raise CollectionChanged(Reset) when item move affects inside")]
 		public void MoveItemAffectsInsideEventsTest()
 		{
 			// Setup
@@ -619,16 +589,16 @@ namespace Digillect.Tests
 			});
 
 			// Exercise
-			((XCollection<XObject>) sut.UnderlyingCollection).Move(0, 1);
-			((XCollection<XObject>) sut.UnderlyingCollection).Move(1, 3);
-			((XCollection<XObject>) sut.UnderlyingCollection).Move(3, 4);
+			((XCollection<XObject>) sut.BaseCollection).Move(0, 1);
+			((XCollection<XObject>) sut.BaseCollection).Move(1, 3);
+			((XCollection<XObject>) sut.BaseCollection).Move(3, 4);
 
 			// Verify
 			expectedCollectionChanged.ShouldBe(3);
 			expectedPropertyChanged.ShouldBe(3);
 		}
 
-		[Fact(DisplayName = "XSRC.UC.Move should not raise events when item moved outside")]
+		[Fact(DisplayName = "XSRC.Base.Move should not raise events when item moved outside")]
 		public void MoveItemOutsideEventsTest()
 		{
 			// Setup
@@ -639,12 +609,12 @@ namespace Digillect.Tests
 			});
 
 			// Exercise
-			((XCollection<XObject>) sut.UnderlyingCollection).Move(0, 2);
+			((XCollection<XObject>) sut.BaseCollection).Move(0, 2);
 
 			// Verify
 		}
 
-		[Fact(DisplayName = "XSRC.UC.Item[].set should raise CollectionChanged(Replace) when item replaced inside")]
+		[Fact(DisplayName = "XSRC.Base.Item[].set should raise CollectionChanged(Replace) when item replaced inside")]
 		public void ReplaceItemInsideEventsTest()
 		{
 			// Setup
@@ -664,14 +634,14 @@ namespace Digillect.Tests
 			});
 
 			// Exercise
-			sut.UnderlyingCollection[replaceIndex] = XIntegerObject.Create();
+			sut.BaseCollection[replaceIndex] = XIntegerObject.Create();
 
 			// Verify
 			expectedCollectionChanged.ShouldBe(true);
 			expectedPropertyChanged.ShouldBe(true);
 		}
 
-		[Fact(DisplayName = "XSRC.UC.Item[].set should not raise events when item replaced outside")]
+		[Fact(DisplayName = "XSRC.Base.Item[].set should not raise events when item replaced outside")]
 		public void ReplaceItemOutsideEventsTest()
 		{
 			// Setup
@@ -682,13 +652,13 @@ namespace Digillect.Tests
 			});
 
 			// Exercise
-			sut.UnderlyingCollection[0] = XIntegerObject.Create();
-			sut.UnderlyingCollection[2] = XIntegerObject.Create();
+			sut.BaseCollection[0] = XIntegerObject.Create();
+			sut.BaseCollection[2] = XIntegerObject.Create();
 
 			// Verify
 		}
 
-		[Fact(DisplayName = "XSRC.UC.Update should raise events")]
+		[Fact(DisplayName = "XSRC.Base.Update should raise events")]
 		public void UnderlyingCollectionUpdateEventsTest()
 		{
 			// Setup
@@ -704,7 +674,7 @@ namespace Digillect.Tests
 			});
 
 			// Exercise
-			sut.UnderlyingCollection.Update(CreateSourceCollection(TooMany));
+			sut.BaseCollection.Update(CreateSourceCollection(TooMany));
 
 			// Verify
 			expectedCollectionChanged.ShouldBe(true);
