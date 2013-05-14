@@ -596,7 +596,7 @@ namespace Digillect.Collections
 
 		#region FilteredList
 		/// <summary>
-		/// Creates a <see cref="FilteredList&lt;T&gt;"/> instance using the <paramref name="filter"/> as a filter.
+		/// Creates a <see cref="XFilteredCollection&lt;T&gt;"/> instance using the <paramref name="filter"/> as a filter.
 		/// </summary>
 		/// <typeparam name="T">Type of the collection's members.</typeparam>
 		/// <param name="collection">Source collection.</param>
@@ -928,38 +928,38 @@ namespace Digillect.Collections
 		#endregion
 
 		#region class FuncFilteredCollection`1
-		private class FuncFilteredCollection<T> : XFilteredCollection<T>
+		private sealed class FuncFilteredCollection<T> : XFilteredCollection<T>
 			where T : XObject
 		{
 			private readonly Func<T, bool> _filter;
 
-			public FuncFilteredCollection(IXList<T> originalCollection, Func<T, bool> filter)
-				: base(originalCollection)
+			public FuncFilteredCollection(IXList<T> collection, Func<T, bool> filter)
+				: base(collection)
 			{
 				if ( filter == null )
 				{
 					throw new ArgumentNullException("filter");
 				}
 
-				Contract.Requires(originalCollection != null);
+				Contract.Requires(collection != null);
 
-				this._filter = filter;
+				_filter = filter;
 			}
 
-			protected override XFilteredCollection<T> CreateInstanceOfSameType(IXList<T> originalCollection)
+			protected override XFilteredCollection<T> CreateInstanceOfSameType(IXList<T> collection)
 			{
 #if !(SILVERLIGHT || WINDOWS8)
-				Func<T, bool> filter = (Func<T, bool>) this._filter.Clone();
+				Func<T, bool> filter = (Func<T, bool>) _filter.Clone();
 #else
-				Func<T, bool> filter = this._filter;
+				Func<T, bool> filter = _filter;
 #endif
 
-				return new FuncFilteredCollection<T>(originalCollection, filter);
+				return new FuncFilteredCollection<T>(collection, filter);
 			}
 
 			protected override bool Filter(T obj)
 			{
-				return this._filter(obj);
+				return _filter(obj);
 			}
 		} 
 		#endregion

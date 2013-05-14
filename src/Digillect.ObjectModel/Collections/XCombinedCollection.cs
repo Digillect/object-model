@@ -32,13 +32,12 @@ namespace Digillect.Collections
 #if !(SILVERLIGHT || WINDOWS8)
 	[Serializable]
 #endif
-	public class XCombinedCollection<T> : XBasedCollection<T>
+	public sealed class XCombinedCollection<T> : XBasedCollection<T>
 		where T : XObject
 	{
-		private readonly IList<IXList<T>> _collections;
+		private readonly IList<IXList<T>> _baseCollections;
 
-		private int _count = -1;
-		private ushort _updateCount;
+		private int _size = -1;
 		private int _version;
 
 		#region Constructor/Disposer
@@ -64,11 +63,11 @@ namespace Digillect.Collections
 
 			Contract.EndContractBlock();
 
-			_collections = new List<IXList<T>>(collections);
+			_baseCollections = collections.ToList();
 
-			foreach ( var item in _collections )
+			foreach ( var item in _baseCollections )
 			{
-				item.CollectionChanged += UnderlyingCollection_CollectionChanged;
+				item.CollectionChanged += BaseCollection_CollectionChanged;
 			}
 		}
 
@@ -77,41 +76,13 @@ namespace Digillect.Collections
 		{
 			if ( disposing )
 			{
-				foreach ( var item in _collections )
+				foreach ( var item in _baseCollections )
 				{
-					item.CollectionChanged -= UnderlyingCollection_CollectionChanged;
-
-					for ( uint i = _updateCount; i != 0; i-- )
-					{
-						item.EndUpdate();
-					}
+					item.CollectionChanged -= BaseCollection_CollectionChanged;
 				}
-
-				_collections.Clear();
-				_updateCount = 0;
 			}
 
 			base.Dispose(disposing);
-		}
-		#endregion
-
-		#region Events
-		/// <inheritdoc/>
-		protected override void OnCollectionChanged(Func<NotifyCollectionChangedEventArgs> e)
-		{
-			if ( _updateCount == 0 )
-			{
-				base.OnCollectionChanged(e);
-			}
-		}
-
-		/// <inheritdoc/>
-		protected override void OnPropertyChanged(PropertyChangedEventArgs e)
-		{
-			if ( _updateCount == 0 )
-			{
-				base.OnPropertyChanged(e);
-			}
 		}
 		#endregion
 
@@ -121,12 +92,12 @@ namespace Digillect.Collections
 		{
 			get
 			{
-				if ( _count == -1 )
+				if ( _size == -1 )
 				{
-					Interlocked.Exchange(ref _count, _collections.Sum(x => x.Count));
+					Interlocked.Exchange(ref _size, _baseCollections.Sum(x => x.Count));
 				}
 
-				return _count;
+				return _size;
 			}
 		}
 
@@ -135,7 +106,7 @@ namespace Digillect.Collections
 		{
 			get
 			{
-				foreach ( var c in _collections )
+				foreach ( var c in _baseCollections )
 				{
 					if ( index >= c.Count )
 					{
@@ -154,42 +125,33 @@ namespace Digillect.Collections
 
 		#region Methods
 		/// <inheritdoc/>
-		public override void BeginUpdate()
-		{
-			_updateCount++;
-
-			foreach ( var c in _collections )
-			{
-				c.BeginUpdate();
-			}
-		}
-
-		/// <inheritdoc/>
 		public override XBasedCollection<T> Clone(bool deep)
 		{
-			IEnumerable<IXList<T>> collections = deep ? _collections.Select(x => (IXList<T>) x.Clone(deep)) : _collections;
+			IEnumerable<IXList<T>> collections = deep ? _baseCollections.Select(x => (IXList<T>) x.Clone(deep)) : _baseCollections;
 
-			return (XBasedCollection<T>) Activator.CreateInstance(GetType(), collections);
+			Contract.Assume(Contract.ForAll(collections, item => item != null));
+
+			return new XCombinedCollection<T>(collections);
 		}
 
 		/// <inheritdoc/>
 		[ContractVerification(false)]
 		public override bool Contains(T item)
 		{
-			return _collections.Any(x => x.Contains(item));
+			return _baseCollections.Any(x => x.Contains(item));
 		}
 
 		/// <inheritdoc/>
 		[ContractVerification(false)]
 		public override bool ContainsKey(XKey key)
 		{
-			return _collections.Any(x => x.ContainsKey(key));
+			return _baseCollections.Any(x => x.ContainsKey(key));
 		}
 
 		/// <inheritdoc/>
 		public override void CopyTo(T[] array, int arrayIndex)
 		{
-			foreach ( var c in _collections )
+			foreach ( var c in _baseCollections )
 			{
 				c.CopyTo(array, arrayIndex);
 
@@ -198,31 +160,11 @@ namespace Digillect.Collections
 		}
 
 		/// <inheritdoc/>
-		public override void EndUpdate()
-		{
-			if ( _updateCount == 0 )
-			{
-				return;
-			}
-
-			foreach ( var c in _collections )
-			{
-				c.EndUpdate();
-			}
-
-			if ( --_updateCount == 0 )
-			{
-				OnPropertyChanged((string) null);
-				OnCollectionReset();
-			}
-		}
-
-		/// <inheritdoc/>
 		public override IEnumerator<T> GetEnumerator()
 		{
 			int version = _version;
 
-			foreach ( var item in _collections.SelectMany(x => x) )
+			foreach ( var item in _baseCollections.SelectMany(x => x) )
 			{
 				if ( version != _version )
 				{
@@ -236,7 +178,7 @@ namespace Digillect.Collections
 		/// <inheritdoc/>
 		public override IEnumerable<XKey> GetKeys()
 		{
-			return _collections.SelectMany(x => x.GetKeys());
+			return _baseCollections.SelectMany(x => x.GetKeys());
 		}
 
 		/// <inheritdoc/>
@@ -244,7 +186,7 @@ namespace Digillect.Collections
 		{
 			int count = 0;
 
-			foreach ( var c in _collections )
+			foreach ( var c in _baseCollections )
 			{
 				int index = c.IndexOf(key);
 
@@ -264,7 +206,7 @@ namespace Digillect.Collections
 		{
 			int count = 0;
 
-			foreach ( var c in _collections )
+			foreach ( var c in _baseCollections )
 			{
 				int index = c.IndexOf(item);
 
@@ -285,7 +227,7 @@ namespace Digillect.Collections
 		{
 			Contract.Requires(item != null);
 
-			InsertCollection(_collections.Count, item);
+			InsertCollection(_baseCollections.Count, item);
 		}
 
 		public void InsertCollection(int index, IXList<T> item)
@@ -298,18 +240,13 @@ namespace Digillect.Collections
 			Contract.Requires(index >= 0);
 			//Contract.Requires(index <= _collections.Count);
 
-			_collections.Insert(index, item);
+			_baseCollections.Insert(index, item);
 
-			item.CollectionChanged += UnderlyingCollection_CollectionChanged;
+			_version++;
 
-			if ( _updateCount != 0 )
-			{
-				for ( uint i = 0; i < _updateCount; i++ )
-				{
-					item.BeginUpdate();
-				}
-			}
-			else if ( item.Count != 0 )
+			item.CollectionChanged += BaseCollection_CollectionChanged;
+
+			if ( !this.IsInUpdate && item.Count != 0 )
 			{
 				OnPropertyChanged(CountString);
 				OnPropertyChanged(IndexerName);
@@ -327,21 +264,16 @@ namespace Digillect.Collections
 
 			Contract.EndContractBlock();
 
-			if ( !_collections.Remove(item) )
+			if ( !_baseCollections.Remove(item) )
 			{
 				return false;
 			}
 
-			item.CollectionChanged -= UnderlyingCollection_CollectionChanged;
+			_version++;
 
-			if ( _updateCount != 0 )
-			{
-				for ( uint i = _updateCount; i != 0; i-- )
-				{
-					item.EndUpdate();
-				}
-			}
-			else if ( item.Count != 0 )
+			item.CollectionChanged -= BaseCollection_CollectionChanged;
+
+			if ( !this.IsInUpdate && item.Count != 0 )
 			{
 				OnPropertyChanged(CountString);
 				OnPropertyChanged(IndexerName);
@@ -353,8 +285,8 @@ namespace Digillect.Collections
 		}
 		#endregion
 
-		#region Protected Methods
-		protected int CalculateCombinedIndex(IXList<T> collection, int index)
+		#region CalculateCombinedIndex
+		private int CalculateCombinedIndex(IXList<T> collection, int index)
 		{
 			Contract.Requires(collection != null);
 			Contract.Requires(index >= 0);
@@ -362,7 +294,7 @@ namespace Digillect.Collections
 
 			int count = 0;
 
-			foreach ( var c in _collections )
+			foreach ( var c in _baseCollections )
 			{
 				if ( !Object.ReferenceEquals(c, collection) )
 				{
@@ -374,23 +306,23 @@ namespace Digillect.Collections
 				}
 			}
 
-			throw new ArgumentException("The collection is not an underlying member of this collection.", "collection");
+			throw new ArgumentException("The collection is not a member of this collection.", "collection");
 		}
 		#endregion
 
 		#region Event Handlers
-		private void UnderlyingCollection_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
+		private void BaseCollection_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
 		{
 			_version++;
 
 			if ( e.Action == NotifyCollectionChangedAction.Add || e.Action == NotifyCollectionChangedAction.Remove || e.Action == NotifyCollectionChangedAction.Reset )
 			{
-				_count = -1;
+				_size = -1;
 
 				OnPropertyChanged(CountString);
 			}
 
-			if ( _updateCount != 0 )
+			if ( this.IsInUpdate )
 			{
 				return;
 			}

@@ -37,26 +37,26 @@ namespace Digillect.Collections
 	public abstract class XFilteredCollection<T> : XBasedCollection<T>
 		where T : XObject
 	{
-		private readonly IXList<T> _originalCollection;
+		private readonly IXList<T> _baseCollection;
 
-		private int _count = -1;
+		private int _size = -1;
 #if CUSTOM_ENUMERATOR
 		private int _version;
 #endif
 
 		#region Constructor/Disposer
-		protected XFilteredCollection(IXList<T> originalCollection)
+		protected XFilteredCollection(IXList<T> collection)
 		{
-			if ( originalCollection == null )
+			if ( collection == null )
 			{
-				throw new ArgumentNullException("originalCollection");
+				throw new ArgumentNullException("collection");
 			}
 
 			Contract.EndContractBlock();
 
-			this._originalCollection = originalCollection;
+			_baseCollection = collection;
 
-			this._originalCollection.CollectionChanged += OriginalCollection_CollectionChanged;
+			_baseCollection.CollectionChanged += BaseCollection_CollectionChanged;
 		}
 
 		/// <inheritdoc/>
@@ -64,17 +64,17 @@ namespace Digillect.Collections
 		{
 			if ( disposing )
 			{
-				this._originalCollection.CollectionChanged -= OriginalCollection_CollectionChanged;
+				_baseCollection.CollectionChanged -= BaseCollection_CollectionChanged;
 			}
 
 			base.Dispose(disposing);
 		}
 		#endregion
 
-		#region OriginalCollection
-		public IXList<T> OriginalCollection
+		#region BaseCollection
+		public IXList<T> BaseCollection
 		{
-			get { return this._originalCollection; }
+			get { return _baseCollection; }
 		}
 		#endregion
 
@@ -82,31 +82,17 @@ namespace Digillect.Collections
 		/// <inheritdoc/>
 		public override int IndexOf(XKey key)
 		{
-			return CalculateFilteredIndex(this._originalCollection.IndexOf(key));
-		}
-		#endregion
-
-		#region IXCollection`1 Members
-		/// <inheritdoc/>
-		public override XBasedCollection<T> Clone(bool deep)
-		{
-			IXList<T> collection = deep ? (IXList<T>) this._originalCollection.Clone(true) : this._originalCollection;
-
-			return CreateInstanceOfSameType( collection );
+			return CalculateFilteredIndex(_baseCollection.IndexOf(key));
 		}
 		#endregion
 
 		#region IXUpdatable`1 Members
 		/// <inheritdoc/>
-		public override void BeginUpdate()
+		public override XBasedCollection<T> Clone(bool deep)
 		{
-			_originalCollection.BeginUpdate();
-		}
+			IXList<T> collection = deep ? (IXList<T>) _baseCollection.Clone(true) : _baseCollection;
 
-		/// <inheritdoc/>
-		public override void EndUpdate()
-		{
-			_originalCollection.EndUpdate();
+			return CreateInstanceOfSameType( collection );
 		}
 		#endregion
 
@@ -118,14 +104,14 @@ namespace Digillect.Collections
 			{
 				var originalIndex = CalculateOriginalIndex( index );
 
-				return originalIndex >= 0 ? this._originalCollection[originalIndex] : default( T );
+				return originalIndex >= 0 ? _baseCollection[originalIndex] : default(T);
 			}
 		}
 
 		/// <inheritdoc/>
 		public override int IndexOf(T item)
 		{
-			return CalculateFilteredIndex( this._originalCollection.IndexOf( item ) );
+			return CalculateFilteredIndex(_baseCollection.IndexOf(item));
 		}
 		#endregion
 
@@ -135,14 +121,12 @@ namespace Digillect.Collections
 		{
 			get
 			{
-				if ( _count == -1 )
+				if ( _size == -1 )
 				{
-					Interlocked.Exchange(ref _count, _originalCollection.Count(Filter));
+					Interlocked.Exchange(ref _size, _baseCollection.Count(Filter));
 				}
 
-				//Contract.Assume(_count >= 0);
-
-				return _count;
+				return _size;
 			}
 		}
 
@@ -150,7 +134,7 @@ namespace Digillect.Collections
 		[ContractVerification(false)]
 		public override bool Contains(T item)
 		{
-			return this._originalCollection.Contains(item) && Filter(item);
+			return _baseCollection.Contains(item) && Filter(item);
 		}
 		#endregion
 
@@ -161,14 +145,14 @@ namespace Digillect.Collections
 #if CUSTOM_ENUMERATOR
 			int version = _version;
 
-			for ( int i = 0; i < _originalCollection.Count; i++ )
+			for ( int i = 0; i < _baseCollection.Count; i++ )
 			{
 				if ( version != _version )
 				{
 					throw new InvalidOperationException(Errors.XCollectionEnumFailedVersionException);
 				}
 
-				T obj = _originalCollection[i];
+				T obj = _baseCollection[i];
 
 				if ( Filter(obj) )
 				{
@@ -176,7 +160,7 @@ namespace Digillect.Collections
 				}
 			}
 #else
-			return _originalCollection.Where(Filter).GetEnumerator();
+			return _baseCollection.Where(Filter).GetEnumerator();
 #endif
 		}
 		#endregion
@@ -185,10 +169,10 @@ namespace Digillect.Collections
 		/// <summary>
 		/// This method supports the <see cref="Clone"/> infrastructure.
 		/// </summary>
-		/// <param name="originalCollection">The original collection used to construct a filtered one.</param>
+		/// <param name="collection">The original collection used to construct a filtered one.</param>
 		/// <returns>New collection identical to the current one.</returns>
 		[Pure]
-		protected abstract XFilteredCollection<T> CreateInstanceOfSameType(IXList<T> originalCollection);
+		protected abstract XFilteredCollection<T> CreateInstanceOfSameType(IXList<T> collection);
 
 		/// <summary>
 		/// Determines whether an item satisfies a filtering criteria.
@@ -212,7 +196,7 @@ namespace Digillect.Collections
 
 			for ( int i = 0; i <= originalIndex; i++ )
 			{
-				if ( Filter(this._originalCollection[i]) )
+				if ( Filter(_baseCollection[i]) )
 				{
 					filteredIndex++;
 				}
@@ -231,9 +215,9 @@ namespace Digillect.Collections
 
 			int originalIndex = -1;
 
-			for ( int i = 0, counter = 0; i < this._originalCollection.Count && counter <= filteredIndex; i++ )
+			for ( int i = 0, counter = 0; i < _baseCollection.Count && counter <= filteredIndex; i++ )
 			{
-				if ( Filter(this._originalCollection[i]) )
+				if ( Filter(_baseCollection[i]) )
 				{
 					originalIndex = i;
 					counter++;
@@ -245,7 +229,7 @@ namespace Digillect.Collections
 		#endregion
 
 		#region Event Handlers
-		private void OriginalCollection_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
+		private void BaseCollection_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
 		{
 #if CUSTOM_ENUMERATOR
 			_version++;
@@ -253,7 +237,12 @@ namespace Digillect.Collections
 
 			if ( e.Action == NotifyCollectionChangedAction.Add || e.Action == NotifyCollectionChangedAction.Remove || e.Action == NotifyCollectionChangedAction.Reset )
 			{
-				_count = -1;
+				_size = -1;
+			}
+
+			if ( this.IsInUpdate )
+			{
+				return;
 			}
 
 			switch ( e.Action )
@@ -362,7 +351,7 @@ namespace Digillect.Collections
 		[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1822:MarkMembersAsStatic", Justification = "Required for code contracts.")]
 		private void ObjectInvariant()
 		{
-			Contract.Invariant(_count >= -1);
+			Contract.Invariant(_size >= -1);
 		}
 		#endregion
 	}
@@ -377,7 +366,7 @@ namespace Digillect.Collections
 		{
 		}
 
-		protected override XFilteredCollection<T> CreateInstanceOfSameType(IXList<T> originalCollection)
+		protected override XFilteredCollection<T> CreateInstanceOfSameType(IXList<T> collection)
 		{
 			Contract.Ensures(Contract.Result<XFilteredCollection<T>>() != null);
 

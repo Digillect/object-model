@@ -32,17 +32,22 @@ namespace Digillect.Collections
 #if !(SILVERLIGHT || WINDOWS8)
 	[Serializable]
 #endif
-	public class XSortedCollection<T> : XBasedCollection<T>
+	public sealed class XSortedCollection<T> : XBasedCollection<T>
 		where T : XObject
 	{
-		private IXList<T> _originalCollection;
+		private readonly IXList<T> _baseCollection;
 		private readonly Comparison<T> _itemsComparison;
 
 		private readonly List<T> _sortedItems;
 
 		#region Constructor/Disposer
-		public XSortedCollection(Comparison<T> itemsComparison)
+		public XSortedCollection(IXList<T> collection, Comparison<T> itemsComparison)
 		{
+			if ( collection == null )
+			{
+				throw new ArgumentNullException("collection");
+			}
+
 			if ( itemsComparison == null )
 			{
 				throw new ArgumentNullException("itemsComparison");
@@ -50,37 +55,20 @@ namespace Digillect.Collections
 
 			Contract.EndContractBlock();
 
+			_baseCollection = collection;
 			_itemsComparison = itemsComparison;
-		}
 
-		public XSortedCollection(IXList<T> originalCollection, Comparison<T> itemsComparison)
-			: this(itemsComparison)
-		{
-			if ( originalCollection == null )
-			{
-				throw new ArgumentNullException("originalCollection");
-			}
-
-			Contract.Requires(itemsComparison != null);
-
-			_originalCollection = originalCollection;
-
-			_sortedItems = new List<T>(_originalCollection.Count);
+			_sortedItems = new List<T>(_baseCollection.Count);
 
 			InitSortedItems();
 
-			_originalCollection.CollectionChanged += OriginalCollection_CollectionChanged;
+			_baseCollection.CollectionChanged += BaseCollection_CollectionChanged;
 		}
 
-		public XSortedCollection(IComparer<T> itemsComparer)
-			: this(itemsComparer == null ? null : new Comparison<T>(itemsComparer.Compare))
+		public XSortedCollection(IXList<T> sourceCollection, IComparer<T> itemsComparer)
+			: this(sourceCollection, itemsComparer == null ? null : new Comparison<T>(itemsComparer.Compare))
 		{
-		}
-
-		public XSortedCollection(IXList<T> originalCollection, IComparer<T> itemsComparer)
-			: this(originalCollection, itemsComparer == null ? null : new Comparison<T>(itemsComparer.Compare))
-		{
-			Contract.Requires(originalCollection != null);
+			Contract.Requires(sourceCollection != null);
 			Contract.Requires(itemsComparer != null);
 		}
 
@@ -89,12 +77,9 @@ namespace Digillect.Collections
 		{
 			if ( disposing )
 			{
-				if ( _originalCollection != null )
-				{
-					_originalCollection.CollectionChanged -= OriginalCollection_CollectionChanged;
+				_baseCollection.CollectionChanged -= BaseCollection_CollectionChanged;
 
-					CleanSortedItems();
-				}
+				CleanSortedItems();
 			}
 
 			base.Dispose(disposing);
@@ -102,38 +87,9 @@ namespace Digillect.Collections
 		#endregion
 
 		#region Public Properties
-		[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
-		public IXList<T> OriginalCollection
+		public IXList<T> BaseCollection
 		{
-			get { return _originalCollection; }
-			set
-			{
-				if ( value == null )
-				{
-					throw new ArgumentNullException("value");
-				}
-
-				Contract.EndContractBlock();
-
-				if ( _originalCollection != value )
-				{
-					if ( _originalCollection != null )
-					{
-						_originalCollection.CollectionChanged -= OriginalCollection_CollectionChanged;
-
-						CleanSortedItems();
-					}
-
-					_originalCollection = value;
-
-					InitSortedItems();
-
-					_originalCollection.CollectionChanged += OriginalCollection_CollectionChanged;
-
-					OnPropertyChanged((string) null);
-					OnCollectionReset();
-				}
-			}
+			get { return _baseCollection; }
 		}
 		#endregion
 
@@ -141,7 +97,7 @@ namespace Digillect.Collections
 		/// <inheritdoc/>
 		public override int Count
 		{
-			get { return _originalCollection.Count; }
+			get { return _baseCollection.Count; }
 		}
 
 		/// <inheritdoc/>
@@ -151,33 +107,21 @@ namespace Digillect.Collections
 		}
 
 		/// <inheritdoc/>
-		public override void BeginUpdate()
-		{
-			_originalCollection.BeginUpdate();
-		}
-
-		/// <inheritdoc/>
 		public override XBasedCollection<T> Clone(bool deep)
 		{
-			return new XSortedCollection<T>(deep? (IXList<T>) _originalCollection.Clone(true) : _originalCollection, _itemsComparison);
+			return new XSortedCollection<T>(deep? (IXList<T>) _baseCollection.Clone(true) : _baseCollection, _itemsComparison);
 		}
 
 		/// <inheritdoc/>
 		public override bool Contains(T item)
 		{
-			return _originalCollection.Contains(item);
+			return _baseCollection.Contains(item);
 		}
 
 		/// <inheritdoc/>
 		public override bool ContainsKey(XKey key)
 		{
-			return _originalCollection.ContainsKey(key);
-		}
-
-		/// <inheritdoc/>
-		public override void EndUpdate()
-		{
-			_originalCollection.EndUpdate();
+			return _baseCollection.ContainsKey(key);
 		}
 
 		/// <inheritdoc/>
@@ -199,27 +143,25 @@ namespace Digillect.Collections
 		}
 		#endregion
 
-		#region Protected Methods
-		protected void InitSortedItems()
+		#region Private Methods
+		private void InitSortedItems()
 		{
-			_sortedItems.AddRange(_originalCollection);
+			Contract.Assert(_sortedItems.Count == 0);
+
+			_sortedItems.AddRange(_baseCollection);
 			_sortedItems.Sort(_itemsComparison);
 			_sortedItems.ForEach(x => x.PropertyChanged += Item_PropertyChanged);
 		}
 
-		protected void CleanSortedItems()
+		private void CleanSortedItems()
 		{
 			_sortedItems.ForEach(x => x.PropertyChanged -= Item_PropertyChanged);
 			_sortedItems.Clear();
 		}
 
-		protected int InsertNewItemsSorted(IList newItems)
+		private int InsertNewItemsSorted(IList newItems)
 		{
-			if ( newItems == null )
-			{
-				throw new ArgumentNullException("newItems");
-			}
-
+			Contract.Requires(newItems != null);
 			Contract.Ensures(Contract.Result<int>() >= 0);
 			Contract.Ensures(Contract.Result<int>() <= Contract.OldValue(_sortedItems.Count));
 
@@ -250,13 +192,9 @@ namespace Digillect.Collections
 			return minIndex;
 		}
 
-		protected int RemoveOldItems(IList oldItems)
+		private int RemoveOldItems(IList oldItems)
 		{
-			if ( oldItems == null )
-			{
-				throw new ArgumentNullException("oldItems");
-			}
-
+			Contract.Requires(oldItems != null);
 			Contract.Ensures(Contract.Result<int>() >= 0);
 			Contract.Ensures(Contract.Result<int>() < Contract.OldValue(_sortedItems.Count));
 
@@ -281,7 +219,7 @@ namespace Digillect.Collections
 		#endregion
 
 		#region Event Handlers
-		private void OriginalCollection_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
+		private void BaseCollection_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
 		{
 			switch ( e.Action )
 			{
@@ -383,6 +321,8 @@ namespace Digillect.Collections
 
 					break;
 				}
+
+				item = next;
 			}
 		}
 		#endregion
@@ -392,8 +332,8 @@ namespace Digillect.Collections
 		[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1822:MarkMembersAsStatic", Justification = "Required for code contracts.")]
 		private void ObjectInvariant()
 		{
-			Contract.Invariant(this.Count == _originalCollection.Count);
-			Contract.Invariant(_sortedItems.Count == _originalCollection.Count);
+			Contract.Invariant(this.Count == _baseCollection.Count);
+			Contract.Invariant(_sortedItems.Count == _baseCollection.Count);
 		}
 		#endregion
 	}

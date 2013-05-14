@@ -54,6 +54,8 @@ namespace Digillect.Collections
 		/// </summary>
 		protected const string IndexerName = "Item[]";
 
+		private ushort _updateCount;
+
 		#region Constructor/Disposer
 		/// <summary>
 		/// Default constructor.
@@ -65,14 +67,25 @@ namespace Digillect.Collections
 		/// <inheritdoc/>
 		public void Dispose()
 		{
+			CollectionChanged = null;
+			PropertyChanged = null;
 			Dispose(true);
 			GC.SuppressFinalize(this);
 		}
 
 		protected virtual void Dispose(bool disposing)
 		{
+			if ( disposing )
+			{
+				_updateCount = 0;
+			}
 		}
 		#endregion
+
+		protected bool IsInUpdate
+		{
+			get { return _updateCount != 0; }
+		}
 
 		#region IXList`1 Members
 		/// <inheritdoc/>
@@ -108,10 +121,25 @@ namespace Digillect.Collections
 		public abstract XBasedCollection<T> Clone(bool deep);
 
 		/// <inheritdoc/>
-		public abstract void BeginUpdate();
+		public void BeginUpdate()
+		{
+			_updateCount++;
+		}
 
 		/// <inheritdoc/>
-		public abstract void EndUpdate();
+		public void EndUpdate()
+		{
+			if ( _updateCount == 0 )
+			{
+				return;
+			}
+
+			if ( --_updateCount == 0 )
+			{
+				OnPropertyChanged((string) null);
+				OnCollectionReset();
+			}
+		}
 
 		bool IXUpdatable<IXCollection<T>>.IsUpdateRequired(IXCollection<T> source)
 		{
@@ -401,7 +429,7 @@ namespace Digillect.Collections
 		[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly", MessageId = "e")]
 		protected virtual void OnCollectionChanged(Func<NotifyCollectionChangedEventArgs> e)
 		{
-			if ( CollectionChanged != null )
+			if ( _updateCount == 0 && CollectionChanged != null )
 			{
 				CollectionChanged(this, e == null ? null : e());
 			}
@@ -438,7 +466,7 @@ namespace Digillect.Collections
 		/// <param name="e">The <see cref="PropertyChangedEventArgs" /> instance containing the event data.</param>
 		protected virtual void OnPropertyChanged(PropertyChangedEventArgs e)
 		{
-			if ( PropertyChanged != null )
+			if ( _updateCount == 0 && PropertyChanged != null )
 			{
 				PropertyChanged(this, e);
 			}

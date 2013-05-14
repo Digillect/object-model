@@ -56,52 +56,85 @@ namespace Digillect.Tests
 			}
 		}
 
-		[Fact(DisplayName = "XSC.OC.Add should raise appropriate events")]
+		[Fact(DisplayName = "XSC.BeginUpdate should block events and raise them after the EndUpdate call")]
+		public void BeginEndUpdateEventsTest()
+		{
+			// Setup
+			bool eventsBlocked = false;
+			var expectedCollectionChanged = false;
+			var expectedPropertyChanged = false;
+			var sut = CreateTestCollection(Many, (sender, e) => {
+				Assert.False(eventsBlocked, "CollectionChanged with " + e.Action);
+				expectedCollectionChanged.ShouldNotBe(true);
+				e.Action.ShouldBe(NotifyCollectionChangedAction.Reset);
+				expectedCollectionChanged = true;
+			}, (sender, e) => {
+				Assert.False(eventsBlocked, "PropertyChanged with " + e.PropertyName);
+				expectedPropertyChanged.ShouldNotBe(true);
+				e.PropertyName.ShouldBe(null);
+				expectedPropertyChanged = true;
+			});
+
+			// Exercise
+			sut.BeginUpdate();
+			eventsBlocked = true;
+			sut.BaseCollection.Update(CreateSourceCollection(Many));
+			sut.BaseCollection.Insert(0, XIntegerObject.Create());
+			sut.BaseCollection.RemoveAt(0);
+			eventsBlocked = false;
+			sut.EndUpdate();
+
+			// Verify
+			expectedCollectionChanged.ShouldBe(true);
+			expectedPropertyChanged.ShouldBe(true);
+		}
+
+		[Fact(DisplayName = "XSC.Base.Add should raise appropriate events")]
 		public void InsertItemTest()
 		{
 			// Setup
-			bool ncchEventRaised = false;
-			int pchEventRaised = 0;
+			var expectedCollectionChanged = false;
+			var expectedPropertyChanged = 0;
 			var sut = CreateTestCollection(Many, (sender, e) => {
-				ncchEventRaised = true;
+				expectedCollectionChanged = true;
 				e.Action.ShouldBe(NotifyCollectionChangedAction.Add);
 			}, (sender, e) => {
-				pchEventRaised++;
+				expectedPropertyChanged++;
 			});
 
 			// Exercise
 			var item = sut[0].Clone();
 			item.Id -= 1;
-			sut.OriginalCollection.Add(item);
+			sut.BaseCollection.Add(item);
 
 			// Verify
-			ncchEventRaised.ShouldBe(true);
-			pchEventRaised.ShouldBe(2);
+			expectedCollectionChanged.ShouldBe(true);
+			expectedPropertyChanged.ShouldBe(2);
 			sut.IndexOf(item).ShouldBe(0);
 		}
 
-		[Fact(DisplayName = "XSC.OC.Remove should raise appropriate events")]
+		[Fact(DisplayName = "XSC.Base.Remove should raise appropriate events")]
 		public void RemoveItemTest()
 		{
 			// Setup
-			bool ncchEventRaised = false;
-			int pchEventRaised = 0;
+			var expectedCollectionChanged = false;
+			var expectedPropertyChanged = 0;
 			var sut = CreateTestCollection(Many, (sender, e) => {
-				ncchEventRaised = true;
+				expectedCollectionChanged = true;
 				e.Action.ShouldBe(NotifyCollectionChangedAction.Remove);
 			}, (sender, e) => {
-				pchEventRaised++;
+				expectedPropertyChanged++;
 			});
 
 			// Exercise
-			sut.OriginalCollection.RemoveAt(0);
+			sut.BaseCollection.RemoveAt(0);
 
 			// Verify
-			ncchEventRaised.ShouldBe(true);
-			pchEventRaised.ShouldBe(2);
+			expectedCollectionChanged.ShouldBe(true);
+			expectedPropertyChanged.ShouldBe(2);
 		}
 
-		[Fact(DisplayName = "XSC.OC.Move should not produce any visible changes")]
+		[Fact(DisplayName = "XSC.Base.Move should not produce any visible changes")]
 		public void MoveItemTest()
 		{
 			// Setup
@@ -113,8 +146,8 @@ namespace Digillect.Tests
 			var snaphot = sut.ToArray();
 
 			// Exercise
-			((XCollection<XIntegerObject>) sut.OriginalCollection).Move(0, Many - 1);
-			((XCollection<XIntegerObject>) sut.OriginalCollection).Move(0, Many - 1);
+			((XCollection<XIntegerObject>) sut.BaseCollection).Move(0, Many - 1);
+			((XCollection<XIntegerObject>) sut.BaseCollection).Move(0, Many - 1);
 
 			// Verify
 			sut.SequenceEqual(snaphot).ShouldBe(true);
@@ -124,36 +157,49 @@ namespace Digillect.Tests
 		public void ItemPropertyChangeTest()
 		{
 			// Setup
-			bool ncchEventRaised = false;
-			bool pchEventRaised = false;
+			var expectedCollectionChanged = false;
+			var expectedPropertyChanged = false;
 			var sut = CreateTestCollection(Many, (sender, e) => {
-				ncchEventRaised = true;
+				expectedCollectionChanged = true;
 				e.Action.ShouldBe(NotifyCollectionChangedAction.Reset);
 			}, (sender, e) => {
-				pchEventRaised = true;
+				expectedPropertyChanged = true;
 				e.PropertyName.ShouldBe("Item[]");
 			});
+			var item = sut[0];
 
-			// Exercise
-			var item0 = sut[0];
-			item0.Id = sut[Many - 1].Id + 1;
+			// Exercise (move from the start to the end)
+			item.Id = sut[Many - 1].Id + 10;
 
 			// Verify
-			ncchEventRaised.ShouldBe(true);
-			pchEventRaised.ShouldBe(true);
-			sut.IndexOf(item0).ShouldBe(Many - 1);
+			expectedCollectionChanged.ShouldBe(true);
+			expectedPropertyChanged.ShouldBe(true);
+			sut.IndexOf(item).ShouldBe(Many - 1);
 
 			// Setup 2
-			ncchEventRaised = false;
-			pchEventRaised = false;
+			expectedCollectionChanged = false;
+			expectedPropertyChanged = false;
 
-			// Exercise 2
-			item0.Id = sut[0].Id - 1;
+			// Exercise 2 (move from the end to the start)
+			item.Id = sut[0].Id - 10;
 
 			// Verify 2
-			ncchEventRaised.ShouldBe(true);
-			pchEventRaised.ShouldBe(true);
-			sut.IndexOf(item0).ShouldBe(0);
+			expectedCollectionChanged.ShouldBe(true);
+			expectedPropertyChanged.ShouldBe(true);
+			sut.IndexOf(item).ShouldBe(0);
+
+			// Setup 3
+			expectedCollectionChanged = false;
+			expectedPropertyChanged = false;
+			item = sut[Many - 1];
+
+			// Exercise 3 (move into the middle)
+			item.Id = sut[1].Id - 1;
+
+			// Verify 3
+			expectedCollectionChanged.ShouldBe(true);
+			expectedPropertyChanged.ShouldBe(true);
+			sut.IndexOf(item).ShouldBe(1);
 		}
 
 		[Fact(DisplayName = "XSC.Clone should produce an equivalent collection")]
