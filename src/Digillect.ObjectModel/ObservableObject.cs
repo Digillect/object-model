@@ -57,6 +57,9 @@ namespace Digillect
 		/// <summary>
 		/// Occurs when a property value changes.
 		/// </summary>
+#if !(SILVERLIGHT || WINDOWS8)
+		[field: NonSerialized]
+#endif
 		public event PropertyChangedEventHandler PropertyChanged;
 
 		/// <summary>
@@ -129,7 +132,7 @@ namespace Digillect
 		protected bool SetProperty<T>(ref T location, T value, string propertyName)
 #endif
 		{
-			if( object.Equals( location, value ) )
+			if ( Object.ReferenceEquals(location, value) )
 				return false;
 
 			if ( propertyName != null )
