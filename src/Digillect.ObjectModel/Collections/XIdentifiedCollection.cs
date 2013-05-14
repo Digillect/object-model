@@ -198,10 +198,6 @@ namespace Digillect.Collections
 
 			collection = collection.Distinct(ReferenceComparer);
 
-#if NET45
-			Contract.Assume(collection != null);
-#endif
-
 			var results = this.Items.Merge(collection, options);
 
 			if ( !results.IsEmpty )
