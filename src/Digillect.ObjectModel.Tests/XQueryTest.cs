@@ -36,7 +36,7 @@ namespace Digillect.Tests
 		[Fact]
 		public void query_should_clone()
 		{
-			var original = new IntegerQuery( "Entity", XParameters.From( "Id", 1 ) );
+			var original = new IntegerQuery( "Entity", XParameters.Create( "Id", 1 ) );
 			var clone = original.Clone();
 
 			clone.ShouldNotBeSameAs( original );

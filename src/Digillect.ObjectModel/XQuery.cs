@@ -56,7 +56,7 @@ namespace Digillect
 		public XQuery( string method, XParameters parameters )
 		{
 			_method = method;
-			_parameters = parameters == null ? new XParameters() : XParameters.From( parameters );
+			_parameters = parameters ?? XParameters.Empty;
 		}
 		#endregion
 
@@ -153,7 +153,7 @@ namespace Digillect
 			Contract.Assume(source._parameters != null);
 
 			_method = source._method;
-			_parameters = XParameters.From( source._parameters );
+			_parameters = source._parameters;
 		}
 		#endregion
 
