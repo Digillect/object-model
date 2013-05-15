@@ -1,0 +1,34 @@
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <CompileDependsOn>$(CompileDependsOn);CheckForCodeContracts</CompileDependsOn>
+  </PropertyGroup>
+
+  <Target Name="CheckForCodeContracts" Condition=" '$(CodeContractsImported)' != 'true' ">
+    <Error Text="Project requires Code Contracts http://research.microsoft.com/en-us/projects/contracts/" />
+  </Target>
+
+  <!--============================================================================
+      Copy reference's Contract Reference Assembles that are marked as "CopyLocal"
+      ============================================================================-->
+  <Target Name="CopyReferenceCodeContractReferenceAssemblies"
+          Condition="'@(ReferenceCopyLocalPaths)' != ''"
+          AfterTargets="CodeContractReferenceAssembly">
+    <ItemGroup>
+      <CodeContractsReferenceAssembliesFiles Include="@(ReferenceCopyLocalPaths->'%(RootDir)%(Directory)CodeContracts\%(Filename).Contracts%(Extension)')" />
+	  <CodeContractsReferenceAssembliesCopiedFiles />
+    </ItemGroup>
+
+    <Copy SourceFiles="@(CodeContractsReferenceAssembliesFiles)"
+          DestinationFolder="$(OutDir)CodeContracts"
+          SkipUnchangedFiles="$(SkipCopyUnchangedFiles)"
+          Retries="$(CopyRetryCount)"
+          RetryDelayMilliseconds="$(CopyRetryDelayMilliseconds)"
+          Condition="'$(UseCommonOutputDirectory)' != 'true' And Exists('%(RootDir)%(Directory)%(Filename)%(Extension)')">
+      <Output TaskParameter="CopiedFiles" ItemName="CodeContractsReferenceAssembliesCopiedFiles" />
+    </Copy>
+
+    <ItemGroup>
+      <FileWrites Include="@(CodeContractsReferenceAssembliesCopiedFiles)" />
+    </ItemGroup>
+  </Target>
+</Project>

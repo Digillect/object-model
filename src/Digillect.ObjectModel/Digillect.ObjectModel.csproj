@@ -207,12 +207,7 @@
     </CodeAnalysisDictionary>
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\Portable\$(TargetFrameworkVersion)\Microsoft.Portable.CSharp.targets" />
-  <PropertyGroup>
-    <CompileDependsOn>$(CompileDependsOn);CheckForCodeContracts</CompileDependsOn>
-  </PropertyGroup>
-  <Target Name="CheckForCodeContracts" Condition=" '$(CodeContractsImported)' != 'true' ">
-    <Error Text="Project requires Code Contracts http://msdn.microsoft.com/en-us/devlabs/dd491992.aspx" />
-  </Target>
+  <Import Project="..\..\tools\build\Digillect.CodeContracts.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">
