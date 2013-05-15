@@ -8,9 +8,20 @@
 		<owners>Gregory Nickonov, Andrew Nefedkin</owners>
 		<requireLicenseAcceptance>false</requireLicenseAcceptance>
 		<description>Digillect Object Model Framework</description>
-		<!--releaseNotes>Initial release.</releaseNotes-->
+		<releaseNotes/>
 		<copyright>Copyright © 2002-2013 Gregory Nickonov and Andrew Nefedkin (Actis® Wunderman). All rights reserved.</copyright>
 		<tags>digillect objectmodel</tags>
+		<dependencies>
+			<group targetFramework="net40">
+				<dependency id="Microsoft.Bcl" version="1.0.19"/>
+			</group>
+			<group targetFramework="sl4">
+				<dependency id="Microsoft.Bcl" version="1.0.19"/>
+			</group>
+			<group targetFramework="wp71">
+				<dependency id="Microsoft.Bcl" version="1.0.19"/>
+			</group>
+		</dependencies>
 		<references>
 			<reference file="Digillect.ObjectModel.dll"/>
 		</references>
