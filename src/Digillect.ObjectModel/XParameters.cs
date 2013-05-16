@@ -193,31 +193,47 @@ namespace Digillect
 
 		#region Public Methods
 		/// <summary>
-		///     Returns a value with the specified name.
+		///     Returns a value for the specified name.
 		/// </summary>
 		/// <typeparam name="T">The desired type of the value.</typeparam>
 		/// <param name="name">The name of the parameter's value.</param>
-		/// <returns></returns>
+		/// <returns>Value or default value for the <typeparamref name="T"/> if specified name doesn't exists.</returns>
 		[Pure]
 		public T GetValue<T>( string name )
 		{
+			if( name == null )
+			{
+				throw new ArgumentNullException( "name" );
+			}
+
+			Contract.EndContractBlock();
+
 #if NET40 && SILVERLIGHT
-			return (T) _parameters.FirstOrDefault(x => String.Equals(x.Key, name, StringComparison.OrdinalIgnoreCase)).Value;
+			var pair = _parameters.FirstOrDefault(x => String.Equals(x.Key, name, StringComparison.OrdinalIgnoreCase));
 #else
-			return (T) Array.Find( _parameters, x => KeyNameComparer.Equals( x.Key, name ) ).Value;
+			var pair = Array.Find( _parameters, x => KeyNameComparer.Equals( x.Key, name ) );
 #endif
+
+			return pair.Key == null ? default(T) : (T) pair.Value;
 		}
 
 		/// <summary>
-		///     Returns a value with the specified name or default value.
+		///     Returns a value for the specified name.
 		/// </summary>
 		/// <typeparam name="T">The desired type of the value.</typeparam>
 		/// <param name="name">The name of the parameter's value.</param>
 		/// <param name="defaultValue">Default value.</param>
-		/// <returns></returns>
+		/// <returns>Value or <paramref name="defaultValue"/>.</returns>
 		[Pure]
 		public T GetValue<T>( string name, T defaultValue )
 		{
+			if( name == null )
+			{
+				throw new ArgumentNullException( "name" );
+			}
+
+			Contract.EndContractBlock();
+
 #if NET40 && SILVERLIGHT
 			var pair = _parameters.FirstOrDefault(x => String.Equals(x.Key, name, StringComparison.OrdinalIgnoreCase));
 #else
@@ -227,6 +243,33 @@ namespace Digillect
 			return pair.Key == null ? defaultValue : (T) pair.Value;
 		}
 
+		/// <summary>
+		///     Determines whether parameters contains the specified name.
+		/// </summary>
+		/// <param name="name">Name to check.</param>
+		/// <returns>
+		///     <c>true</c> if parameters contains the specified name; otherwise, <c>false</c>.
+		/// </returns>
+		/// <exception cref="System.ArgumentNullException">
+		///     If <paramref name="name" /> is <c>null</c>.
+		/// </exception>		[Pure]
+		public bool Contains( string name )
+		{
+			if( name == null )
+			{
+				throw new ArgumentNullException( "name" );
+			}
+
+			Contract.EndContractBlock();
+
+#if NET40 && SILVERLIGHT
+			var pair = _parameters.FirstOrDefault(x => String.Equals(x.Key, name, StringComparison.OrdinalIgnoreCase));
+#else
+			var pair = Array.Find( _parameters, x => KeyNameComparer.Equals( x.Key, name ) );
+#endif
+
+			return pair.Key != null;
+		}
 		/// <summary>
 		///     Returns the <see cref="Digillect.XParameters.Builder" /> object which allows mutation in a multistep fashion.
 		/// </summary>
