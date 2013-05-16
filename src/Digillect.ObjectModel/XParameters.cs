@@ -209,6 +209,25 @@ namespace Digillect
 		}
 
 		/// <summary>
+		///     Returns a value with the specified name or default value.
+		/// </summary>
+		/// <typeparam name="T">The desired type of the value.</typeparam>
+		/// <param name="name">The name of the parameter's value.</param>
+		/// <param name="defaultValue">Default value.</param>
+		/// <returns></returns>
+		[Pure]
+		public T GetValue<T>( string name, T defaultValue )
+		{
+#if NET40 && SILVERLIGHT
+			var pair = _parameters.FirstOrDefault(x => String.Equals(x.Key, name, StringComparison.OrdinalIgnoreCase));
+#else
+			var pair = Array.Find( _parameters, x => KeyNameComparer.Equals( x.Key, name ) );
+#endif
+
+			return pair.Key == null ? defaultValue : (T) pair.Value;
+		}
+
+		/// <summary>
 		///     Returns the <see cref="Digillect.XParameters.Builder" /> object which allows mutation in a multistep fashion.
 		/// </summary>
 		/// <returns>
