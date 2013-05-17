@@ -1,9 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
-<Project DefaultTargets="BuildAndPackage" InitialTargets="CheckForBuildTools;UpdateAssemblyVersion" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project DefaultTargets="Build;Package" InitialTargets="CheckForBuildTools;UpdateAssemblyVersion" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 	<PropertyGroup>
 		<BuildToolsVersion>1.2.0</BuildToolsVersion>
 		<Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-		<XUnitRunner>$(MSBuildProjectDirectory)\packages\xunit.runners.1.9.1\tools\xunit.console.clr4.exe</XUnitRunner>
+		<XUnitRunnerDirectory>$(MSBuildProjectDirectory)\packages\xunit.1.9.1\lib\net20</XUnitRunnerDirectory>
+		<TestGenerateNUnitResults Condition="'$(TestGenerateNUnitResults)' == ''">false</TestGenerateNUnitResults>
+		<TestVerbose Condition="'$(TestVerbose)' == ''">false</TestVerbose>
+		<TestWorkingDirectory>$(MSBuildProjectDirectory)\target\$(Configuration)\tests</TestWorkingDirectory>
 	</PropertyGroup>
 
 	<Target Name="CheckForBuildTools" Condition="!Exists('$(MSBuildProjectDirectory)\packages\Digillect.Build.Tools.$(BuildToolsVersion)\tools\Build.targets')">
@@ -24,13 +27,22 @@
 		<PackagingProjectReference Include="Digillect.ObjectModel.nuproj"/>
 	</ItemGroup>
 
+	<UsingTask AssemblyFile="$(XUnitRunnerDirectory)\xunit.runner.msbuild.dll" TaskName="Xunit.Runner.MSBuild.xunit"/>
+
 	<Target Name="Test" DependsOnTargets="Build">
-		<Exec Command="$(XUnitRunner) Digillect.ObjectModel.Tests.dll /silent /noshadow /nunit TestResult.xml" ContinueOnError="true" WorkingDirectory="$(MSBuildProjectDirectory)\target\$(Configuration)\tests"/>
+		<xunit Assembly="Digillect.ObjectModel.Tests.dll"
+			ShadowCopy="false"
+			Verbose="$(TestVerbose)"
+			WorkingFolder="$(TestWorkingDirectory)"
+			Xml="TestResults.xml"/>
+
+		<XslTransformation Condition="'$(TestGenerateNUnitResults)' == 'true'"
+			OutputPaths="$(TestWorkingDirectory)\TestResultsNUnit.xml"
+			XmlInputPaths="$(TestWorkingDirectory)\TestResults.xml"
+			XslInputPath="$(MSBuildProjectDirectory)\tools\testing\NUnitXml.xslt"/>
 	</Target>
 
 	<Target Name="UpdateAssemblyVersion" Condition="'$(BuildNumber)' != ''">
 		<FileUpdate Files="src\AssemblyVersionInfo.cs" Regex='BuildNumber = "\d+"' ReplacementText='BuildNumber = "$(BuildNumber)"'/>
 	</Target>
-
-	<Target Name="BuildAndPackage" DependsOnTargets="Build;Package"/>
 </Project>
