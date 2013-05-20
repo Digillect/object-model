@@ -77,7 +77,7 @@ namespace Digillect
 			{
 				if ( !EqualityComparer<TId>.Default.Equals(_id, value) )
 				{
-					OnPropertyChanging("Id", _id, value);
+					OnPropertyChanging(_id, value, "Id");
 					_id = value;
 					ResetKey();
 					OnPropertyChanged( "Id" );

@@ -198,23 +198,13 @@ namespace Digillect.Collections
 
 			collection = collection.Distinct(ReferenceComparer);
 
-#if NET45
-			Contract.Assume(collection != null);
-#endif
-
 			var results = this.Items.Merge(collection, options);
 
 			if ( !results.IsEmpty )
 			{
 				RestoreDictionaryState();
-				OnUpdated(EventArgs.Empty);
 
-				if ( results.Added != results.Removed )
-				{
-					OnPropertyChanged(CountString);
-				}
-
-				OnPropertyChanged(IndexerName);
+				OnPropertyChanged(null);
 				OnCollectionReset();
 			}
 

@@ -117,21 +117,21 @@ namespace Digillect
 		/// <summary>
 		/// Returns cached query result, if any.
 		/// </summary>
-		public IXList<T> Get(XQuery<T> query)
+		public IXCollection<T> Get(XQuery<T> query)
 		{
 			Contract.Requires(query != null);
 
 			return Get(query, null, true);
 		}
 
-		public IXList<T> Get(XQuery<T> query, object cookie)
+		public IXCollection<T> Get(XQuery<T> query, object cookie)
 		{
 			Contract.Requires(query != null);
 
 			return Get(query, cookie, false);
 		}
 
-		public IXList<T> Get(XQuery<T> query, object cookie, bool suppressConversion)
+		public IXCollection<T> Get(XQuery<T> query, object cookie, bool suppressConversion)
 		{
 			if ( query == null )
 			{
@@ -275,7 +275,7 @@ namespace Digillect
 		/// <see cref="XCachedQuery"/> или добавляет <paramref name="cookie"/> к уже существующему.
 		/// </summary>
 		/// <returns>Возвращает список объектов.</returns>
-		public IEnumerable<T> Cache(IEnumerable<T> collection, XQuery<T> query, object cookie)
+		public IXCollection<T> Cache(IEnumerable<T> collection, XQuery<T> query, object cookie)
 		{
 			if ( collection == null )
 			{
@@ -287,7 +287,7 @@ namespace Digillect
 				throw new ArgumentNullException("query");
 			}
 
-			Contract.Ensures(Contract.Result<IEnumerable<T>>() != null);
+			Contract.Ensures(Contract.Result<IXCollection<T>>() != null);
 
 			var cached = CacheCollectionCore(collection);
 
@@ -305,7 +305,7 @@ namespace Digillect
 
 			if ( cookie != null )
 			{
-				cq = new XCachedQuery(query, new XCollection<T>(cached), cookie);
+				cq = new XCachedQuery(query, cached, cookie);
 
 				lock ( _queryCache )
 				{
@@ -556,13 +556,14 @@ namespace Digillect
 			return null;
 		}
 
-		private IEnumerable<T> CacheCollectionCore(IEnumerable<T> collection)
+		[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Contracts", "Requires")]
+		private IXCollection<T> CacheCollectionCore(IEnumerable<T> collection)
 		{
 			Contract.Requires(collection != null);
-			Contract.Ensures(Contract.Result<IEnumerable<T>>() != null);
-			Contract.Ensures(Contract.ForAll(Contract.Result<IEnumerable<T>>(), item => item != null));
+			Contract.Ensures(Contract.Result<IXCollection<T>>() != null);
+			Contract.Ensures(Contract.ForAll(Contract.Result<IXCollection<T>>(), item => item != null));
 
-			return collection.Where(x => x != null).Select(x => Cache(x)).ToArray();
+			return new XCollection<T>(collection.Where(x => x != null).Select(x => Cache(x)));
 		}
 		#endregion
 
@@ -570,12 +571,12 @@ namespace Digillect
 		protected sealed class XCachedQuery
 		{
 			private readonly XQuery<T> _query;
-			private readonly IXList<T> _items;
-			private readonly IXList<T> _readonlyItems;
+			private readonly IXCollection<T> _items;
+			private readonly IXCollection<T> _readonlyItems;
 			private readonly IList<WeakReference> _cookies = new List<WeakReference>();
 
 			#region Constructors/Disposer
-			public XCachedQuery( XQuery<T> query, IXList<T> items, object cookie )
+			public XCachedQuery(XQuery<T> query, IXCollection<T> items, object cookie)
 			{
 				if( query == null )
 				{
@@ -596,7 +597,7 @@ namespace Digillect
 
 				_query = query.Clone();
 				_items = items;
-				_readonlyItems = XCollectionsUtil.UnmodifiableList( items );
+				_readonlyItems = XCollectionsUtil.UnmodifiableCollection(items);
 
 				AddCookie( cookie );
 			}
@@ -613,11 +614,11 @@ namespace Digillect
 				}
 			}
 
-			public IXList<T> Items
+			public IXCollection<T> Items
 			{
 				get
 				{
-					Contract.Ensures(Contract.Result<IXList<T>>() != null);
+					Contract.Ensures(Contract.Result<IXCollection<T>>() != null);
 
 					return _readonlyItems;
 				}
@@ -627,6 +628,8 @@ namespace Digillect
 			{
 				get
 				{
+					Contract.Ensures(Contract.Result<int>() >= 0);
+
 					CleanCookies();
 
 					return _cookies.Count;

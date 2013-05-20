@@ -22,6 +22,7 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
+using System.ComponentModel;
 using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Threading;
@@ -31,13 +32,12 @@ namespace Digillect.Collections
 #if !(SILVERLIGHT || WINDOWS8)
 	[Serializable]
 #endif
-	public class XCombinedCollection<T> : XBasedCollection<T>
+	public sealed class XCombinedCollection<T> : XBasedCollection<T>
 		where T : XObject
 	{
-		private readonly IList<IXList<T>> _collections;
+		private readonly IList<IXList<T>> _baseCollections;
 
-		private int _count = -1;
-		private ushort _updateCount;
+		private int _size = -1;
 		private int _version;
 
 		#region Constructor/Disposer
@@ -63,12 +63,11 @@ namespace Digillect.Collections
 
 			Contract.EndContractBlock();
 
-			_collections = new List<IXList<T>>(collections);
+			_baseCollections = collections.ToList();
 
-			foreach ( var item in _collections )
+			foreach ( var item in _baseCollections )
 			{
-				item.CollectionChanged += UnderlyingCollection_CollectionChanged;
-				item.Updated += UnderlyingCollection_Updated;
+				item.CollectionChanged += BaseCollection_CollectionChanged;
 			}
 		}
 
@@ -77,57 +76,13 @@ namespace Digillect.Collections
 		{
 			if ( disposing )
 			{
-				foreach ( var item in _collections )
+				foreach ( var item in _baseCollections )
 				{
-					item.CollectionChanged -= UnderlyingCollection_CollectionChanged;
-					item.Updated -= UnderlyingCollection_Updated;
-
-					for ( uint i = _updateCount; i != 0; i-- )
-					{
-						item.EndUpdate();
-					}
+					item.CollectionChanged -= BaseCollection_CollectionChanged;
 				}
-
-				_collections.Clear();
-				_updateCount = 0;
 			}
 
 			base.Dispose(disposing);
-		}
-		#endregion
-
-		#region Events
-		/// <inheritdoc/>
-		public override event NotifyCollectionChangedEventHandler CollectionChanged;
-
-		/// <summary>
-		/// Raises the <see cref="CollectionChanged" /> event.
-		/// </summary>
-		/// <param name="e">The <see cref="NotifyCollectionChangedEventArgs" /> instance containing the event data.</param>
-		protected virtual void OnCollectionChanged(NotifyCollectionChangedEventArgs e)
-		{
-			if ( _updateCount == 0 && CollectionChanged != null )
-			{
-				CollectionChanged(this, e);
-			}
-		}
-
-		/// <inheritdoc/>
-		protected override void OnPropertyChanged(System.ComponentModel.PropertyChangedEventArgs e)
-		{
-			if ( _updateCount == 0 )
-			{
-				base.OnPropertyChanged(e);
-			}
-		}
-
-		/// <inheritdoc/>
-		protected override void OnUpdated(EventArgs e)
-		{
-			if ( _updateCount == 0 )
-			{
-				base.OnUpdated(e);
-			}
 		}
 		#endregion
 
@@ -137,12 +92,12 @@ namespace Digillect.Collections
 		{
 			get
 			{
-				if ( _count == -1 )
+				if ( _size == -1 )
 				{
-					Interlocked.Exchange(ref _count, _collections.Sum(x => x.Count));
+					Interlocked.Exchange(ref _size, _baseCollections.Sum(x => x.Count));
 				}
 
-				return _count;
+				return _size;
 			}
 		}
 
@@ -151,7 +106,7 @@ namespace Digillect.Collections
 		{
 			get
 			{
-				foreach ( var c in _collections )
+				foreach ( var c in _baseCollections )
 				{
 					if ( index >= c.Count )
 					{
@@ -170,56 +125,33 @@ namespace Digillect.Collections
 
 		#region Methods
 		/// <inheritdoc/>
-		public override void BeginUpdate()
-		{
-			_updateCount++;
-
-			foreach ( var c in _collections )
-			{
-				c.BeginUpdate();
-			}
-		}
-
-		/// <inheritdoc/>
 		public override XBasedCollection<T> Clone(bool deep)
 		{
-			IList<IXList<T>> collections;
+			IEnumerable<IXList<T>> collections = deep ? _baseCollections.Select(x => (IXList<T>) x.Clone(deep)) : _baseCollections;
 
-			if ( deep )
-			{
-				collections = new List<IXList<T>>();
+			Contract.Assume(Contract.ForAll(collections, item => item != null));
 
-				for ( int i = 0; i < _collections.Count; i++ )
-				{
-					collections.Add((IXList<T>) _collections[i].Clone(deep));
-				}
-			}
-			else
-			{
-				collections = _collections;
-			}
-
-			return (XBasedCollection<T>) Activator.CreateInstance(GetType(), collections);
+			return new XCombinedCollection<T>(collections);
 		}
 
 		/// <inheritdoc/>
 		[ContractVerification(false)]
 		public override bool Contains(T item)
 		{
-			return _collections.Any(x => x.Contains(item));
+			return _baseCollections.Any(x => x.Contains(item));
 		}
 
 		/// <inheritdoc/>
 		[ContractVerification(false)]
 		public override bool ContainsKey(XKey key)
 		{
-			return _collections.Any(x => x.ContainsKey(key));
+			return _baseCollections.Any(x => x.ContainsKey(key));
 		}
 
 		/// <inheritdoc/>
 		public override void CopyTo(T[] array, int arrayIndex)
 		{
-			foreach ( var c in _collections )
+			foreach ( var c in _baseCollections )
 			{
 				c.CopyTo(array, arrayIndex);
 
@@ -228,33 +160,11 @@ namespace Digillect.Collections
 		}
 
 		/// <inheritdoc/>
-		public override void EndUpdate()
-		{
-			if ( _updateCount == 0 )
-			{
-				return;
-			}
-
-			foreach ( var c in _collections )
-			{
-				c.EndUpdate();
-			}
-
-			if ( --_updateCount == 0 )
-			{
-				OnUpdated(EventArgs.Empty);
-				OnPropertyChanged(CountString);
-				OnPropertyChanged(IndexerName);
-				OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset));
-			}
-		}
-
-		/// <inheritdoc/>
 		public override IEnumerator<T> GetEnumerator()
 		{
 			int version = _version;
 
-			foreach ( var item in _collections.SelectMany(x => x) )
+			foreach ( var item in _baseCollections.SelectMany(x => x) )
 			{
 				if ( version != _version )
 				{
@@ -268,7 +178,7 @@ namespace Digillect.Collections
 		/// <inheritdoc/>
 		public override IEnumerable<XKey> GetKeys()
 		{
-			return _collections.SelectMany(x => x.GetKeys());
+			return _baseCollections.SelectMany(x => x.GetKeys());
 		}
 
 		/// <inheritdoc/>
@@ -276,7 +186,7 @@ namespace Digillect.Collections
 		{
 			int count = 0;
 
-			foreach ( var c in _collections )
+			foreach ( var c in _baseCollections )
 			{
 				int index = c.IndexOf(key);
 
@@ -296,7 +206,7 @@ namespace Digillect.Collections
 		{
 			int count = 0;
 
-			foreach ( var c in _collections )
+			foreach ( var c in _baseCollections )
 			{
 				int index = c.IndexOf(item);
 
@@ -315,33 +225,9 @@ namespace Digillect.Collections
 		#region Collections Manipulations
 		public void AddCollection(IXList<T> item)
 		{
-			if ( item == null )
-			{
-				throw new ArgumentNullException("item");
-			}
+			Contract.Requires(item != null);
 
-			Contract.EndContractBlock();
-
-			_collections.Add(item);
-
-			item.CollectionChanged += UnderlyingCollection_CollectionChanged;
-			item.Updated += UnderlyingCollection_Updated;
-
-			if ( _updateCount != 0 )
-			{
-				for ( uint i = 0; i < _updateCount; i++ )
-				{
-					item.BeginUpdate();
-				}
-			}
-			else if ( item.Count != 0 )
-			{
-				OnUpdated(EventArgs.Empty);
-				OnPropertyChanged(CountString);
-				OnPropertyChanged(IndexerName);
-				// WPF is known to not support range operations so we can not issue Add with all of the items at a time
-				OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset));
-			}
+			InsertCollection(_baseCollections.Count, item);
 		}
 
 		public void InsertCollection(int index, IXList<T> item)
@@ -352,26 +238,20 @@ namespace Digillect.Collections
 			}
 
 			Contract.Requires(index >= 0);
+			//Contract.Requires(index <= _collections.Count);
 
-			_collections.Insert(index, item);
+			_baseCollections.Insert(index, item);
 
-			item.CollectionChanged += UnderlyingCollection_CollectionChanged;
-			item.Updated += UnderlyingCollection_Updated;
+			_version++;
 
-			if ( _updateCount != 0 )
+			item.CollectionChanged += BaseCollection_CollectionChanged;
+
+			if ( !this.IsInUpdate && item.Count != 0 )
 			{
-				for ( uint i = 0; i < _updateCount; i++ )
-				{
-					item.BeginUpdate();
-				}
-			}
-			else if ( item.Count != 0 )
-			{
-				OnUpdated(EventArgs.Empty);
 				OnPropertyChanged(CountString);
 				OnPropertyChanged(IndexerName);
 				// WPF is known to not support range operations so we can not issue Add with all of the items at a time
-				OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset));
+				OnCollectionReset();
 			}
 		}
 
@@ -384,36 +264,29 @@ namespace Digillect.Collections
 
 			Contract.EndContractBlock();
 
-			if ( !_collections.Remove(item) )
+			if ( !_baseCollections.Remove(item) )
 			{
 				return false;
 			}
 
-			item.CollectionChanged -= UnderlyingCollection_CollectionChanged;
-			item.Updated -= UnderlyingCollection_Updated;
+			_version++;
 
-			if ( _updateCount != 0 )
+			item.CollectionChanged -= BaseCollection_CollectionChanged;
+
+			if ( !this.IsInUpdate && item.Count != 0 )
 			{
-				for ( uint i = _updateCount; i != 0; i-- )
-				{
-					item.EndUpdate();
-				}
-			}
-			else if ( item.Count != 0 )
-			{
-				OnUpdated(EventArgs.Empty);
 				OnPropertyChanged(CountString);
 				OnPropertyChanged(IndexerName);
 				// WPF is known to not support range operations so we can not issue Remove with all of the items at a time
-				OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset));
+				OnCollectionReset();
 			}
 
 			return true;
 		}
 		#endregion
 
-		#region Protected Methods
-		protected int CalculateCombinedIndex(IXList<T> collection, int index)
+		#region CalculateCombinedIndex
+		private int CalculateCombinedIndex(IXList<T> collection, int index)
 		{
 			Contract.Requires(collection != null);
 			Contract.Requires(index >= 0);
@@ -421,7 +294,7 @@ namespace Digillect.Collections
 
 			int count = 0;
 
-			foreach ( var c in _collections )
+			foreach ( var c in _baseCollections )
 			{
 				if ( !Object.ReferenceEquals(c, collection) )
 				{
@@ -433,87 +306,67 @@ namespace Digillect.Collections
 				}
 			}
 
-			throw new ArgumentException("The collection is not an underlying member of this collection.", "collection");
+			throw new ArgumentException("The collection is not a member of this collection.", "collection");
 		}
 		#endregion
 
 		#region Event Handlers
-		private void UnderlyingCollection_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
+		private void BaseCollection_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
 		{
 			_version++;
 
 			if ( e.Action == NotifyCollectionChangedAction.Add || e.Action == NotifyCollectionChangedAction.Remove || e.Action == NotifyCollectionChangedAction.Reset )
 			{
-				_count = -1;
+				_size = -1;
 
-				if ( _updateCount == 0 )
-				{
-					OnPropertyChanged(CountString);
-				}
+				OnPropertyChanged(CountString);
 			}
 
-			if ( _updateCount != 0 )
+			if ( this.IsInUpdate )
 			{
 				return;
 			}
 
 			OnPropertyChanged(IndexerName);
 
-			if ( CollectionChanged != null )
+			IXList<T> collection = (IXList<T>) sender;
+
+			Contract.Assume(collection != null);
+
+			switch ( e.Action )
 			{
-				Contract.Assume(sender != null);
-
-				IXList<T> collection = (IXList<T>) sender;
-				NotifyCollectionChangedEventArgs args;
-
-				switch ( e.Action )
-				{
 #if NET40 && SILVERLIGHT
-					case NotifyCollectionChangedAction.Add:
-						args = new NotifyCollectionChangedEventArgs(e.Action, e.NewItems[0], CalculateCombinedIndex(collection, e.NewStartingIndex));
-						break;
-					case NotifyCollectionChangedAction.Remove:
-						args = new NotifyCollectionChangedEventArgs(e.Action, e.OldItems[0], CalculateCombinedIndex(collection, e.OldStartingIndex));
-						break;
-					case NotifyCollectionChangedAction.Replace:
-						// e.NewStartingIndex == e.OldStartingIndex
-						args = new NotifyCollectionChangedEventArgs(e.Action, e.NewItems[0], e.OldItems[0], CalculateCombinedIndex(collection, e.NewStartingIndex));
-						break;
+				case NotifyCollectionChangedAction.Add:
+					OnCollectionChanged(() => new NotifyCollectionChangedEventArgs(e.Action, e.NewItems[0], CalculateCombinedIndex(collection, e.NewStartingIndex)));
+					break;
+				case NotifyCollectionChangedAction.Remove:
+					OnCollectionChanged(() => new NotifyCollectionChangedEventArgs(e.Action, e.OldItems[0], CalculateCombinedIndex(collection, e.OldStartingIndex)));
+					break;
+				case NotifyCollectionChangedAction.Replace:
+					// e.NewStartingIndex == e.OldStartingIndex
+					OnCollectionChanged(() => new NotifyCollectionChangedEventArgs(e.Action, e.NewItems[0], e.OldItems[0], CalculateCombinedIndex(collection, e.NewStartingIndex)));
+					break;
 #else
-					case NotifyCollectionChangedAction.Add:
-						args = new NotifyCollectionChangedEventArgs(e.Action, e.NewItems, CalculateCombinedIndex(collection, e.NewStartingIndex));
-						break;
-					case NotifyCollectionChangedAction.Remove:
-						args = new NotifyCollectionChangedEventArgs(e.Action, e.OldItems, CalculateCombinedIndex(collection, e.OldStartingIndex));
-						break;
-					case NotifyCollectionChangedAction.Move:
-						// e.NewItems and e.OldItems have the same content
-						args = new NotifyCollectionChangedEventArgs(e.Action, e.NewItems, CalculateCombinedIndex(collection, e.NewStartingIndex), CalculateCombinedIndex(collection, e.OldStartingIndex));
-						break;
-					case NotifyCollectionChangedAction.Replace:
-						// e.NewStartingIndex == e.OldStartingIndex
-						args = new NotifyCollectionChangedEventArgs(e.Action, e.NewItems, e.OldItems, CalculateCombinedIndex(collection, e.NewStartingIndex));
-						break;
+				case NotifyCollectionChangedAction.Add:
+					OnCollectionChanged(() => new NotifyCollectionChangedEventArgs(e.Action, e.NewItems, CalculateCombinedIndex(collection, e.NewStartingIndex)));
+					break;
+				case NotifyCollectionChangedAction.Remove:
+					OnCollectionChanged(() => new NotifyCollectionChangedEventArgs(e.Action, e.OldItems, CalculateCombinedIndex(collection, e.OldStartingIndex)));
+					break;
+				case NotifyCollectionChangedAction.Move:
+					// e.NewItems and e.OldItems have the same content
+					OnCollectionChanged(() => new NotifyCollectionChangedEventArgs(e.Action, e.NewItems, CalculateCombinedIndex(collection, e.NewStartingIndex), CalculateCombinedIndex(collection, e.OldStartingIndex)));
+					break;
+				case NotifyCollectionChangedAction.Replace:
+					// e.NewStartingIndex == e.OldStartingIndex
+					OnCollectionChanged(() => new NotifyCollectionChangedEventArgs(e.Action, e.NewItems, e.OldItems, CalculateCombinedIndex(collection, e.NewStartingIndex)));
+					break;
 #endif
-					case NotifyCollectionChangedAction.Reset:
-						args = new NotifyCollectionChangedEventArgs(e.Action);
-						break;
-					default:
-						throw new ArgumentException(e.Action.ToString(), "e");
-				}
-
-				CollectionChanged(this, args);
-			}
-		}
-
-		private void UnderlyingCollection_Updated(object sender, EventArgs e)
-		{
-			_version++;
-			_count = -1;
-
-			if ( _updateCount == 0 )
-			{
-				OnUpdated(EventArgs.Empty);
+				case NotifyCollectionChangedAction.Reset:
+					OnCollectionReset();
+					break;
+				default:
+					throw new ArgumentException(e.Action.ToString(), "e");
 			}
 		}
 		#endregion

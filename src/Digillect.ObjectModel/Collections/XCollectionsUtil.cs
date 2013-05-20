@@ -102,6 +102,24 @@ namespace Digillect.Collections
 #endif
 		#endregion
 
+		#region ToXCollection`1 Extension
+		/// <summary>
+		/// Creates a <see cref="XCollection{T}"/> from an <see cref="IEnumerable{T}"/>.
+		/// </summary>
+		/// <typeparam name="T">The type of the elements of <paramref name="source"/>.</typeparam>
+		/// <param name="source">The <see cref="IEnumerable{T}"/> to create a <see cref="XCollection{T}"/> from.</param>
+		/// <returns>A <see cref="XCollection{T}"/> that contains elements from the input sequence.</returns>
+		/// <exception cref="ArgumentNullException"><paramref name="source"/> is null.</exception>
+		public static XCollection<T> ToXCollection<T>(this IEnumerable<T> source)
+			where T : XObject
+		{
+			Contract.Requires(source != null);
+			Contract.Requires(Contract.ForAll(source, item => item != null));
+
+			return new XCollection<T>(source);
+		}
+		#endregion
+
 		#region RemoveAll`1 Extension
 		/// <summary>
 		/// Removes all items from the <paramref name="source"/> collection which match the <paramref name="predicate"/>.
@@ -115,6 +133,7 @@ namespace Digillect.Collections
 		{
 			Contract.Requires(source != null);
 			Contract.Requires(predicate != null);
+			Contract.Ensures(!Contract.Result<bool>() || source.Count < Contract.OldValue(source.Count));
 
 			return source.RemoveAll(source.Where(predicate).ToArray());
 		}
@@ -127,6 +146,7 @@ namespace Digillect.Collections
 		/// <param name="collection">The collection which contains the items to remove. The value can be <c>null</c> in which case no operation is performed and the returned value will be <c>false</c>.</param>
 		/// <returns><c>true</c> if any items were removed; otherwise, <c>false</c>.</returns>
 		/// <exception cref="ArgumentNullException">The <paramref name="source"/> parameter cannot be null.</exception>
+		[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Contracts", "Ensures")]
 		public static bool RemoveAll<T>(this ICollection<T> source, IEnumerable<T> collection)
 		{
 			if ( source == null )
@@ -134,7 +154,7 @@ namespace Digillect.Collections
 				throw new ArgumentNullException("source");
 			}
 
-			Contract.EndContractBlock();
+			Contract.Ensures(!Contract.Result<bool>() || source.Count < Contract.OldValue(source.Count));
 
 			bool modified = false;
 
@@ -160,6 +180,7 @@ namespace Digillect.Collections
 		/// <param name="collection">The collection which contains the keys to remove. The value can be <c>null</c> in which case no operation is performed and the returned value will be <c>false</c>.</param>
 		/// <returns><c>true</c> if any items were removed; otherwise, <c>false</c>.</returns>
 		/// <exception cref="ArgumentNullException">The <paramref name="source"/> parameter cannot be null.</exception>
+		[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Contracts", "Ensures")]
 		public static bool RemoveAll<T>(this IXCollection<T> source, IEnumerable<XKey> collection)
 		{
 			if ( source == null )
@@ -167,7 +188,7 @@ namespace Digillect.Collections
 				throw new ArgumentNullException("source");
 			}
 
-			Contract.EndContractBlock();
+			Contract.Ensures(!Contract.Result<bool>() || source.Count < Contract.OldValue(source.Count));
 
 			bool modified = false;
 
@@ -470,6 +491,7 @@ namespace Digillect.Collections
 		///	}
 		/// </code>
 		/// </example>
+		[Pure]
 		public static XCollectionDifference<T> Difference<T>(this IXCollection<T> source, IEnumerable<T> target)
 			where T : XObject
 		{
@@ -535,6 +557,7 @@ namespace Digillect.Collections
 		/// <returns>
 		/// Unmodifiable (<see cref="ICollection&lt;T&gt;.IsReadOnly"/> == <c>true</c>) wrapper around the original collection.
 		/// </returns>
+		[Pure]
 		public static IXCollection<T> UnmodifiableCollection<T>(IXCollection<T> collection)
 		{
 			Contract.Requires( collection != null );
@@ -550,6 +573,7 @@ namespace Digillect.Collections
 		/// <returns>
 		/// Unmodifiable (<see cref="ICollection&lt;T&gt;.IsReadOnly"/> == <c>true</c>) wrapper around the original collection.
 		/// </returns>
+		[Pure]
 		public static IXList<T> UnmodifiableList<T>(IXList<T> collection)
 		{
 			Contract.Requires(collection != null);
@@ -572,12 +596,13 @@ namespace Digillect.Collections
 
 		#region FilteredList
 		/// <summary>
-		/// Creates a <see cref="FilteredList&lt;T&gt;"/> instance using the <paramref name="filter"/> as a filter.
+		/// Creates a <see cref="XFilteredCollection&lt;T&gt;"/> instance using the <paramref name="filter"/> as a filter.
 		/// </summary>
 		/// <typeparam name="T">Type of the collection's members.</typeparam>
 		/// <param name="collection">Source collection.</param>
 		/// <param name="filter">A function which performs actual filtering.</param>
 		/// <returns></returns>
+		[Pure]
 		public static XFilteredCollection<T> FilteredList<T>(IXList<T> collection, Func<T, bool> filter)
 			where T : XObject
 		{
@@ -604,6 +629,57 @@ namespace Digillect.Collections
 
 			Contract.EndContractBlock();
 		}
+
+		#region Compatibility Extensions
+#if NET40 && SILVERLIGHT
+		internal static int FindIndex<T>(this List<T> collection, Predicate<T> match)
+		{
+			if ( collection == null )
+			{
+				throw new ArgumentNullException("collection");
+			}
+
+			if ( match == null )
+			{
+				throw new ArgumentNullException("match");
+			}
+
+			Contract.EndContractBlock();
+
+			for ( int i = 0; i < collection.Count; i++ )
+			{
+				if ( match(collection[i]) )
+				{
+					return i;
+				}
+			}
+
+			return -1;
+		}
+#endif
+
+#if WINDOWS8
+		internal static void ForEach<T>(this List<T> collection, Action<T> action)
+		{
+			if ( collection == null )
+			{
+				throw new ArgumentNullException("collection");
+			}
+
+			if ( action == null )
+			{
+				throw new ArgumentNullException("action");
+			}
+
+			Contract.EndContractBlock();
+
+			foreach ( var item in collection )
+			{
+				action(item);
+			}
+		}
+#endif
+		#endregion
 
 		#region class ReadOnlyXCollection`1
 #if !(SILVERLIGHT || WINDOWS8)
@@ -653,12 +729,6 @@ namespace Digillect.Collections
 			#endregion
 
 			#region IXUpdatable`1 Members
-			event EventHandler IXUpdatable<IXCollection<T>>.Updated
-			{
-				add { this.collection.Updated += value; }
-				remove { this.collection.Updated -= value; }
-			}
-
 			void IXUpdatable<IXCollection<T>>.BeginUpdate()
 			{
 				collection.BeginUpdate();
@@ -743,6 +813,14 @@ namespace Digillect.Collections
 			{
 				add { this.collection.CollectionChanged += value; }
 				remove { this.collection.CollectionChanged -= value; }
+			}
+			#endregion
+
+			#region INotifyPropertyChanged Members
+			event PropertyChangedEventHandler INotifyPropertyChanged.PropertyChanged
+			{
+				add { collection.PropertyChanged += value; }
+				remove { collection.PropertyChanged -= value; }
 			}
 			#endregion
 
@@ -850,39 +928,38 @@ namespace Digillect.Collections
 		#endregion
 
 		#region class FuncFilteredCollection`1
-		private class FuncFilteredCollection<T> : XFilteredCollection<T>
+		private sealed class FuncFilteredCollection<T> : XFilteredCollection<T>
 			where T : XObject
 		{
 			private readonly Func<T, bool> _filter;
 
-			public FuncFilteredCollection(IXList<T> originalCollection, Func<T, bool> filter)
-				: base(originalCollection)
+			public FuncFilteredCollection(IXList<T> collection, Func<T, bool> filter)
+				: base(collection)
 			{
 				if ( filter == null )
 				{
 					throw new ArgumentNullException("filter");
 				}
 
-				Contract.Requires(originalCollection != null);
+				Contract.Requires(collection != null);
 
-				this._filter = filter;
+				_filter = filter;
 			}
 
-			protected override XFilteredCollection<T> CreateInstanceOfSameType(IXList<T> originalCollection)
+			protected override XFilteredCollection<T> CreateInstanceOfSameType(IXList<T> collection)
 			{
 #if !(SILVERLIGHT || WINDOWS8)
-				Func<T, bool> filter = (Func<T, bool>) this._filter.Clone();
+				Func<T, bool> filter = (Func<T, bool>) _filter.Clone();
 #else
-				Contract.Assume(this._filter != null);
-				Func<T, bool> filter = this._filter;
+				Func<T, bool> filter = _filter;
 #endif
 
-				return new FuncFilteredCollection<T>(originalCollection, filter);
+				return new FuncFilteredCollection<T>(collection, filter);
 			}
 
 			protected override bool Filter(T obj)
 			{
-				return this._filter(obj);
+				return _filter(obj);
 			}
 		} 
 		#endregion

@@ -23,6 +23,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Specialized;
+using System.ComponentModel;
 using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Threading;
@@ -32,23 +33,26 @@ namespace Digillect.Collections
 #if !(SILVERLIGHT || WINDOWS8)
 	[Serializable]
 #endif
-	public class XSubRangeCollection<T> : XBasedCollection<T>
+	public sealed class XSubRangeCollection<T> : XBasedCollection<T>
 		where T : XObject
 	{
-		[ContractPublicPropertyName("UnderlyingCollection")]
-		private IXList<T> _underlyingCollection;
+		private readonly IXList<T> _baseCollection;
 		private readonly int _startIndex;
 		private readonly int _maxCount;
 
 		private int _size;
-		private ushort _updateCount;
 #if CUSTOM_ENUMERATOR
 		private int _version;
 #endif
 
 		#region Constructor/Disposer
-		public XSubRangeCollection(int startIndex, int maxCount)
+		public XSubRangeCollection(IXList<T> collection, int startIndex, int maxCount)
 		{
+			if ( collection == null )
+			{
+				throw new ArgumentNullException("collection");
+			}
+
 			if ( startIndex < 0 )
 			{
 				throw new ArgumentOutOfRangeException("startIndex", Errors.ArgumentOutOfRange_NeedNonNegNum);
@@ -59,22 +63,13 @@ namespace Digillect.Collections
 				throw new ArgumentOutOfRangeException("maxCount", Errors.ArgumentOutOfRange_NeedNonNegNum);
 			}
 
+			Contract.EndContractBlock();
+
+			_baseCollection = collection;
 			_startIndex = startIndex;
 			_maxCount = maxCount;
-		}
 
-		public XSubRangeCollection(IXList<T> collection, int startIndex, int maxCount)
-			: this(startIndex, maxCount)
-		{
-			if ( collection == null )
-			{
-				throw new ArgumentNullException("collection");
-			}
-
-			_underlyingCollection = collection;
-
-			_underlyingCollection.CollectionChanged += UnderlyingCollection_CollectionChanged;
-			_underlyingCollection.Updated += UnderlyingCollection_Updated;
+			_baseCollection.CollectionChanged += BaseCollection_CollectionChanged;
 
 			_size = CalculateCollectionSize();
 		}
@@ -84,57 +79,10 @@ namespace Digillect.Collections
 		{
 			if ( disposing )
 			{
-				if ( _underlyingCollection != null )
-				{
-					_underlyingCollection.CollectionChanged -= UnderlyingCollection_CollectionChanged;
-					_underlyingCollection.Updated -= UnderlyingCollection_Updated;
-
-					for ( uint i = _updateCount; i != 0; i-- )
-					{
-						_underlyingCollection.EndUpdate();
-					}
-
-					_underlyingCollection = null;
-					_updateCount = 0;
-				}
+				_baseCollection.CollectionChanged -= BaseCollection_CollectionChanged;
 			}
 
 			base.Dispose(disposing);
-		}
-		#endregion
-
-		#region Events
-		/// <inheritdoc/>
-		public override event NotifyCollectionChangedEventHandler CollectionChanged;
-
-		/// <summary>
-		/// Raises the <see cref="CollectionChanged" /> event.
-		/// </summary>
-		/// <param name="e">The <see cref="NotifyCollectionChangedEventArgs" /> instance containing the event data.</param>
-		protected virtual void OnCollectionChanged(NotifyCollectionChangedEventArgs e)
-		{
-			if ( _updateCount == 0 && CollectionChanged != null )
-			{
-				CollectionChanged(this, e);
-			}
-		}
-
-		/// <inheritdoc/>
-		protected override void OnPropertyChanged(System.ComponentModel.PropertyChangedEventArgs e)
-		{
-			if ( _updateCount == 0 )
-			{
-				base.OnPropertyChanged(e);
-			}
-		}
-
-		/// <inheritdoc/>
-		protected override void OnUpdated(EventArgs e)
-		{
-			if ( _updateCount == 0 )
-			{
-				base.OnUpdated(e);
-			}
 		}
 		#endregion
 
@@ -155,136 +103,43 @@ namespace Digillect.Collections
 					throw new ArgumentOutOfRangeException("index", Errors.ArgumentOutOfRange_Index);
 				}
 
-				return _underlyingCollection[_startIndex + index];
+				return _baseCollection[_startIndex + index];
 			}
 		}
 
-		[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
-		public IXList<T> UnderlyingCollection
+		public IXList<T> BaseCollection
 		{
-			get { return _underlyingCollection; }
-			set
-			{
-				if ( value == null )
-				{
-					throw new ArgumentNullException("value");
-				}
-
-				if ( _underlyingCollection != null )
-				{
-					_underlyingCollection.CollectionChanged -= UnderlyingCollection_CollectionChanged;
-					_underlyingCollection.Updated -= UnderlyingCollection_Updated;
-
-					uint updateCount = _updateCount;
-
-					for ( uint i = updateCount; i != 0; i-- )
-					{
-						_underlyingCollection.EndUpdate();
-					}
-				}
-
-				_underlyingCollection = value;
-
-				uint updateCount2 = _updateCount;
-
-				for ( uint i = 0 ; i < updateCount2; i++ )
-				{
-					_underlyingCollection.BeginUpdate();
-				}
-
-				_underlyingCollection.CollectionChanged += UnderlyingCollection_CollectionChanged;
-				_underlyingCollection.Updated += UnderlyingCollection_Updated;
-
-				_size = CalculateCollectionSize();
-
-				OnPropertyChanged(CountString);
-				OnPropertyChanged(IndexerName);
-				OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset));
-				OnUpdated(EventArgs.Empty);
-			}
+			get { return _baseCollection; }
 		}
 		#endregion
 
 		#region Methods
 		/// <inheritdoc/>
-		public override void BeginUpdate()
-		{
-			_updateCount++;
-
-			if ( _underlyingCollection != null )
-			{
-				_underlyingCollection.BeginUpdate();
-			}
-		}
-
-		/// <inheritdoc/>
 		public override XBasedCollection<T> Clone(bool deep)
 		{
-			if ( _underlyingCollection == null )
-			{
-				return new XSubRangeCollection<T>(_startIndex, _maxCount);
-			}
-
-			return new XSubRangeCollection<T>(deep ? (IXList<T>) _underlyingCollection.Clone(true) : _underlyingCollection, _startIndex, _maxCount);
+			return new XSubRangeCollection<T>(deep ? (IXList<T>) _baseCollection.Clone(true) : _baseCollection, _startIndex, _maxCount);
 		}
 
 		/// <inheritdoc/>
 		[ContractVerification(false)]
 		public override bool Contains(T item)
 		{
-			if ( _underlyingCollection == null )
-			{
-				return false;
-			}
-
-			return _underlyingCollection.Skip(_startIndex).Take(_size).Any(x => x.Equals(item));
+			return _baseCollection.Skip(_startIndex).Take(_size).Any(x => x.Equals(item));
 		}
 
 		/// <inheritdoc/>
 		[ContractVerification(false)]
 		public override bool ContainsKey(XKey key)
 		{
-			if ( _underlyingCollection == null )
-			{
-				return false;
-			}
-
-			return _underlyingCollection.Skip(_startIndex).Take(_size).Any(x => x.GetKey() == key);
-		}
-
-		/// <inheritdoc/>
-		public override void EndUpdate()
-		{
-			if ( _updateCount == 0 )
-			{
-				return;
-			}
-
-			if ( _underlyingCollection != null )
-			{
-				_underlyingCollection.EndUpdate();
-			}
-
-			if ( --_updateCount == 0 )
-			{
-				OnUpdated(EventArgs.Empty);
-				OnPropertyChanged(CountString);
-				OnPropertyChanged(IndexerName);
-				OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset));
-			}
+			return _baseCollection.Skip(_startIndex).Take(_size).Any(x => x.GetKey() == key);
 		}
 
 		/// <inheritdoc/>
 		public override IEnumerator<T> GetEnumerator()
 		{
 #if CUSTOM_ENUMERATOR
-			if ( _underlyingCollection == null )
-			{
-				yield break;
-			}
-
 			int version = _version;
-			int endIndex = Math.Min(_startIndex + _size, _underlyingCollection.Count);
+			int endIndex = Math.Min(_startIndex + _size, _baseCollection.Count);
 
 			for ( int i = _startIndex; i < endIndex; i++ )
 			{
@@ -293,34 +148,26 @@ namespace Digillect.Collections
 					throw new InvalidOperationException(Errors.XCollectionEnumFailedVersionException);
 				}
 
-				yield return _underlyingCollection[i];
+				yield return _baseCollection[i];
 			}
 #else
-			if ( _underlyingCollection == null )
-			{
-				return Enumerable.Empty<T>().GetEnumerator();
-			}
-
-			return _underlyingCollection.Skip(_startIndex).Take(_size).GetEnumerator();
+			return _baseCollection.Skip(_startIndex).Take(_size).GetEnumerator();
 #endif
 		}
 
 		/// <inheritdoc/>
 		public override int IndexOf(XKey key)
 		{
-			if ( _underlyingCollection != null )
+			int index = 0;
+
+			foreach ( T element in _baseCollection.Skip(_startIndex).Take(_size) )
 			{
-				int index = 0;
-
-				foreach ( T element in _underlyingCollection.Skip(_startIndex).Take(_size) )
+				if ( element.GetKey() == key )
 				{
-					if ( element.GetKey() == key )
-					{
-						return index;
-					}
-
-					index++;
+					return index;
 				}
+
+				index++;
 			}
 
 			return -1;
@@ -329,43 +176,33 @@ namespace Digillect.Collections
 		/// <inheritdoc/>
 		public override int IndexOf(T item)
 		{
-			if ( _underlyingCollection != null )
+			int index = 0;
+
+			foreach ( T element in _baseCollection.Skip(_startIndex).Take(_size) )
 			{
-				int index = 0;
-
-				foreach ( T element in _underlyingCollection.Skip(_startIndex).Take(_size) )
+				if ( element.Equals(item) )
 				{
-					if ( element.Equals(item) )
-					{
-						return index;
-					}
-
-					index++;
+					return index;
 				}
+
+				index++;
 			}
 
 			return -1;
 		}
 
 		[Pure]
-		protected int CalculateCollectionSize()
+		private int CalculateCollectionSize()
 		{
-			if ( _underlyingCollection == null )
-			{
-				throw new InvalidOperationException();
-			}
-
-			Contract.EndContractBlock();
-
-			return Math.Min(_maxCount, Math.Max(_underlyingCollection.Count - _startIndex, 0));
+			return Math.Min(_maxCount, Math.Max(_baseCollection.Count - _startIndex, 0));
 		}
 		#endregion
 
 		#region Event Handlers
 		[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Maintainability", "CA1502:AvoidExcessiveComplexity")]
-		private void UnderlyingCollection_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
+		private void BaseCollection_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
 		{
-			Contract.Assume(_underlyingCollection != null);
+			Contract.Assume(_baseCollection != null);
 
 #if CUSTOM_ENUMERATOR
 			_version++;
@@ -373,7 +210,7 @@ namespace Digillect.Collections
 
 			int prevSize = Interlocked.Exchange(ref _size, CalculateCollectionSize());
 
-			if ( _updateCount != 0 )
+			if ( this.IsInUpdate )
 			{
 				return;
 			}
@@ -399,11 +236,7 @@ namespace Digillect.Collections
 					}
 
 					OnPropertyChanged(IndexerName);
-
-					if ( CollectionChanged != null )
-					{
-						CollectionChanged(this, new NotifyCollectionChangedEventArgs(e.Action, e.NewItems[0], e.NewStartingIndex - _startIndex));
-					}
+					OnCollectionChanged(() => new NotifyCollectionChangedEventArgs(e.Action, e.NewItems[0], e.NewStartingIndex - _startIndex));
 
 					break;
 
@@ -413,18 +246,14 @@ namespace Digillect.Collections
 						// After the range - no visible changes
 						return;
 					}
-					else if ( e.OldStartingIndex < _startIndex || (_size == _maxCount && _underlyingCollection.Count > _startIndex + _size) )
+					else if ( e.OldStartingIndex < _startIndex || (_size == _maxCount && _baseCollection.Count > _startIndex + _size) )
 					{
-						// Before the range or inside the fully filled collection with items remaining to the right in the underlying collection - reset
+						// Before the range or inside the fully filled collection with items remaining to the right in the source collection - reset
 						goto case NotifyCollectionChangedAction.Reset;
 					}
 
 					OnPropertyChanged(IndexerName);
-
-					if ( CollectionChanged != null )
-					{
-						CollectionChanged(this, new NotifyCollectionChangedEventArgs(e.Action, e.OldItems[0], e.OldStartingIndex - _startIndex));
-					}
+					OnCollectionChanged(() => new NotifyCollectionChangedEventArgs(e.Action, e.OldItems[0], e.OldStartingIndex - _startIndex));
 
 					break;
 
@@ -437,11 +266,7 @@ namespace Digillect.Collections
 					}
 
 					OnPropertyChanged(IndexerName);
-
-					if ( CollectionChanged != null )
-					{
-						CollectionChanged(this, new NotifyCollectionChangedEventArgs(e.Action, e.NewItems[0], e.OldItems[0], e.NewStartingIndex - _startIndex));
-					}
+					OnCollectionChanged(() => new NotifyCollectionChangedEventArgs(e.Action, e.NewItems[0], e.OldItems[0], e.NewStartingIndex - _startIndex));
 
 					break;
 #else
@@ -459,10 +284,9 @@ namespace Digillect.Collections
 
 					OnPropertyChanged(IndexerName);
 
-					IList newItems;
+					OnCollectionChanged(() => {
+						IList newItems;
 
-					if ( CollectionChanged != null )
-					{
 						if ( e.NewStartingIndex + e.NewItems.Count <= _startIndex + _size )
 						{
 							newItems = e.NewItems;
@@ -474,8 +298,8 @@ namespace Digillect.Collections
 							newItems = e.NewItems.Cast<T>().Take(count).ToList();
 						}
 
-						CollectionChanged(this, new NotifyCollectionChangedEventArgs(e.Action, newItems, e.NewStartingIndex - _startIndex));
-					}
+						return new NotifyCollectionChangedEventArgs(e.Action, newItems, e.NewStartingIndex - _startIndex);
+					});
 
 					break;
 
@@ -485,18 +309,17 @@ namespace Digillect.Collections
 						// After the range - no visible changes
 						return;
 					}
-					else if ( e.OldStartingIndex < _startIndex || (_size == _maxCount && _underlyingCollection.Count > _startIndex + _size) )
+					else if ( e.OldStartingIndex < _startIndex || (_size == _maxCount && _baseCollection.Count > _startIndex + _size) )
 					{
-						// Before the range or inside the fully filled collection with items remaining to the right in the underlying collection - reset
+						// Before the range or inside the fully filled collection with items remaining to the right in the source collection - reset
 						goto case NotifyCollectionChangedAction.Reset;
 					}
 
 					OnPropertyChanged(IndexerName);
 
-					IList oldItems;
+					OnCollectionChanged(() => {
+						IList oldItems;
 
-					if ( CollectionChanged != null )
-					{
 						if ( e.OldStartingIndex + e.OldItems.Count <= _startIndex + _size )
 						{
 							oldItems = e.OldItems;
@@ -508,8 +331,8 @@ namespace Digillect.Collections
 							oldItems = e.OldItems.Cast<T>().Take(count).ToList();
 						}
 
-						CollectionChanged(this, new NotifyCollectionChangedEventArgs(e.Action, oldItems, e.OldStartingIndex - _startIndex));
-					}
+						return new NotifyCollectionChangedEventArgs(e.Action, oldItems, e.OldStartingIndex - _startIndex);
+					});
 
 					break;
 
@@ -535,8 +358,9 @@ namespace Digillect.Collections
 
 					OnPropertyChanged(IndexerName);
 
-					if ( CollectionChanged != null )
-					{
+					OnCollectionChanged(() => {
+						IList newItems;
+						IList oldItems;
 						int newStartingIndex;
 
 						if ( e.NewStartingIndex >= _startIndex )
@@ -568,39 +392,19 @@ namespace Digillect.Collections
 							newStartingIndex = 0;
 						}
 
-						CollectionChanged(this, new NotifyCollectionChangedEventArgs(e.Action, newItems, oldItems, newStartingIndex));
-					}
+						return new NotifyCollectionChangedEventArgs(e.Action, newItems, oldItems, newStartingIndex);
+					});
 
 					break;
 #endif
 				case NotifyCollectionChangedAction.Reset:
 					OnPropertyChanged(IndexerName);
-
-					if ( CollectionChanged != null )
-					{
-						CollectionChanged(this, new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset));
-					}
+					OnCollectionReset();
 
 					break;
 
 				default:
 					throw new ArgumentException(e.Action.ToString(), "e");
-			}
-		}
-
-		private void UnderlyingCollection_Updated(object sender, EventArgs e)
-		{
-			Contract.Assume(_underlyingCollection != null);
-
-#if CUSTOM_ENUMERATOR
-			_version++;
-#endif
-
-			Interlocked.Exchange(ref _size, CalculateCollectionSize());
-
-			if ( _updateCount == 0 )
-			{
-				OnUpdated(EventArgs.Empty);
 			}
 		}
 		#endregion

@@ -22,6 +22,7 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
+using System.ComponentModel;
 using System.Diagnostics.Contracts;
 
 namespace Digillect.Collections
@@ -130,12 +131,6 @@ namespace Digillect.Collections
 		#endregion
 
 		#region IXUpdatable<IXCollection<T>> Members
-		event EventHandler IXUpdatable<IXCollection<T>>.Updated
-		{
-			add { }
-			remove { }
-		}
-
 		IXCollection<T> IXUpdatable<IXCollection<T>>.Clone(bool deep)
 		{
 			return null;
@@ -175,6 +170,14 @@ namespace Digillect.Collections
 
 		#region INotifyCollectionChanged Members
 		event NotifyCollectionChangedEventHandler INotifyCollectionChanged.CollectionChanged
+		{
+			add { }
+			remove { }
+		}
+		#endregion
+
+		#region INotifyPropertyChanged Members
+		event PropertyChangedEventHandler INotifyPropertyChanged.PropertyChanged
 		{
 			add { }
 			remove { }

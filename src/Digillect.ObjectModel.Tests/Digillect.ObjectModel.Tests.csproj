@@ -89,6 +89,7 @@
     <Compile Include="..\AssemblyVersionInfo.cs">
       <Link>Properties\AssemblyVersionInfo.cs</Link>
     </Compile>
+    <Compile Include="XParametersTest.cs" />
     <Compile Include="XImmutableIdentifiedObjectTest.cs" />
     <Compile Include="XKeyTest.cs" />
     <Compile Include="XQueryTest.cs" />
@@ -98,6 +99,7 @@
     <Compile Include="XCollectionsUtilTest.cs" />
     <Compile Include="XCollectionTest.cs" />
     <Compile Include="XObjectTest.cs" />
+    <Compile Include="XSortedCollectionTest.cs" />
     <Compile Include="XSubRangeCollectionTest.cs" />
   </ItemGroup>
   <ItemGroup>

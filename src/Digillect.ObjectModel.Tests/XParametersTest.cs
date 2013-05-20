@@ -32,63 +32,63 @@ using Xunit;
 
 namespace Digillect.Tests
 {
-	public class XKeyTest
+	public class XParametersTest
 	{
-		[Fact(DisplayName = "XKey: building key in various fashion should produce equal keys")]
+		[Fact(DisplayName = "XParameters: building key in various fashion should produce equal parameters objects")]
 		public void EqualityTest()
 		{
 			// Setup
-			var sut = XKey.Empty.WithKey("string", "string").WithKey("int", 999);
+			var sut = XParameters.Create( "string", "string" ).WithValue( "int", 999 );
 
 			// Exercise
-			var result = XKey.Empty.ToBuilder().AddKey("int", 999).AddKey("string", "string").ToImmutable();
+			var result = XParameters.Empty.ToBuilder().AddValue("int", 999).AddValue("string", "string").ToImmutable();
 
 			// Verify
 			result.ShouldBe(sut);
 		}
 
-		[Fact(DisplayName = "XKey: clearing all keys from empty builder should produce empty key")]
+		[Fact( DisplayName = "XParameters: clearing all values from empty builder should produce empty parameters object" )]
 		[Trait("Category", "Immutability")]
-		public void XKeyBuilderClearEmptyTest()
+		public void XParametersBuilderClearEmptyTest()
 		{
 			// Setup
-			var sut = XKey.Empty;
+			var sut = XParameters.Empty;
 
 			// Exercise
-			var result = sut.ToBuilder().ClearKeys().ToImmutable();
+			var result = sut.ToBuilder().ClearValues().ToImmutable();
 
 			// Verify
 			result.ShouldBeSameAs(sut);
 		}
 
-		[Fact(DisplayName = "XKey: clearing all keys from non-empty builder should produce empty key")]
+		[Fact( DisplayName = "XParameters: clearing all values from non-empty builder should produce empty parameters object" )]
 		[Trait("Category", "Immutability")]
-		public void XKeyBuilderClearNonEmptyTest()
+		public void XParametersBuilderClearNonEmptyTest()
 		{
 			// Setup
-			var sut = XKey.From(XKey.IdKeyName, XIntegerObject.NewId());
+			var sut = XParameters.Create("test", XIntegerObject.NewId());
 
 			// Exercise
-			var result = sut.ToBuilder().AddKey("name", String.Empty).ClearKeys().ToImmutable();
+			var result = sut.ToBuilder().AddValue("name", String.Empty).ClearValues().ToImmutable();
 
 			// Verify
-			sut.ShouldNotBe(XKey.Empty);
-			result.ShouldBe(XKey.Empty);
+			sut.ShouldNotBe(XParameters.Empty);
+			result.ShouldBe(XParameters.Empty);
 		}
 
-		[Fact(DisplayName = "XKey: serializing key and deserializing it back should produce equal key")]
+		[Fact( DisplayName = "XParameters: serializing parameters object and deserializing it back should produce equal parameters objects" )]
 		[Trait("Category", "Serialization")]
 		public void XKeySerializerTest()
 		{
 			// Setup
-			var sut = XKey.From( XKey.IdKeyName, XIntegerObject.NewId() );
+			var sut = XParameters.Create( "test", XIntegerObject.NewId() );
 
 			// Exercise
-			var keyString = XKeySerializer.Serialize( sut );
-			var result = XKeySerializer.Deserialize( keyString );
+			var parametersString = XParametersSerializer.Serialize( sut );
+			var result = XParametersSerializer.Deserialize( parametersString );
 
 			// Verify
-			sut.ShouldNotBe( XKey.Empty );
+			sut.ShouldNotBe( XParameters.Empty );
 			result.ShouldBe( sut );
 		}
 	}

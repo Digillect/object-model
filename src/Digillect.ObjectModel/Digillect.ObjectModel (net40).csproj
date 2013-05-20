@@ -160,7 +160,13 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
+    <Reference Include="System.Runtime">
+      <HintPath>..\..\packages\Microsoft.Bcl.1.0.19\lib\net40\System.Runtime.dll</HintPath>
+    </Reference>
     <Reference Include="System.Runtime.Serialization" />
+    <Reference Include="System.Threading.Tasks">
+      <HintPath>..\..\packages\Microsoft.Bcl.1.0.19\lib\net40\System.Threading.Tasks.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="..\AssemblySharedInfo.cs">
@@ -175,6 +181,7 @@
     <Compile Include="Collections\IXCollectionContract.cs" />
     <Compile Include="Collections\XBasedCollection.cs" />
     <Compile Include="Collections\XCombinedCollection.cs" />
+    <Compile Include="Collections\XSortedCollection.cs" />
     <Compile Include="Collections\XSubRangeCollection.cs" />
     <Compile Include="ContractExtensions.cs" />
     <Compile Include="Errors.cs" />
@@ -193,11 +200,15 @@
     <Compile Include="IXUpdatable.cs" />
     <Compile Include="ObservableObject.cs" />
     <Compile Include="Reflection\ReflectionHelpers.cs" />
+    <Compile Include="Runtime\Serialization\KeyValuePairReader.cs" />
+    <Compile Include="Runtime\Serialization\KeyValuePairReaderWriterBase.cs" />
+    <Compile Include="Runtime\Serialization\KeyValuePairWriter.cs" />
+    <Compile Include="Runtime\Serialization\XKeySerializer.cs" />
+    <Compile Include="Runtime\Serialization\XParametersSerializer.cs" />
     <Compile Include="XCache.cs" />
     <Compile Include="XImmutableIdentifiedObject.cs" />
     <Compile Include="XKey.cs" />
     <Compile Include="XKeyNotAvailableException.cs" />
-    <Compile Include="XKeySerializer.cs" />
     <Compile Include="XObject.cs" />
     <Compile Include="XObject`1.cs" />
     <Compile Include="XParameters.cs" />
@@ -208,13 +219,12 @@
       <Link>Properties\CustomDictionary.xml</Link>
     </CodeAnalysisDictionary>
   </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
+  </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
-  <PropertyGroup>
-    <CompileDependsOn>$(CompileDependsOn);CheckForCodeContracts</CompileDependsOn>
-  </PropertyGroup>
-  <Target Name="CheckForCodeContracts" Condition=" '$(CodeContractsImported)' != 'true' ">
-    <Error Text="Project requires Code Contracts http://msdn.microsoft.com/en-us/devlabs/dd491992.aspx" />
-  </Target>
+  <Import Project="..\..\tools\build\Digillect.CodeContracts.targets" />
+  <Import Project="..\..\packages\Microsoft.Bcl.Build.1.0.5\tools\Microsoft.Bcl.Build.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">

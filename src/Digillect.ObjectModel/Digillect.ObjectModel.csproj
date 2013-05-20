@@ -176,6 +176,7 @@
     <Compile Include="Collections\XCombinedCollection.cs" />
     <Compile Include="Collections\XFilteredCollection.cs" />
     <Compile Include="Collections\XIdentifiedCollection.cs" />
+    <Compile Include="Collections\XSortedCollection.cs" />
     <Compile Include="Collections\XSubRangeCollection.cs" />
     <Compile Include="Collections\XUniqueCollection.cs" />
     <Compile Include="ComponentModel\PropertyChangingEventArgs.cs" />
@@ -186,11 +187,15 @@
     <Compile Include="IXUpdatableContract.cs" />
     <Compile Include="ObservableObject.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Runtime\Serialization\KeyValuePairReader.cs" />
+    <Compile Include="Runtime\Serialization\KeyValuePairReaderWriterBase.cs" />
+    <Compile Include="Runtime\Serialization\KeyValuePairWriter.cs" />
+    <Compile Include="Runtime\Serialization\XKeySerializer.cs" />
+    <Compile Include="Runtime\Serialization\XParametersSerializer.cs" />
     <Compile Include="XCache.cs" />
     <Compile Include="XImmutableIdentifiedObject.cs" />
     <Compile Include="XKey.cs" />
     <Compile Include="XKeyNotAvailableException.cs" />
-    <Compile Include="XKeySerializer.cs" />
     <Compile Include="XObject.cs" />
     <Compile Include="XObject`1.cs" />
     <Compile Include="XParameters.cs" />
@@ -202,12 +207,7 @@
     </CodeAnalysisDictionary>
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\Portable\$(TargetFrameworkVersion)\Microsoft.Portable.CSharp.targets" />
-  <PropertyGroup>
-    <CompileDependsOn>$(CompileDependsOn);CheckForCodeContracts</CompileDependsOn>
-  </PropertyGroup>
-  <Target Name="CheckForCodeContracts" Condition=" '$(CodeContractsImported)' != 'true' ">
-    <Error Text="Project requires Code Contracts http://msdn.microsoft.com/en-us/devlabs/dd491992.aspx" />
-  </Target>
+  <Import Project="..\..\tools\build\Digillect.CodeContracts.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">
