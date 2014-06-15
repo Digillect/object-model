@@ -21,6 +21,8 @@
 			<group targetFramework="wp71">
 				<dependency id="Microsoft.Bcl" version="1.0.19"/>
 			</group>
+			<group targetFramework="wp8">
+			</group>
 		</dependencies>
 		<references>
 			<reference file="Digillect.ObjectModel.dll"/>

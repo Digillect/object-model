@@ -2,7 +2,7 @@
 
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 	<PropertyGroup>
-		<BuildToolsVersion>1.2.0</BuildToolsVersion>
+		<BuildToolsVersion>1.2.2</BuildToolsVersion>
 		<Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
 
 		<BuildPath>target\$(Configuration)\bin</BuildPath>
@@ -17,7 +17,7 @@
 		<LibWP71 Include="$(BuildPath)\wp71\**\Digillect.ObjectModel.*" Exclude="$(ExcludeList)"/>
 		<LibWP71 Include="$(BuildPath)\wp71\Microsoft.Contracts.dll"/>
 		<LibPortable Include="$(BuildPath)\net45+wp8+win8\**\Digillect.ObjectModel.*" Exclude="$(ExcludeList)">
-			<Profile>net45+wp8+win8</Profile>
+			<Profile>net45+wp8+win8+wpa81</Profile>
 		</LibPortable>
 	</ItemGroup>
 
