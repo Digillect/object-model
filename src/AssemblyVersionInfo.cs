@@ -1,5 +1,5 @@
-﻿#region Copyright (c) 2002-2013 Gregory Nickonov and Andrew Nefedkin (Actis® Wunderman)
-// Copyright (c) 2002-2013 Gregory Nickonov and Andrew Nefedkin (Actis® Wunderman).
+﻿#region Copyright (c) 2002-2014 Gregory Nickonov and Andrew Nefedkin (Actis® Wunderman)
+// Copyright (c) 2002-2014 Gregory Nickonov and Andrew Nefedkin (Actis® Wunderman).
 // 
 // Permission is hereby granted, free of charge, to any person obtaining a copy of this
 // software and associated documentation files (the "Software"), to deal in the Software
@@ -31,7 +31,7 @@ internal static class AssemblyInfo
 {
 	public const string Major = "4";
 	public const string Minor = "1";
-	public const string Revision = "1";
+	public const string Revision = "2";
 	public const string BuildNumber = "0";
 
 	public const string Version = Major + "." + Minor + "." + Revision + ".0";

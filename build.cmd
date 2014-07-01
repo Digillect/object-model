@@ -2,7 +2,7 @@
 
 setlocal enableextensions
 set PATH=%~dp0\tools;%PATH%
-set BuildTargets=%~dp0\packages\Digillect.Build.Tools.1.2.0\tools\Build.targets
+set BuildTargets=%~dp0\packages\Digillect.Build.Tools.1.2.5\tools\Build.targets
 set EnableNuGetPackageRestore=true
 
 if not exist "%BuildTargets%" (
