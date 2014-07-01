@@ -1,5 +1,5 @@
-﻿#region Copyright (c) 2002-2013 Gregory Nickonov and Andrew Nefedkin (Actis® Wunderman)
-// Copyright (c) 2002-2013 Gregory Nickonov and Andrew Nefedkin (Actis® Wunderman).
+﻿#region Copyright (c) 2002-2014 Gregory Nickonov and Andrew Nefedkin (Actis® Wunderman)
+// Copyright (c) 2002-2014 Gregory Nickonov and Andrew Nefedkin (Actis® Wunderman).
 // 
 // Permission is hereby granted, free of charge, to any person obtaining a copy of this
 // software and associated documentation files (the "Software"), to deal in the Software
@@ -31,7 +31,7 @@ using System.Resources;
 #endif
 [assembly: AssemblyCompany("Actis® Wunderman")]
 [assembly: AssemblyProduct("Digillect® Frameworks")]
-[assembly: AssemblyCopyright("© 2002-2013 Gregory Nickonov and Andrew Nefedkin (Actis® Wunderman). All rights reserved.")]
+[assembly: AssemblyCopyright("© 2002-2014 Gregory Nickonov and Andrew Nefedkin (Actis® Wunderman). All rights reserved.")]
 [assembly: AssemblyTrademark("Digillect is a registered trademark of Actis® Wunderman.")]
 
 [assembly: CLSCompliant(true)]
