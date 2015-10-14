@@ -2,8 +2,8 @@
 
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 	<PropertyGroup>
-		<BuildToolsVersion>1.2.5</BuildToolsVersion>
-		<Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+		<BuildToolsVersion>1.2.6</BuildToolsVersion>
+		<Configuration Condition=" '$(Configuration)' == '' ">Release</Configuration>
 
 		<BuildPath>target\$(Configuration)\bin</BuildPath>
 		<OutputPath>target\$(Configuration)\package</OutputPath>

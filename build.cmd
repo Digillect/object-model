@@ -1,14 +1,37 @@
 @echo off
 
 setlocal enableextensions
-set PATH=%~dp0\tools;%PATH%
-set BuildTargets=%~dp0\packages\Digillect.Build.Tools.1.2.5\tools\Build.targets
 set EnableNuGetPackageRestore=true
 
-if not exist "%BuildTargets%" (
-	nuget.exe install -o "%~dp0\packages" "%~dp0\.nuget\packages.config"
+pushd %~dp0
+
+call :ResolveNuGet nuget.exe
+
+if errorlevel 1 (
+	echo NuGet.Exe was not found either in .nuget subfolder or PATH
+	exit /b %ERRORLEVEL%
+)
+
+if exist .nuget\packages.config (
+	"%NuGetExe%" restore .nuget\packages.config -PackagesDirectory packages -NonInteractive
+)
+
+if exist *.sln (
+	for %%f in (*.sln) do "%NuGetExe%" restore "%%f" -NonInteractive
 )
 
 if not errorlevel 1 (
-	%SystemRoot%\Microsoft.NET\Framework\v4.0.30319\MSBuild.exe build.proj %*
+	%SystemRoot%\Microsoft.NET\Framework\v4.0.30319\MSBuild.exe build.proj /nologo /v:m %*
 )
+
+popd
+goto :EOF
+
+:ResolveNuGet
+set NuGetExe=%~$PATH:1
+if not "%NuGetExe%"=="" goto :EOF
+if exist %CD%\.nuget\%1 (
+	set NuGetExe=%CD%\.nuget\%1
+	goto :EOF
+)
+exit /b 1

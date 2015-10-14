@@ -1,18 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
-<Project DefaultTargets="Build;Package" InitialTargets="CheckForBuildTools;UpdateAssemblyVersion" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project DefaultTargets="Build;Package" InitialTargets="_CheckForBuildTools;UpdateAssemblyVersion" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 	<PropertyGroup>
-		<BuildToolsVersion>1.2.5</BuildToolsVersion>
-		<Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-		<XUnitRunnerDirectory>$(MSBuildProjectDirectory)\packages\xunit.1.9.2\lib\net20</XUnitRunnerDirectory>
+		<BuildToolsVersion>1.2.6</BuildToolsVersion>
+		<Configuration Condition=" '$(Configuration)' == '' ">Release</Configuration>
+		<XUnitRunnerDirectory>$(MSBuildProjectDirectory)\packages\xunit.runner.msbuild.2.1.0\build\portable-net45+win8+wp8+wpa81</XUnitRunnerDirectory>
 		<TestGenerateNUnitResults Condition="'$(TestGenerateNUnitResults)' == ''">false</TestGenerateNUnitResults>
 		<TestVerbose Condition="'$(TestVerbose)' == ''">false</TestVerbose>
 		<TestWorkingDirectory>$(MSBuildProjectDirectory)\target\$(Configuration)\tests</TestWorkingDirectory>
 	</PropertyGroup>
 
-	<Target Name="CheckForBuildTools" Condition="!Exists('$(MSBuildProjectDirectory)\packages\Digillect.Build.Tools.$(BuildToolsVersion)\tools\Build.targets')">
-		<Error Text="Project requires Digillect.Build.Tools package to run."/>
+	<Target Name="_CheckForBuildTools">
+		<Error Condition="!Exists('$(MSBuildProjectDirectory)\packages\Digillect.Build.Tools.$(BuildToolsVersion)\tools\Build.targets')" Text="Project requires Digillect.Build.Tools $(BuildToolsVersion) package to run." />
+		<Error Condition="!Exists('$(XUnitRunnerDirectory)\xunit.runner.msbuild.props')" Text="xUnit MSBuild runner package missing" />
 	</Target>
-	
+
 	<Import Project="$(MSBuildProjectDirectory)\packages\Digillect.Build.Tools.$(BuildToolsVersion)\tools\Build.targets" Condition="Exists('$(MSBuildProjectDirectory)\packages\Digillect.Build.Tools.$(BuildToolsVersion)\tools\Build.targets')"/>
 
 	<ItemGroup>
@@ -27,19 +28,20 @@
 		<PackagingProjectReference Include="Digillect.ObjectModel.nuproj"/>
 	</ItemGroup>
 
-	<UsingTask AssemblyFile="$(XUnitRunnerDirectory)\xunit.runner.msbuild.dll" TaskName="Xunit.Runner.MSBuild.xunit"/>
+	<Import Project="$(XUnitRunnerDirectory)\xunit.runner.msbuild.props" Condition="Exists('$(XUnitRunnerDirectory)\xunit.runner.msbuild.props')" />
 
 	<Target Name="Test" DependsOnTargets="Build">
-		<xunit Assembly="Digillect.ObjectModel.Tests.dll"
+		<xunit Assemblies="$(TestWorkingDirectory)\Digillect.ObjectModel.Tests.dll"
 			ShadowCopy="false"
 			Verbose="$(TestVerbose)"
-			WorkingFolder="$(TestWorkingDirectory)"
-			Xml="TestResults.xml"/>
+			Xml="$(TestWorkingDirectory)\TestResults.xml"
+		/>
 
 		<XslTransformation Condition="'$(TestGenerateNUnitResults)' == 'true'"
 			OutputPaths="$(TestWorkingDirectory)\TestResultsNUnit.xml"
 			XmlInputPaths="$(TestWorkingDirectory)\TestResults.xml"
-			XslInputPath="$(MSBuildProjectDirectory)\tools\testing\NUnitXml.xslt"/>
+			XslInputPath="$(XUnitRunnerDirectory)\NUnitXml.xslt"
+		/>
 	</Target>
 
 	<Target Name="UpdateAssemblyVersion" Condition="'$(BuildNumber)' != ''">
