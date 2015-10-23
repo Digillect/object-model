@@ -13,11 +13,7 @@ if errorlevel 1 (
 )
 
 if exist .nuget\packages.config (
-	"%NuGetExe%" restore .nuget\packages.config -PackagesDirectory packages -NonInteractive
-)
-
-if exist *.sln (
-	for %%f in (*.sln) do "%NuGetExe%" restore "%%f" -NonInteractive
+	"%NuGetExe%" restore .nuget\packages.config -PackagesDirectory packages -Verbosity quiet -NonInteractive
 )
 
 if not errorlevel 1 (

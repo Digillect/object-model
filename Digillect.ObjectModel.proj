@@ -1,0 +1,45 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+	<PropertyGroup>
+		<BuildToolsVersion Condition="'$(BuildToolsVersion)' == ''">2.0.0</BuildToolsVersion>
+		<Configuration Condition=" '$(Configuration)' == '' ">Release</Configuration>
+		<VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">11.0</VisualStudioVersion>
+		<BuildPath>$(MSBuildProjectDirectory)\target\$(Configuration)\bin\</BuildPath>
+		<OutputPath>$(MSBuildProjectDirectory)\target\$(Configuration)\package\</OutputPath>
+		<VersionAssembly>$(BuildPath)net45+win8+wp8+wpa81\Digillect.ObjectModel.dll</VersionAssembly>
+	</PropertyGroup>
+
+	<Import Project="$(MSBuildProjectDirectory)\packages\Digillect.Build.Tools.$(BuildToolsVersion)\build\Digillect.Build.Packaging.Nuget.props" />
+
+	<PropertyGroup>
+		<_PackageExcludeList>$(BuildPath)**\*.xml.old;$(BuildPath)**\*.dll.config</_PackageExcludeList>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<LibNet40 Include="$(BuildPath)net40\**\Digillect.ObjectModel.*" Exclude="$(_PackageExcludeList)" />
+		<LibSL4 Include="$(BuildPath)sl4\**\Digillect.ObjectModel.*" Exclude="$(_PackageExcludeList)" />
+		<LibWP71 Include="$(BuildPath)wp71\**\Digillect.ObjectModel.*" Exclude="$(_PackageExcludeList)" />
+		<LibWP71 Include="$(BuildPath)wp71\Microsoft.Contracts.dll" />
+		<LibPortable Include="$(BuildPath)net45+win8+wp8+wpa81\**\Digillect.ObjectModel.*" Exclude="$(_PackageExcludeList)">
+			<Profile>net45+dnxcore50+win8+wp8+wpa81</Profile>
+		</LibPortable>
+		<LibNet45 Include="$(BuildPath)net45+win8+wp8+wpa81\**\Digillect.ObjectModel.*" Exclude="$(_PackageExcludeList)" />
+		<LibWP8 Include="$(BuildPath)net45+win8+wp8+wpa81\**\Digillect.ObjectModel.*" Exclude="$(_PackageExcludeList)" />
+	</ItemGroup>
+
+	<Import Project="$(MSBuildProjectDirectory)\packages\Digillect.Build.Tools.$(BuildToolsVersion)\build\Digillect.Build.Packaging.NuGet.targets" />
+
+	<Target Name="TransformPackageVersion">
+		<PropertyGroup>
+			<_PackageBuildNumber>$([System.Text.RegularExpressions.Regex]::Match($(PackageVersion), "^\d+\.\d+\.\d+\.(\d+)").Groups[1].Value)</_PackageBuildNumber>
+
+			<PackageVersion>$([System.Text.RegularExpressions.Regex]::Replace($(PackageVersion), "^(\d+\.\d+\.\d+)\.\d+(.*)$", "$1$2"))</PackageVersion>
+		</PropertyGroup>
+
+		<PropertyGroup Condition="'$(BranchName)' != '' And '$(BranchName)' != 'master'">
+			<PackageVersion>$(PackageVersion)-$(BranchName)</PackageVersion>
+			<PackageVersion Condition="'$(_PackageBuildNumber)' != ''">$(PackageVersion)-$([System.String]::Format("{0:00000}", $([MSBuild]::Add($(_PackageBuildNumber), 0))))</PackageVersion>
+		</PropertyGroup>
+	</Target>
+</Project>

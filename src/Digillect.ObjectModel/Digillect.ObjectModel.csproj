@@ -22,11 +22,11 @@
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
-    <OutputPath>..\..\target\Debug\bin\net45+win8+wp8+wp81+wpa81\</OutputPath>
+    <OutputPath>..\..\target\Debug\bin\net45+win8+wp8+wpa81\</OutputPath>
     <DefineConstants>TRACE;DEBUG;NET45;SILVERLIGHT;WINDOWS_PHONE;WINDOWS_PHONE_8;WINDOWS_PHONE_80;WINDOWS8</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <DocumentationFile>..\..\target\Debug\bin\net45+win8+wp8+wp81+wpa81\Digillect.ObjectModel.xml</DocumentationFile>
+    <DocumentationFile>..\..\target\Debug\bin\net45+win8+wp8+wpa81\Digillect.ObjectModel.xml</DocumentationFile>
     <NoWarn>1591,1607</NoWarn>
     <CodeAnalysisRuleSet>..\DigillectRules.ruleset</CodeAnalysisRuleSet>
     <CodeContractsEnableRuntimeChecking>True</CodeContractsEnableRuntimeChecking>
@@ -68,12 +68,12 @@
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
-    <OutputPath>..\..\target\Release\bin\net45+win8+wp8+wp81+wpa81\</OutputPath>
+    <OutputPath>..\..\target\Release\bin\net45+win8+wp8+wpa81\</OutputPath>
     <DefineConstants>TRACE;NET45;SILVERLIGHT;WINDOWS_PHONE;WINDOWS_PHONE_8;WINDOWS_PHONE_80;WINDOWS8</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <NoWarn>1591,1607</NoWarn>
-    <DocumentationFile>..\..\target\Release\bin\net45+win8+wp8+wp81+wpa81\Digillect.ObjectModel.xml</DocumentationFile>
+    <DocumentationFile>..\..\target\Release\bin\net45+win8+wp8+wpa81\Digillect.ObjectModel.xml</DocumentationFile>
     <CodeAnalysisRuleSet>..\DigillectRules.ruleset</CodeAnalysisRuleSet>
     <CodeContractsEnableRuntimeChecking>True</CodeContractsEnableRuntimeChecking>
     <CodeContractsRuntimeOnlyPublicSurface>False</CodeContractsRuntimeOnlyPublicSurface>
