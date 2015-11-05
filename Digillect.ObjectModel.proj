@@ -17,7 +17,7 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<LibNet40 Include="$(BuildPath)net40\**\Digillect.ObjectModel.*" Exclude="$(_PackageExcludeList)" />
+		<LibNet40Client Include="$(BuildPath)net40\**\Digillect.ObjectModel.*" Exclude="$(_PackageExcludeList)" />
 		<LibSL4 Include="$(BuildPath)sl4\**\Digillect.ObjectModel.*" Exclude="$(_PackageExcludeList)" />
 		<LibWP71 Include="$(BuildPath)wp71\**\Digillect.ObjectModel.*" Exclude="$(_PackageExcludeList)" />
 		<LibWP71 Include="$(BuildPath)wp71\Microsoft.Contracts.dll" />
