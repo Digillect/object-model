@@ -5,7 +5,7 @@
 		<Configuration Condition=" '$(Configuration)' == '' ">Release</Configuration>
 		<VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">11.0</VisualStudioVersion>
 		<NuGetVerbosity Condition="'$(NuGetVerbosity)' == ''">quiet</NuGetVerbosity>
-		<MSBuildCommunityTasksPath>$(MSBuildProjectDirectory)\packages\MSBuildTasks.1.4.0.88\tools</MSBuildCommunityTasksPath>
+		<MSBuildCommunityTasksPath>$(MSBuildProjectDirectory)\packages\MSBuildTasks.1.4.0.128\tools</MSBuildCommunityTasksPath>
 		<XUnitRunnerDirectory>$(MSBuildProjectDirectory)\packages\xunit.runner.msbuild.2.1.0\build\portable-net45+win8+wp8+wpa81</XUnitRunnerDirectory>
 	</PropertyGroup>
 
@@ -21,7 +21,7 @@
 			<TestFramework>xUnit</TestFramework>
 		</ProjectReference>
 		<ProjectReference Include="$(MSBuildProjectDirectory)\Digillect.ObjectModel.proj">
-			<AdditionalProperties>BuildToolsVersion=$(BuildToolsVersion);NuGetVerbosity=$(NuGetVerbosity)</AdditionalProperties>
+			<AdditionalProperties>BuildToolsVersion=$(BuildToolsVersion);NuGetExecutable=$(NuGetExecutable);NuGetVerbosity=$(NuGetVerbosity)</AdditionalProperties>
 		</ProjectReference>
 	</ItemGroup>
 
