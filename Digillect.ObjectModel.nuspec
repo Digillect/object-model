@@ -15,7 +15,7 @@
 		<tags>digillect objectmodel</tags>
 		<dependencies>
 			<group />
-			<group targetFramework="net40">
+			<group targetFramework="net40-client">
 				<dependency id="Microsoft.Bcl" version="1.1.10"/>
 			</group>
 			<group targetFramework="net45" />
