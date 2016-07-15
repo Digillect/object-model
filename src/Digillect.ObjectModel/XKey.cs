@@ -20,10 +20,9 @@
 #endregion
 
 using System;
-using System.Collections;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Diagnostics;
-using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Contracts;
 using System.Linq;
 
@@ -38,14 +37,16 @@ namespace Digillect
 #if !(SILVERLIGHT || WINDOWS8)
 	[Serializable]
 #endif
-	[SuppressMessage( "Microsoft.Naming", "CA1710:IdentifiersShouldHaveCorrectSuffix" )]
+	[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1710:IdentifiersShouldHaveCorrectSuffix")]
 	public sealed class XKey : IEnumerable<KeyValuePair<string, object>>, IEquatable<XKey>
 	{
 		public const string IdKeyName = "ID";
 
-		[SuppressMessage( "Microsoft.Security", "CA2104:DoNotDeclareReadOnlyMutableReferenceTypes" )] public static readonly XKey Empty = new XKey();
+		[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA2104:DoNotDeclareReadOnlyMutableReferenceTypes")]
+		public static readonly XKey Empty = new XKey();
 
-		[DebuggerBrowsable( DebuggerBrowsableState.Never )] private static readonly StringComparer KeyNameComparer = StringComparer.OrdinalIgnoreCase;
+		[DebuggerBrowsable(DebuggerBrowsableState.Never)]
+		private static readonly StringComparer KeyNameComparer = StringComparer.OrdinalIgnoreCase;
 
 		private readonly KeyValuePair<string, object>[] _keys;
 		private readonly int _hashCode = 17;
@@ -87,7 +88,7 @@ namespace Digillect
 				}
 			}
 #else
-			var index = Array.FindIndex( baseKeys, x => KeyNameComparer.Equals( x.Key, name ) );
+			int index = Array.FindIndex(baseKeys, x => KeyNameComparer.Equals(x.Key, name));
 #endif
 
 			if( index == -1 )
@@ -120,7 +121,7 @@ namespace Digillect
 		#endregion
 
 		#region IEnumerable Members
-		IEnumerator IEnumerable.GetEnumerator()
+		System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
 		{
 			return _keys.GetEnumerator();
 		}
@@ -151,7 +152,7 @@ namespace Digillect
 				return false;
 			}
 
-			for( var i = 0; i < _keys.Length; i++ )
+			for (int i = 0; i < _keys.Length; i++)
 			{
 				if( !KeyNameComparer.Equals( other._keys[i].Key, _keys[i].Key ) || !Equals( other._keys[i].Value, _keys[i].Value ) )
 				{
@@ -256,13 +257,15 @@ namespace Digillect
 		/// <param name="keyName">The name of the value.</param>
 		/// <param name="key">The value.</param>
 		/// <returns>Created key.</returns>
+		[EditorBrowsable(EditorBrowsableState.Never)]
+		[Obsolete("Use From<T>(string, T)")]
 		public static XKey Create<T>( string keyName, T key )
 		{
 			Contract.Requires( keyName != null );
 			Contract.Requires( key != null );
 			Contract.Ensures( Contract.Result<XKey>() != null );
 
-			return Empty.WithKey( keyName, key );
+			return From(keyName, key);
 		}
 
 		#region Equality Operators
@@ -354,11 +357,12 @@ namespace Digillect
 		/// <summary>
 		///     <see cref="XKey" /> builder which allows mutation in a multistep fashion.
 		/// </summary>
-		[SuppressMessage( "Microsoft.Design", "CA1034:NestedTypesShouldNotBeVisible" )]
+		[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1034:NestedTypesShouldNotBeVisible")]
 		public sealed class Builder
 		{
+			[DebuggerBrowsable(DebuggerBrowsableState.Never)]
+			private XKey _immutable;
 			private readonly IDictionary<string, object> _keys;
-			[DebuggerBrowsable( DebuggerBrowsableState.Never )] private XKey _immutable;
 
 			#region Constructors/Disposer
 			internal Builder( XKey immutable )

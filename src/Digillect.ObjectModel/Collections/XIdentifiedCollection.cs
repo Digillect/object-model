@@ -93,6 +93,8 @@ namespace Digillect.Collections
 		{
 			get
 			{
+				Contract.Requires(id != null);
+
 				TObject value;
 
 				m_dictionary.TryGetValue(id, out value);
@@ -114,6 +116,7 @@ namespace Digillect.Collections
 		[Pure]
 		public bool Contains(TId id)
 		{
+			Contract.Requires(id != null);
 			Contract.Ensures(!Contract.Result<bool>() || this.Count > 0);
 
 			return m_dictionary.ContainsKey(id);
@@ -122,6 +125,7 @@ namespace Digillect.Collections
 		[Pure]
 		public int IndexOf(TId id)
 		{
+			Contract.Requires(id != null);
 			Contract.Ensures(Contract.Result<int>() >= -1);
 			Contract.Ensures(Contract.Result<int>() < this.Count);
 
@@ -135,7 +139,9 @@ namespace Digillect.Collections
 
 		public bool Remove(TId id)
 		{
-			// TODO: Should we be so paranoic?
+			Contract.Requires(id != null);
+
+			// TODO: Should we be so paranoiac?
 			/*
 			if ( this.Items.IsReadOnly )
 			{
@@ -239,7 +245,10 @@ namespace Digillect.Collections
 
 			foreach ( TObject item in this.Items )
 			{
-				m_dictionary.Add(item.Id, item);
+				if (item.Id != null)
+				{
+					m_dictionary.Add(item.Id, item);
+				}
 			}
 		}
 		#endregion
@@ -269,26 +278,38 @@ namespace Digillect.Collections
 				{
 					foreach ( TObject item in e.NewItems )
 					{
-						m_dictionary.Add(item.Id, item);
+						if (item.Id != null)
+						{
+							m_dictionary.Add(item.Id, item);
+						}
 					}
 				}
 				else if ( e.Action == NotifyCollectionChangedAction.Remove )
 				{
 					foreach ( TObject item in e.OldItems )
 					{
-						m_dictionary.Remove(item.Id);
+						if (item.Id != null)
+						{
+							m_dictionary.Remove(item.Id);
+						}
 					}
 				}
 				else if ( e.Action == NotifyCollectionChangedAction.Replace )
 				{
 					foreach ( TObject oldItem in e.OldItems )
 					{
-						m_dictionary.Remove(oldItem.Id);
+						if (oldItem.Id != null)
+						{
+							m_dictionary.Remove(oldItem.Id);
+						}
 					}
 
 					foreach ( TObject newItem in e.NewItems )
 					{
-						m_dictionary.Add(newItem.Id, newItem);
+						if (newItem.Id != null)
+						{
+							m_dictionary.Add(newItem.Id, newItem);
+						}
 					}
 				}
 

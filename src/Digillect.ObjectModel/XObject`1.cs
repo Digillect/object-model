@@ -30,7 +30,7 @@ using System.Runtime.Serialization;
 namespace Digillect
 {
 	/// <summary>
-	/// <see cref="Digillect.XObject"/> that uses <typeparamref name="TId"/> type as the indentifier and key.
+	/// <see cref="Digillect.XObject"/> that uses <typeparamref name="TId"/> type as the identifier and key.
 	/// </summary>
 	/// <typeparam name="TId">The type of the identifier.</typeparam>
 	[DataContract]

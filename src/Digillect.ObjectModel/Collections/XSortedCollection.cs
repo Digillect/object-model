@@ -206,6 +206,8 @@ namespace Digillect.Collections
 
 				int index = _sortedItems.IndexOf(item);
 
+				Contract.Assume(index >= 0); // Because it is for sure here
+
 				if ( index < minIndex )
 				{
 					minIndex = index;

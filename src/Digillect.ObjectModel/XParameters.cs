@@ -20,7 +20,6 @@
 #endregion
 
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
@@ -87,7 +86,7 @@ namespace Digillect
 				}
 			}
 #else
-			var index = Array.FindIndex( baseParameters, x => KeyNameComparer.Equals( x.Key, name ) );
+			int index = Array.FindIndex(baseParameters, x => KeyNameComparer.Equals(x.Key, name));
 #endif
 
 			if( index == -1 )
@@ -120,7 +119,7 @@ namespace Digillect
 		#endregion
 
 		#region IEnumerable Members
-		IEnumerator IEnumerable.GetEnumerator()
+		System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
 		{
 			return _parameters.GetEnumerator();
 		}
@@ -201,20 +200,7 @@ namespace Digillect
 		[Pure]
 		public T GetValue<T>( string name )
 		{
-			if( name == null )
-			{
-				throw new ArgumentNullException( "name" );
-			}
-
-			Contract.EndContractBlock();
-
-#if NET40 && SILVERLIGHT
-			var pair = _parameters.FirstOrDefault(x => String.Equals(x.Key, name, StringComparison.OrdinalIgnoreCase));
-#else
-			var pair = Array.Find( _parameters, x => KeyNameComparer.Equals( x.Key, name ) );
-#endif
-
-			return pair.Key == null ? default(T) : (T) pair.Value;
+			return GetValue(name, default(T));
 		}
 
 		/// <summary>
@@ -227,13 +213,6 @@ namespace Digillect
 		[Pure]
 		public T GetValue<T>( string name, T defaultValue )
 		{
-			if( name == null )
-			{
-				throw new ArgumentNullException( "name" );
-			}
-
-			Contract.EndContractBlock();
-
 #if NET40 && SILVERLIGHT
 			var pair = _parameters.FirstOrDefault(x => String.Equals(x.Key, name, StringComparison.OrdinalIgnoreCase));
 #else

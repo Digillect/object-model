@@ -32,7 +32,7 @@ using System.Runtime.Serialization;
 namespace Digillect
 {
 	/// <summary>
-	/// <see cref="Digillect.XObject"/> which uses <typeparamref name="TId"/> type as the indentifier that can't be ever changed.
+	/// <see cref="Digillect.XObject"/> which uses <typeparamref name="TId"/> type as the identifier that can't be ever changed.
 	/// </summary>
 	/// <typeparam name="TId">The type of the identifier.</typeparam>
 	[DataContract]
@@ -40,7 +40,7 @@ namespace Digillect
 #if !(SILVERLIGHT || WINDOWS8)
 	[Serializable]
 #endif
-	public abstract class XImmutableIdentifiedObject<TId> : XObject, IXIdentified<TId>
+	public class XImmutableIdentifiedObject<TId> : XObject, IXIdentified<TId>
 		where TId : IEquatable<TId>
 	{
 		[DataMember(Name = "Id", IsRequired = true)]
@@ -131,7 +131,7 @@ namespace Digillect
 		/// <inheritdoc/>
 		protected override XKey CreateKey()
 		{
-			return XKey.From(XKey.IdKeyName, _id);
+			return base.CreateKey().WithKey(XKey.IdKeyName, _id);
 		}
 
 		/// <inheritdoc/>
