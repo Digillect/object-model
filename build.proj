@@ -1,15 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" InitialTargets="_CheckRequirements" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 	<PropertyGroup>
-		<BuildToolsVersion>2.0.0-beta</BuildToolsVersion>
-		<Configuration Condition=" '$(Configuration)' == '' ">Release</Configuration>
-		<VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">11.0</VisualStudioVersion>
-		<NuGetVerbosity Condition="'$(NuGetVerbosity)' == ''">quiet</NuGetVerbosity>
-		<MSBuildCommunityTasksPath>$(MSBuildProjectDirectory)\packages\MSBuildTasks.1.4.0.128\tools</MSBuildCommunityTasksPath>
+		<DigillectBuildToolsPath>$(MSBuildProjectDirectory)\packages\Digillect.Build.Tools.2.0.0-rc\build</DigillectBuildToolsPath>
+		<MSBuildCommunityTasksPath>$(MSBuildProjectDirectory)\packages\MSBuildTasks.1.5.0.183\tools</MSBuildCommunityTasksPath>
 		<XUnitRunnerDirectory>$(MSBuildProjectDirectory)\packages\xunit.runner.msbuild.2.1.0\build\portable-net45+win8+wp8+wpa81</XUnitRunnerDirectory>
 	</PropertyGroup>
 
-	<Import Project="$(MSBuildProjectDirectory)\packages\Digillect.Build.Tools.$(BuildToolsVersion)\build\Digillect.Build.Common.props" Condition="Exists('$(MSBuildProjectDirectory)\packages\Digillect.Build.Tools.$(BuildToolsVersion)\build\Digillect.Build.Common.props')" />
+	<Import Project="$(DigillectBuildToolsPath)\Digillect.Build.Common.props" Condition="Exists('$(DigillectBuildToolsPath)\Digillect.Build.Common.props')" />
 	<Import Project="$(XUnitRunnerDirectory)\xunit.runner.msbuild.props" Condition="Exists('$(XUnitRunnerDirectory)\xunit.runner.msbuild.props')" />
 
 	<ItemGroup>
@@ -21,16 +18,16 @@
 			<TestFramework>xUnit</TestFramework>
 		</ProjectReference>
 		<ProjectReference Include="$(MSBuildProjectDirectory)\Digillect.ObjectModel.proj">
-			<AdditionalProperties>BuildToolsVersion=$(BuildToolsVersion);NuGetExecutable=$(NuGetExecutable);NuGetVerbosity=$(NuGetVerbosity)</AdditionalProperties>
+			<AdditionalProperties>DigillectBuildToolsPath=$(DigillectBuildToolsPath);NuGetExecutable=$(NuGetExecutable);NuGetVerbosity=$(NuGetVerbosity)</AdditionalProperties>
 		</ProjectReference>
 	</ItemGroup>
 
-	<Import Project="$(MSBuildProjectDirectory)\packages\Digillect.Build.Tools.$(BuildToolsVersion)\build\Digillect.Build.Common.targets" Condition="Exists('$(MSBuildProjectDirectory)\packages\Digillect.Build.Tools.$(BuildToolsVersion)\build\Digillect.Build.Common.targets')" />
-	<Import Project="$(MSBuildProjectDirectory)\packages\Digillect.Build.Tools.$(BuildToolsVersion)\build\Digillect.Build.Testing.XUnit.targets" Condition="Exists('$(MSBuildProjectDirectory)\packages\Digillect.Build.Tools.$(BuildToolsVersion)\build\Digillect.Build.Testing.XUnit.targets')" />
+	<Import Project="$(DigillectBuildToolsPath)\Digillect.Build.Common.targets" Condition="Exists('$(DigillectBuildToolsPath)\Digillect.Build.Common.targets')" />
+	<Import Project="$(DigillectBuildToolsPath)\Digillect.Build.Testing.XUnit.targets" Condition="Exists('$(DigillectBuildToolsPath)\Digillect.Build.Testing.XUnit.targets')" />
 	<Import Project="$(MSBuildCommunityTasksPath)\MSBuild.Community.Tasks.Targets" Condition="Exists('$(MSBuildCommunityTasksPath)\MSBuild.Community.Tasks.Targets')" />
 
 	<Target Name="_CheckRequirements">
-		<Error Condition="!Exists('$(MSBuildProjectDirectory)\packages\Digillect.Build.Tools.$(BuildToolsVersion)\build\Digillect.Build.Common.props')" Text="This project requires the Digillect.Build.Tools $(BuildToolsVersion) package." />
+		<Error Condition="!Exists('$(DigillectBuildToolsPath)\Digillect.Build.Common.props')" Text="This project requires the Digillect.Build.Tools package." />
 		<Error Condition="!Exists('$(MSBuildCommunityTasksPath)\MSBuild.Community.Tasks.Targets')" Text="This project requires the MSBuildTasks package." />
 		<Error Condition="!Exists('$(XUnitRunnerDirectory)\xunit.runner.msbuild.props')" Text="This project requires the xunit.runner.msbuild package." />
 	</Target>
@@ -41,7 +38,7 @@
 
 	<Target Name="AfterClean">
 		<ItemGroup>
-			<_DirectoriesToClean Include="$(MSBuildProjectDirectory)\target\" />
+			<_DirectoriesToClean Include="$(MSBuildProjectDirectory)\target\$(Configuration)\" />
 		</ItemGroup>
 
 		<RemoveDir Directories="@(_DirectoriesToClean)" ContinueOnError="true" />
