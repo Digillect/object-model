@@ -4,6 +4,7 @@
     "DotNet.Contracts": "1.10.20606.1",
     "Microsoft.NETCore.Portable.Compatibility": "1.0.1",
     "NETStandard.Library": "1.6.1",
+    "NuProj.Common": "0.11.17-beta",
     "System.Diagnostics.Contracts": "4.3.0",
     "System.Runtime.Serialization.Primitives": "4.3.0"
   },

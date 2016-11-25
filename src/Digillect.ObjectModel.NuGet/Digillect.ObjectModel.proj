@@ -4,8 +4,8 @@
   <Import Project="$(DigillectBuildToolsPath)\Digillect.Build.Packaging.Nuget.props" Condition="'$(DigillectBuildToolsPath)' != '' And Exists('$(DigillectBuildToolsPath)\Digillect.Build.Packaging.Nuget.props')" />
 
 	<PropertyGroup>
-		<BuildPath>$(MSBuildProjectDirectory)\target\$(Configuration)\bin\</BuildPath>
-		<OutputPath>$(MSBuildProjectDirectory)\target\$(Configuration)\package\</OutputPath>
+		<BuildPath>$(MSBuildProjectDirectory)\..\..\target\$(Configuration)\bin\</BuildPath>
+		<OutputPath>$(MSBuildProjectDirectory)\..\..\target\$(Configuration)\package\</OutputPath>
 		<VersionAssembly>$(BuildPath)netstandard1.0\Digillect.ObjectModel.dll</VersionAssembly>
 	</PropertyGroup>
 

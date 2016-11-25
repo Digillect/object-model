@@ -14,16 +14,16 @@
 		<copyright>Copyright © 2002 Gregory Nickonov and Andrew Nefedkin (Actis® Wunderman)</copyright>
 		<tags>digillect objectmodel</tags>
 		<dependencies>
-			<group targetFramework="net40-client">
+			<!--<group targetFramework="net40-client">
 				<dependency id="Microsoft.Bcl" version="1.1.10"/>
-			</group>
+			</group>-->
 			<group targetFramework="net45" />
-			<group targetFramework="sl4">
+			<!--<group targetFramework="sl4">
 				<dependency id="Microsoft.Bcl" version="1.1.10"/>
-			</group>
-			<group targetFramework="wp71">
+			</group>-->
+			<!--<group targetFramework="wp71">
 				<dependency id="Microsoft.Bcl" version="1.1.10"/>
-			</group>
+			</group>-->
 			<group targetFramework="wp8" />
 		</dependencies>
 		<references>

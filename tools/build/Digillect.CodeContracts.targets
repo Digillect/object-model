@@ -15,7 +15,7 @@
           AfterTargets="CodeContractReferenceAssembly">
     <ItemGroup>
       <CodeContractsReferenceAssembliesFiles Include="@(ReferenceCopyLocalPaths->'%(RootDir)%(Directory)CodeContracts\%(Filename).Contracts%(Extension)')" />
-	  <CodeContractsReferenceAssembliesCopiedFiles />
+      <CodeContractsReferenceAssembliesCopiedFiles />
     </ItemGroup>
 
     <Copy SourceFiles="@(CodeContractsReferenceAssembliesFiles)"
@@ -29,6 +29,37 @@
 
     <ItemGroup>
       <FileWrites Include="@(CodeContractsReferenceAssembliesCopiedFiles)" />
+    </ItemGroup>
+  </Target>
+
+  <!--
+    ===================================================================================================================
+    These targets support packaging Code Contracts via NuProj project system.
+    Just register their names within the PackageOutputGroups property or ProjectReference.PackageOutputGroups metadata.
+    ===================================================================================================================
+    -->
+  <Target Name="CodeContractsReferenceAssembliesOutputGroup"
+          Returns="@(CodeContractsReferenceAssembliesOutputGroupOutput)">
+    <ItemGroup>
+      <CodeContractsReferenceAssembliesOutputGroupOutput Include="@(ContractReferenceAssemblies->'%(FullPath)')">
+        <TargetPath>$(CodeContractsContractSubDir)%(Filename)%(Extension)</TargetPath>
+      </CodeContractsReferenceAssembliesOutputGroupOutput>
+      <CodeContractsReferenceAssembliesOutputGroupOutput Include="@(ContractDummyReferenceAssembly)">
+        <TargetPath>$(CodeContractsContractSubDir)%(Filename)%(Extension)</TargetPath>
+      </CodeContractsReferenceAssembliesOutputGroupOutput>
+    </ItemGroup>
+  </Target>
+
+  <Target Name="CodeContractsDeclarativeAssembliesOutputGroup"
+          Returns="@(CodeContractsDeclarativeAssembliesOutputGroupOutput)">
+    <PropertyGroup>
+      <_CodeContractsDeclSubDir Condition="HasTrailingSlash('$(CodeContractsDeclDir)')">$([System.IO.Path]::GetFileName($([System.IO.Path]::GetDirectoryName('$(CodeContractsDeclDir)'))))\</_CodeContractsDeclSubDir>
+      <_CodeContractsDeclSubDir Condition="!HasTrailingSlash('$(CodeContractsDeclDir)')">$([System.IO.Path]::GetFileName('$(CodeContractsDeclDir)'))\</_CodeContractsDeclSubDir>
+    </PropertyGroup>
+    <ItemGroup>
+      <CodeContractsDeclarativeAssembliesOutputGroupOutput Include="@(ContractDeclarativeAssemblies->'%(FullPath)')">
+        <TargetPath>$(_CodeContractsDeclSubDir)%(Filename)%(Extension)</TargetPath>
+      </CodeContractsDeclarativeAssembliesOutputGroupOutput>
     </ItemGroup>
   </Target>
 </Project>

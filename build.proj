@@ -17,9 +17,12 @@
 		<ProjectReference Include="$(MSBuildProjectDirectory)\src\Digillect.ObjectModel.Tests\Digillect.ObjectModel.Tests.csproj">
 			<TestFramework>xUnit</TestFramework>
 		</ProjectReference>
-		<ProjectReference Include="$(MSBuildProjectDirectory)\Digillect.ObjectModel.proj">
+		<ProjectReference Include="$(MSBuildProjectDirectory)\src\Digillect.ObjectModel.NuGet\Digillect.ObjectModel.proj">
 			<AdditionalProperties>DigillectBuildToolsPath=$(DigillectBuildToolsPath);NuGetExecutable=$(NuGetExecutable);NuGetVerbosity=$(NuGetVerbosity)</AdditionalProperties>
 		</ProjectReference>
+    <ProjectReference Include="$(MSBuildProjectDirectory)\src\Digillect.ObjectModel.NuGet\Digillect.ObjectModel.NuGet.nuproj">
+      <AdditionalProperties>NuProjPath=$(SolutionDir)packages\NuProj.0.11.17-beta\tools\;NuGetToolExe=$(NuGetExecutable)</AdditionalProperties>
+    </ProjectReference>
 	</ItemGroup>
 
 	<Import Project="$(DigillectBuildToolsPath)\Digillect.Build.Common.targets" Condition="Exists('$(DigillectBuildToolsPath)\Digillect.Build.Common.targets')" />

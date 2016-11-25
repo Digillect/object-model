@@ -13,6 +13,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Digillect.ObjectModel", "sr
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Digillect.ObjectModel.Tests", "src\Digillect.ObjectModel.Tests\Digillect.ObjectModel.Tests.csproj", "{ABDC1825-8F24-4A80-87F3-F30A59F76BAF}"
 EndProject
+Project("{FF286327-C783-4F7A-AB73-9BCBAD0D4460}") = "Digillect.ObjectModel.NuGet", "src\Digillect.ObjectModel.NuGet\Digillect.ObjectModel.NuGet.nuproj", "{652A4B5A-0277-4654-B3E6-52259121E378}"
+EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{47C83165-1C9D-4ADE-BC05-44BBFB6C3ED1}"
 	ProjectSection(SolutionItems) = preProject
 		.nuget\packages.config = .nuget\packages.config
@@ -22,8 +24,10 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 	ProjectSection(SolutionItems) = preProject
 		build.cmd = build.cmd
 		build.proj = build.proj
-		Digillect.ObjectModel.nuspec = Digillect.ObjectModel.nuspec
-		Digillect.ObjectModel.proj = Digillect.ObjectModel.proj
+		tools\build\Digillect.CodeContracts.targets = tools\build\Digillect.CodeContracts.targets
+		src\Digillect.ObjectModel.NuGet\Digillect.ObjectModel.nuspec = src\Digillect.ObjectModel.NuGet\Digillect.ObjectModel.nuspec
+		src\Digillect.ObjectModel.NuGet\Digillect.ObjectModel.proj = src\Digillect.ObjectModel.NuGet\Digillect.ObjectModel.proj
+		NuGet.Config = NuGet.Config
 	EndProjectSection
 EndProject
 Global
@@ -62,6 +66,11 @@ Global
 		{ABDC1825-8F24-4A80-87F3-F30A59F76BAF}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{ABDC1825-8F24-4A80-87F3-F30A59F76BAF}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{ABDC1825-8F24-4A80-87F3-F30A59F76BAF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{652A4B5A-0277-4654-B3E6-52259121E378}.CodeAnalysis|Any CPU.ActiveCfg = Debug|Any CPU
+		{652A4B5A-0277-4654-B3E6-52259121E378}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{652A4B5A-0277-4654-B3E6-52259121E378}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{652A4B5A-0277-4654-B3E6-52259121E378}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{652A4B5A-0277-4654-B3E6-52259121E378}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

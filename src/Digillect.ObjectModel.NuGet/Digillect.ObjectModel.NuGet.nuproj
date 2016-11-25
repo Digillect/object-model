@@ -1,0 +1,38 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|AnyCPU">
+      <Configuration>Debug</Configuration>
+      <Platform>AnyCPU</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|AnyCPU">
+      <Configuration>Release</Configuration>
+      <Platform>AnyCPU</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Digillect.ObjectModel\Digillect.ObjectModel (net40).csproj" />
+    <ProjectReference Include="..\Digillect.ObjectModel\Digillect.ObjectModel (sl4).csproj" />
+    <ProjectReference Include="..\Digillect.ObjectModel\Digillect.ObjectModel (wp71).csproj" />
+    <ProjectReference Include="..\Digillect.ObjectModel\Digillect.ObjectModel.csproj" />
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>652a4b5a-0277-4654-b3e6-52259121e378</ProjectGuid>
+  </PropertyGroup>
+  <PropertyGroup>
+    <NuProjPath Condition=" '$(NuProjPath)' == '' ">$(MSBuildExtensionsPath)\NuProj\</NuProjPath>
+  </PropertyGroup>
+  <Import Project="$(NuProjPath)\NuProj.props" Condition="Exists('$(NuProjPath)\NuProj.props')" />
+  <PropertyGroup Label="Configuration">
+    <PackageOutputGroups>$(PackageOutputGroups);CodeContractsReferenceAssembliesOutputGroup</PackageOutputGroups>
+    <OutputPath>..\..\target\$(Configuration)\package\</OutputPath>
+    <NuSpecTemplate>Digillect.ObjectModel.nuspec</NuSpecTemplate>
+    <Id>Digillect.ObjectModel</Id>
+    <Version>4.2.0</Version>
+    <Title>Digillect.ObjectModel</Title>
+    <Authors>Gregory Nickonov, Andrew Nefedkin</Authors>
+    <Owners>Gregory Nickonov, Andrew Nefedkin</Owners>
+    <Description>Digillect Object Model Framework</Description>
+  </PropertyGroup>
+  <Import Project="$(NuProjPath)\NuProj.targets" />
+</Project>
