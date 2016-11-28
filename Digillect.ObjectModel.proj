@@ -31,8 +31,8 @@
         <FxTarget>wp71</FxTarget>
       </NuPkgLib>
       <NuPkgLib Include="$(BuildPath)net45+win8+wp8+wpa81\**\Digillect.ObjectModel.*" Exclude="$(_PackageExcludeList)">
-        <FxTarget>portable45</FxTarget>
-        <FxProfile>net45+dnxcore50+win8+wp8+wpa81</FxProfile>
+        <FxTarget>portable</FxTarget>
+        <FxProfile>net45+dnxcore50+win8+wp8+wpa81+MonoAndroid10+MonoTouch10+xamarinios10</FxProfile>
       </NuPkgLib>
       <NuPkgLib Include="$(BuildPath)net45+win8+wp8+wpa81\**\Digillect.ObjectModel.*" Exclude="$(_PackageExcludeList)">
         <FxTarget>net45</FxTarget>

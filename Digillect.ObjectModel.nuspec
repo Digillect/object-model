@@ -11,7 +11,7 @@
 		<requireLicenseAcceptance>false</requireLicenseAcceptance>
 		<description>Digillect Object Model Framework</description>
 		<releaseNotes/>
-		<copyright>Copyright © 2002-2015 Gregory Nickonov and Andrew Nefedkin (Actis® Wunderman). All rights reserved.</copyright>
+		<copyright>Copyright © 2002 Gregory Nickonov and Andrew Nefedkin (Actis® Wunderman). All rights reserved.</copyright>
 		<tags>digillect objectmodel</tags>
 		<dependencies>
 			<group />
@@ -25,8 +25,7 @@
 			<group targetFramework="wp71">
 				<dependency id="Microsoft.Bcl" version="1.1.10"/>
 			</group>
-			<group targetFramework="wp8">
-			</group>
+			<group targetFramework="wp8" />
 		</dependencies>
 		<references>
 			<reference file="Digillect.ObjectModel.dll"/>
