@@ -1,6 +1,8 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 2012
+# Visual Studio 14
+VisualStudioVersion = 14.0.25420.1
+MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Digillect.ObjectModel (wp71)", "src\Digillect.ObjectModel\Digillect.ObjectModel (wp71).csproj", "{173D9764-D139-4319-9532-4332C58F96C7}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Digillect.ObjectModel (net40)", "src\Digillect.ObjectModel\Digillect.ObjectModel (net40).csproj", "{F3F1B6B4-8771-4B81-93DC-C0F1DD68D9E0}"

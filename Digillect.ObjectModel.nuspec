@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0"?>
 
 <package>
-	<metadata minClientVersion="2.8.5">
+	<metadata minClientVersion="3.4">
 		<id>Digillect.ObjectModel</id>
 		<version>$version$</version>
 		<authors>Gregory Nickonov, Andrew Nefedkin</authors>
@@ -11,10 +11,9 @@
 		<requireLicenseAcceptance>false</requireLicenseAcceptance>
 		<description>Digillect Object Model Framework</description>
 		<releaseNotes/>
-		<copyright>Copyright © 2002 Gregory Nickonov and Andrew Nefedkin (Actis® Wunderman). All rights reserved.</copyright>
+		<copyright>Copyright © 2002 Gregory Nickonov and Andrew Nefedkin (Actis® Wunderman)</copyright>
 		<tags>digillect objectmodel</tags>
 		<dependencies>
-			<group />
 			<group targetFramework="net40-client">
 				<dependency id="Microsoft.Bcl" version="1.1.10"/>
 			</group>

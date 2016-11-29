@@ -13,7 +13,7 @@
 *.opensdf
 *.orig
 *.pdb
-*.Publish.xml
+*.[Pp]ublish.xml
 *.sav
 *.sdf
 *.sln.cache
@@ -25,6 +25,11 @@
 /packages/
 /target/
 **/aspnet_client/
+
+# DNX
+project.lock.json
+*.project.lock.json
+artifacts/
 
 # IDEs
 *[Rr]e[Ss]harper*

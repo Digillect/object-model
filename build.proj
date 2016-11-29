@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" InitialTargets="_CheckRequirements" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 	<PropertyGroup>
-		<DigillectBuildToolsPath>$(MSBuildProjectDirectory)\packages\Digillect.Build.Tools.2.0.0-rc\build</DigillectBuildToolsPath>
-		<MSBuildCommunityTasksPath>$(MSBuildProjectDirectory)\packages\MSBuildTasks.1.5.0.183\tools</MSBuildCommunityTasksPath>
+		<DigillectBuildToolsPath>$(MSBuildProjectDirectory)\packages\Digillect.Build.Tools.2.0.0-rc2\build</DigillectBuildToolsPath>
+		<MSBuildCommunityTasksPath>$(MSBuildProjectDirectory)\packages\MSBuildTasks.1.5.0.214\tools</MSBuildCommunityTasksPath>
 		<XUnitRunnerDirectory>$(MSBuildProjectDirectory)\packages\xunit.runner.msbuild.2.1.0\build\portable-net45+win8+wp8+wpa81</XUnitRunnerDirectory>
 	</PropertyGroup>
 
