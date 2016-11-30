@@ -17,8 +17,10 @@
     <SilverlightApplication>false</SilverlightApplication>
     <ValidateXaml>true</ValidateXaml>
     <ThrowErrorsInValidation>true</ThrowErrorsInValidation>
+    <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>..\Digillect.snk</AssemblyOriginatorKeyFile>
     <BaseIntermediateOutputPath Condition=" '$(BaseIntermediateOutputPath)' == '' ">obj\sl4\</BaseIntermediateOutputPath>
+    <CodeContractsInstallDir>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\..\packages\DotNet.Contracts.1.10.20606.1\'))</CodeContractsInstallDir>
     <CodeContractsAssemblyMode>0</CodeContractsAssemblyMode>
   </PropertyGroup>
   <!-- This property group is only here to support building this project using the 
@@ -171,9 +173,6 @@
     <CodeContractsSQLServerOption />
     <CodeContractsFailBuildOnWarnings>False</CodeContractsFailBuildOnWarnings>
   </PropertyGroup>
-  <PropertyGroup>
-    <SignAssembly>true</SignAssembly>
-  </PropertyGroup>
   <ItemGroup>
     <Reference Include="mscorlib" />
     <Reference Include="System" />
@@ -248,6 +247,7 @@
     <None Include="packages.Digillect.ObjectModel_%28sl4%29.config" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\Silverlight\$(SilverlightVersion)\Microsoft.Silverlight.CSharp.targets" />
+  <Import Project="$(CodeContractsInstallDir)MsBuild\v$(MSBuildToolsVersion)\Microsoft.CodeContracts.targets" Condition="Exists('$(CodeContractsInstallDir)MsBuild\v$(MSBuildToolsVersion)\Microsoft.CodeContracts.targets') And '$(CodeContractsImported)' != 'true' AND '$(DontImportCodeContracts)' != 'true'" />
   <Import Project="..\..\tools\build\Digillect.CodeContracts.targets" />
   <ProjectExtensions>
     <VisualStudio>

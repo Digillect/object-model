@@ -21,6 +21,7 @@
     <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>..\Digillect.snk</AssemblyOriginatorKeyFile>
     <BaseIntermediateOutputPath Condition=" '$(BaseIntermediateOutputPath)' == '' ">obj\wp71\</BaseIntermediateOutputPath>
+    <CodeContractsInstallDir>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\..\packages\DotNet.Contracts.1.10.20606.1\'))</CodeContractsInstallDir>
     <CodeContractsAssemblyMode>0</CodeContractsAssemblyMode>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
@@ -242,6 +243,7 @@
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath)\Microsoft\Silverlight for Phone\$(TargetFrameworkVersion)\Microsoft.Silverlight.$(TargetFrameworkProfile).Overrides.targets" />
   <Import Project="$(MSBuildExtensionsPath)\Microsoft\Silverlight for Phone\$(TargetFrameworkVersion)\Microsoft.Silverlight.CSharp.targets" />
+  <Import Project="$(CodeContractsInstallDir)MsBuild\v$(MSBuildToolsVersion)\Microsoft.CodeContracts.targets" Condition="Exists('$(CodeContractsInstallDir)MsBuild\v$(MSBuildToolsVersion)\Microsoft.CodeContracts.targets') And '$(CodeContractsImported)' != 'true' AND '$(DontImportCodeContracts)' != 'true'" />
   <Import Project="..\..\tools\build\Digillect.CodeContracts.targets" />
   <ProjectExtensions />
   <Import Project="..\..\packages\Microsoft.Bcl.Build.1.0.21\build\Microsoft.Bcl.Build.targets" Condition="Exists('..\..\packages\Microsoft.Bcl.Build.1.0.21\build\Microsoft.Bcl.Build.targets')" />
