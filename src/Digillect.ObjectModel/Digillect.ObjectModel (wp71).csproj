@@ -168,7 +168,10 @@
     <CodeContractsFailBuildOnWarnings>False</CodeContractsFailBuildOnWarnings>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Microsoft.Contracts, Version=1.0.0.0, Culture=neutral, PublicKeyToken=736440c9b414ea16, processorArchitecture=MSIL" />
+    <Reference Include="Microsoft.Contracts, Version=1.0.0.0, Culture=neutral, PublicKeyToken=736440c9b414ea16, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\DotNet.Contracts.1.10.20606.1\PublicAssemblies\WindowsPhone71\Microsoft.Contracts.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="mscorlib.extensions" />
     <Reference Include="System" />
     <Reference Include="System.Core" />
