@@ -38,14 +38,14 @@ namespace Digillect.Collections
 	{
 		#region Constructor
 		/// <summary>
-		/// Initializes a new instance of the <see cref="XUniqueCollection&lt;T&gt;"/> class.
+		/// Initializes a new instance of the <see cref="XUniqueCollection{T}"/> class.
 		/// </summary>
 		public XUniqueCollection()
 		{
 		}
 
 		/// <summary>
-		/// Initializes a new instance of the <see cref="XUniqueCollection&lt;T&gt;"/> class that contains elements copied from the specified collection.
+		/// Initializes a new instance of the <see cref="XUniqueCollection{T}"/> class that contains elements copied from the specified collection.
 		/// </summary>
 		/// <param name="collection">The collection from which the elements are copied.</param>
 		/// <exception cref="ArgumentNullException">The <paramref name="collection"/> parameter cannot be null.</exception>
@@ -59,7 +59,7 @@ namespace Digillect.Collections
 
 #if !WINDOWS8
 		/// <summary>
-		/// Initializes a new instance of the <see cref="XUniqueCollection&lt;T&gt;"/> class that contains elements copied from the specified list.
+		/// Initializes a new instance of the <see cref="XUniqueCollection{T}"/> class that contains elements copied from the specified list.
 		/// </summary>
 		/// <param name="list">The list from which the elements are copied.</param>
 		/// <exception cref="ArgumentNullException">The <paramref name="list"/> parameter cannot be null.</exception>
@@ -80,7 +80,7 @@ namespace Digillect.Collections
 		{
 			if ( ContainsKey(item.GetKey()) )
 			{
-				throw new ArgumentException(Errors.XCollectionItemDuplicateException, "item");
+				throw new ArgumentException(Errors.XCollectionItemDuplicateException, nameof(item));
 			}
 
 			base.InsertItem(index, item);
@@ -91,14 +91,14 @@ namespace Digillect.Collections
 		{
 			if ( item == null )
 			{
-				throw new ArgumentNullException("item");
+				throw new ArgumentNullException(nameof(item));
 			}
 
 			XKey key = item.GetKey();
 
 			if ( !key.Equals(this.Items[index].GetKey()) && ContainsKey(key) )
 			{
-				throw new ArgumentException(Errors.XCollectionItemDuplicateException, "item");
+				throw new ArgumentException(Errors.XCollectionItemDuplicateException, nameof(item));
 			}
 
 			base.SetItem(index, item);

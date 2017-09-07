@@ -56,7 +56,7 @@ namespace Digillect
 		{
 			if ( id == null )
 			{
-				throw new ArgumentNullException("id");
+				throw new ArgumentNullException(nameof(id));
 			}
 
 			Contract.EndContractBlock();
@@ -114,7 +114,7 @@ namespace Digillect
 		{
 			if ( id == null )
 			{
-				throw new ArgumentNullException("id");
+				throw new ArgumentNullException(nameof(id));
 			}
 
 			Contract.EndContractBlock();
@@ -160,7 +160,7 @@ namespace Digillect
 		{
 			if ( id == null )
 			{
-				throw new ArgumentNullException("id");
+				throw new ArgumentNullException(nameof(id));
 			}
 
 			Contract.Ensures(Contract.Result<TId>() != null);

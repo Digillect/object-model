@@ -31,7 +31,7 @@ using System.Resources;
 #endif
 [assembly: AssemblyCompany("Actis® Wunderman")]
 [assembly: AssemblyProduct("Digillect® Frameworks")]
-[assembly: AssemblyCopyright("© 2002-2014 Gregory Nickonov and Andrew Nefedkin (Actis® Wunderman). All rights reserved.")]
+[assembly: AssemblyCopyright("© 2002 Gregory Nickonov and Andrew Nefedkin (Actis® Wunderman)")]
 [assembly: AssemblyTrademark("Digillect is a registered trademark of Actis® Wunderman.")]
 
 [assembly: CLSCompliant(true)]

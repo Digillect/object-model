@@ -39,10 +39,6 @@ namespace Digillect.Collections
 		[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA2104:DoNotDeclareReadOnlyMutableReferenceTypes", Justification = "Indeed it is immutable")]
 		public static readonly CollectionMergeResults Empty = new CollectionMergeResults();
 
-		private readonly int _added;
-		private readonly int _removed;
-		private readonly int _updated;
-
 		#region Constructor
 		private CollectionMergeResults()
 		{
@@ -50,9 +46,9 @@ namespace Digillect.Collections
 
 		private CollectionMergeResults(int added, int removed, int updated)
 		{
-			_added = added;
-			_removed = removed;
-			_updated = updated;
+			Added = added;
+			Removed = removed;
+			Updated = updated;
 		}
 		#endregion
 
@@ -62,12 +58,7 @@ namespace Digillect.Collections
 		/// </summary>
 		public int Added
 		{
-			get
-			{
-				Contract.Ensures(Contract.Result<int>() >= 0);
-
-				return _added;
-			}
+			get;
 		}
 
 		/// <summary>
@@ -75,12 +66,7 @@ namespace Digillect.Collections
 		/// </summary>
 		public int Removed
 		{
-			get
-			{
-				Contract.Ensures(Contract.Result<int>() >= 0);
-
-				return _removed;
-			}
+			get;
 		}
 
 		/// <summary>
@@ -88,12 +74,7 @@ namespace Digillect.Collections
 		/// </summary>
 		public int Updated
 		{
-			get
-			{
-				Contract.Ensures(Contract.Result<int>() >= 0);
-
-				return _updated;
-			}
+			get;
 		}
 
 		/// <summary>
@@ -108,7 +89,7 @@ namespace Digillect.Collections
 			{
 				Contract.Ensures(!Contract.Result<bool>() || this.Added == 0 && this.Removed == 0 && this.Updated == 0);
 
-				return _added == 0 && _removed == 0 && _updated == 0;
+				return Added == 0 && Removed == 0 && Updated == 0;
 			}
 		}
 		#endregion
@@ -124,22 +105,22 @@ namespace Digillect.Collections
 		{
 			if ( added < 0 )
 			{
-				throw new ArgumentOutOfRangeException("added");
+				throw new ArgumentOutOfRangeException(nameof(added));
 			}
 
 			if ( removed < 0 )
 			{
-				throw new ArgumentOutOfRangeException("removed");
+				throw new ArgumentOutOfRangeException(nameof(removed));
 			}
 
 			if ( updated < 0 )
 			{
-				throw new ArgumentOutOfRangeException("updated");
+				throw new ArgumentOutOfRangeException(nameof(updated));
 			}
 
 			Contract.Ensures(Contract.Result<CollectionMergeResults>() != null);
 
-			if ( added == _added && removed == _removed && updated == _updated )
+			if (added == Added && removed == Removed && updated == Updated)
 			{
 				return this;
 			}
@@ -147,5 +128,15 @@ namespace Digillect.Collections
 			return new CollectionMergeResults(added, removed, updated);
 		}
 		#endregion
+
+		[ContractInvariantMethod]
+		[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
+		[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1822:MarkMembersAsStatic", Justification = "Required for code contracts.")]
+		private void ObjectInvariant()
+		{
+			Contract.Invariant(Added >= 0);
+			Contract.Invariant(Removed >= 0);
+			Contract.Invariant(Updated >= 0);
+		}
 	}
 }

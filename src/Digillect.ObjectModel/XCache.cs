@@ -106,7 +106,7 @@ namespace Digillect
 		{
 			if( key == null )
 			{
-				throw new ArgumentNullException( "key" );
+				throw new ArgumentNullException(nameof(key));
 			}
 
 			Contract.EndContractBlock();
@@ -135,7 +135,7 @@ namespace Digillect
 		{
 			if ( query == null )
 			{
-				throw new ArgumentNullException("query");
+				throw new ArgumentNullException(nameof(query));
 			}
 
 			Contract.EndContractBlock();
@@ -161,7 +161,7 @@ namespace Digillect
 					var converted = candidate.Items.Where(x => query.Match(x));
 
 #if NET45
-					Contract.Assume(converted != null);
+					//Contract.Assume(converted != null);
 #endif
 					Contract.Assume(Contract.ForAll(converted, item => item != null));
 
@@ -197,7 +197,7 @@ namespace Digillect
 		{
 			if ( @object == null )
 			{
-				throw new ArgumentNullException("object");
+				throw new ArgumentNullException(nameof(@object));
 			}
 
 			Contract.Ensures( Contract.Result<T>() != null );
@@ -262,7 +262,7 @@ namespace Digillect
 		{
 			if( collection == null )
 			{
-				throw new ArgumentNullException( "collection" );
+				throw new ArgumentNullException(nameof(collection));
 			}
 
 			Contract.Ensures( Contract.Result<IEnumerable<T>>() != null );
@@ -271,7 +271,7 @@ namespace Digillect
 		}
 
 		/// <summary>
-		/// Кеширует переданный список и (если <paramref name="cookie"/> не равен <see langword="null"/>) создает
+		/// Кэширует переданный список и (если <paramref name="cookie"/> не равен <c>null</c>) создает
 		/// <see cref="XCachedQuery"/> или добавляет <paramref name="cookie"/> к уже существующему.
 		/// </summary>
 		/// <returns>Возвращает список объектов.</returns>
@@ -279,12 +279,12 @@ namespace Digillect
 		{
 			if ( collection == null )
 			{
-				throw new ArgumentNullException("collection");
+				throw new ArgumentNullException(nameof(collection));
 			}
 
 			if ( query == null )
 			{
-				throw new ArgumentNullException("query");
+				throw new ArgumentNullException(nameof(query));
 			}
 
 			Contract.Ensures(Contract.Result<IXCollection<T>>() != null);
@@ -324,7 +324,7 @@ namespace Digillect
 		{
 			if( key == null )
 			{
-				throw new ArgumentNullException( "key" );
+				throw new ArgumentNullException(nameof(key));
 			}
 
 			Contract.EndContractBlock();
@@ -343,7 +343,7 @@ namespace Digillect
 		{
 			if( query == null )
 			{
-				throw new ArgumentNullException( "query" );
+				throw new ArgumentNullException(nameof(query));
 			}
 
 			Contract.EndContractBlock();
@@ -370,7 +370,7 @@ namespace Digillect
 		{
 			if( key == null )
 			{
-				throw new ArgumentNullException( "key" );
+				throw new ArgumentNullException(nameof(key));
 			}
 
 			Contract.EndContractBlock();
@@ -425,12 +425,12 @@ namespace Digillect
 		{
 			if( query == null )
 			{
-				throw new ArgumentNullException( "query" );
+				throw new ArgumentNullException(nameof(query));
 			}
 
 			if ( cookie == null )
 			{
-				throw new ArgumentNullException("cookie");
+				throw new ArgumentNullException(nameof(cookie));
 			}
 
 			Contract.EndContractBlock();
@@ -495,26 +495,17 @@ namespace Digillect
 
 		protected virtual void OnObjectAddedToCache( XCacheObjectEventArgs<T> e )
 		{
-			if( ObjectAddedToCache != null )
-			{
-				ObjectAddedToCache( this, e );
-			}
+			ObjectAddedToCache?.Invoke(this, e);
 		}
 
 		protected virtual void OnObjectRemovedFromCache( XCacheObjectEventArgs<T> e )
 		{
-			if( ObjectRemovedFromCache != null )
-			{
-				ObjectRemovedFromCache( this, e );
-			}
+			ObjectRemovedFromCache?.Invoke(this, e);
 		}
 
 		protected virtual void OnMatch( XCacheMatchEventArgs<T> e )
 		{
-			if( Match != null )
-			{
-				Match( this, e );
-			}
+			Match?.Invoke(this, e);
 		}
 		#endregion
 
@@ -580,17 +571,17 @@ namespace Digillect
 			{
 				if( query == null )
 				{
-					throw new ArgumentNullException( "query" );
+					throw new ArgumentNullException(nameof(query));
 				}
 
 				if ( items == null )
 				{
-					throw new ArgumentNullException("items");
+					throw new ArgumentNullException(nameof(items));
 				}
 
 				if ( cookie == null )
 				{
-					throw new ArgumentNullException("cookie");
+					throw new ArgumentNullException(nameof(cookie));
 				}
 
 				Contract.EndContractBlock();
@@ -661,7 +652,7 @@ namespace Digillect
 			{
 				if( cookie == null )
 				{
-					throw new ArgumentNullException("cookie");
+					throw new ArgumentNullException(nameof(cookie));
 				}
 
 				Contract.EndContractBlock();
@@ -683,7 +674,7 @@ namespace Digillect
 			{
 				if( cookie == null )
 				{
-					throw new ArgumentNullException("cookie");
+					throw new ArgumentNullException(nameof(cookie));
 				}
 
 				Contract.EndContractBlock();
@@ -753,7 +744,7 @@ namespace Digillect
 		{
 			if ( key == null )
 			{
-				throw new ArgumentNullException("key");
+				throw new ArgumentNullException(nameof(key));
 			}
 
 			Contract.EndContractBlock();
@@ -765,7 +756,7 @@ namespace Digillect
 		{
 			if ( @object == null )
 			{
-				throw new ArgumentNullException("object");
+				throw new ArgumentNullException(nameof(@object));
 			}
 
 			Contract.EndContractBlock();
@@ -779,13 +770,11 @@ namespace Digillect
 		public XKey Key
 		{
 			get;
-			private set;
 		}
 
 		public T Object
 		{
 			get;
-			private set;
 		}
 		#endregion
 
@@ -808,12 +797,12 @@ namespace Digillect
 		{
 			if ( query == null )
 			{
-				throw new ArgumentNullException("query");
+				throw new ArgumentNullException(nameof(query));
 			}
 
 			if ( @object == null )
 			{
-				throw new ArgumentNullException("object");
+				throw new ArgumentNullException(nameof(@object));
 			}
 
 			Contract.EndContractBlock();
@@ -827,13 +816,11 @@ namespace Digillect
 		public XQuery<T> Query
 		{
 			get;
-			private set;
 		}
 
 		public T Object
 		{
 			get;
-			private set;
 		}
 
 		public bool Processed

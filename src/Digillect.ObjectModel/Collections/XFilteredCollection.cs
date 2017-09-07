@@ -49,7 +49,7 @@ namespace Digillect.Collections
 		{
 			if ( collection == null )
 			{
-				throw new ArgumentNullException("collection");
+				throw new ArgumentNullException(nameof(collection));
 			}
 
 			Contract.EndContractBlock();
@@ -229,6 +229,11 @@ namespace Digillect.Collections
 		#endregion
 
 		#region Event Handlers
+#if WINDOWS8
+		[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Globalization", "CA1305:SpecifyIFormatProvider", MessageId = "System.String.Format(System.String,System.Object[])")]
+#else
+		[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Globalization", "CA1305:SpecifyIFormatProvider", MessageId = "System.String.Format(System.String,System.Object)")]
+#endif
 		private void BaseCollection_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
 		{
 #if CUSTOM_ENUMERATOR
@@ -341,7 +346,7 @@ namespace Digillect.Collections
 					break;
 
 				default:
-					throw new ArgumentException(e.Action.ToString(), "e");
+					throw new ArgumentException($"Change action {e.Action} is invalid.", nameof(e));
 			}
 		}
 		#endregion

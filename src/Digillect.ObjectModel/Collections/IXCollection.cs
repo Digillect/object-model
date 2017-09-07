@@ -36,8 +36,8 @@ namespace Digillect.Collections
 		/// <summary>
 		/// Determines whether the <b>collection</b> contains an item with the specific key.
 		/// </summary>
-		/// <param name="key">The key of an item to locate in the <see cref="IXCollection&lt;T&gt;"/>.</param>
-		/// <returns><see langword="true"/> if item is found in the <see cref="IXCollection&lt;T&gt;"/>; otherwise, <see langword="false"/>.</returns>
+		/// <param name="key">The key of an item to locate in the <see cref="IXCollection{T}"/>.</param>
+		/// <returns><see langword="true"/> if item is found in the <see cref="IXCollection{T}"/>; otherwise, <see langword="false"/>.</returns>
 		[Pure]
 		bool ContainsKey(XKey key);
 

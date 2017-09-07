@@ -45,12 +45,12 @@ namespace Digillect.Collections
 		{
 			if ( collection == null )
 			{
-				throw new ArgumentNullException("collection");
+				throw new ArgumentNullException(nameof(collection));
 			}
 
 			if ( itemsComparison == null )
 			{
-				throw new ArgumentNullException("itemsComparison");
+				throw new ArgumentNullException(nameof(itemsComparison));
 			}
 
 			Contract.EndContractBlock();

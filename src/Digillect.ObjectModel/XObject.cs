@@ -51,7 +51,7 @@ namespace Digillect
 #if !(SILVERLIGHT || WINDOWS8)
 		[NonSerialized]
 #endif
-		private XKey key;
+		private XKey _key;
 
 		#region Constructor
 		/// <summary>
@@ -108,19 +108,19 @@ namespace Digillect
 		public XKey GetKey()
 		{
 			Contract.Ensures(Contract.Result<XKey>() != null);
-			Contract.EnsuresOnThrow<XKeyNotAvailableException>(this.key == null);
+			Contract.EnsuresOnThrow<XKeyNotAvailableException>(_key == null);
 
-			if ( Object.ReferenceEquals(this.key, null) )
+			if (Object.ReferenceEquals(_key, null))
 			{
-				this.key = CreateKey();
+				_key = CreateKey();
 
-				if ( Object.ReferenceEquals(this.key, null) )
+				if (Object.ReferenceEquals(_key, null))
 				{
 					throw new XKeyNotAvailableException(Errors.XObjectNullKeyException);
 				}
 			}
 
-			return this.key;
+			return _key;
 		}
 
 		/// <summary>
@@ -128,7 +128,7 @@ namespace Digillect
 		/// </summary>
 		protected void ResetKey()
 		{
-			this.key = null;
+			_key = null;
 		}
 
 		/// <summary>
@@ -172,13 +172,13 @@ namespace Digillect
 		/// <c>true</c> if update is required; otherwise, <c>false</c>.
 		/// </returns>
 		/// <remarks>
-		/// Overrride to provide custom logic. Default implementation requires update any time when objects are not equal by reference.
+		/// Override to provide custom logic. Default implementation requires update any time when objects are not equal by reference.
 		/// </remarks>
 		public virtual bool IsUpdateRequired(XObject source)
 		{
 			if ( source == null )
 			{
-				throw new ArgumentNullException("source");
+				throw new ArgumentNullException(nameof(source));
 			}
 
 			return !Object.ReferenceEquals(this, source);
@@ -192,11 +192,13 @@ namespace Digillect
 		{
 			if ( source == null )
 			{
-				throw new ArgumentNullException("source");
+				throw new ArgumentNullException(nameof(source));
 			}
 
-			if ( !IsObjectCompatible(source) )
-				throw new ArgumentException(Errors.XObjectSourceNotCompatibleException, "source");
+			if (!IsObjectCompatible(source))
+			{
+				throw new ArgumentException(Errors.XObjectSourceNotCompatibleException, nameof(source));
+			}
 
 			if( IsUpdateRequired( source ) )
 			{
@@ -214,8 +216,8 @@ namespace Digillect
 		/// <param name="deepCloning"><c>true</c> if performing deep cloning, otherwise, <c>false</c>.</param>
 		protected virtual void ProcessCopy( XObject source, bool cloning, bool deepCloning )
 		{
-			// Drop the key to overcome potentional cloning issues
-			this.key = null;
+			// Drop the key to overcome potential cloning issues
+			_key = null;
 		}
 
 		/// <summary>
@@ -234,7 +236,7 @@ namespace Digillect
 
 			if ( cloning || thisField == null )
 			{
-				thisField = otherField == null ? null : otherField.Clone(cloning && deepCloning);
+				thisField = otherField?.Clone(cloning && deepCloning);
 			}
 			else if ( otherField == null )
 			{

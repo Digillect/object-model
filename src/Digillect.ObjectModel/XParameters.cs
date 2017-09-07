@@ -236,7 +236,7 @@ namespace Digillect
 		{
 			if( name == null )
 			{
-				throw new ArgumentNullException( "name" );
+				throw new ArgumentNullException(nameof(name));
 			}
 
 			Contract.EndContractBlock();
@@ -250,10 +250,10 @@ namespace Digillect
 			return pair.Key != null;
 		}
 		/// <summary>
-		///     Returns the <see cref="Digillect.XParameters.Builder" /> object which allows mutation in a multistep fashion.
+		///     Returns the <see cref="Builder" /> object which allows mutation in a multi-step fashion.
 		/// </summary>
 		/// <returns>
-		///     An instance of the <see cref="Digillect.XParameters.Builder" /> class.
+		///     An instance of the <see cref="Builder" /> class.
 		/// </returns>
 		[Pure]
 		public Builder ToBuilder()
@@ -276,12 +276,12 @@ namespace Digillect
 		{
 			if( name == null )
 			{
-				throw new ArgumentNullException( "name" );
+				throw new ArgumentNullException(nameof(name));
 			}
 
 			if( value == null )
 			{
-				throw new ArgumentNullException( "value" );
+				throw new ArgumentNullException(nameof(value));
 			}
 
 			Contract.Ensures( Contract.Result<XParameters>() != null );
@@ -358,7 +358,7 @@ namespace Digillect
 
 		#region class Builder
 		/// <summary>
-		///     <see cref="Digillect.XParameters" /> builder which allows mutation in a multistep fashion.
+		///     <see cref="XParameters" /> builder which allows mutation in a multi-step fashion.
 		/// </summary>
 		[SuppressMessage( "Microsoft.Design", "CA1034:NestedTypesShouldNotBeVisible" )]
 		public sealed class Builder
@@ -382,12 +382,12 @@ namespace Digillect
 			{
 				if( name == null )
 				{
-					throw new ArgumentNullException( "name" );
+					throw new ArgumentNullException(nameof(name));
 				}
 
 				if( value == null )
 				{
-					throw new ArgumentNullException( "value" );
+					throw new ArgumentNullException(nameof(value));
 				}
 
 				Contract.Ensures( _parameters.Count >= Contract.OldValue( _parameters.Count ) );
@@ -415,7 +415,7 @@ namespace Digillect
 			{
 				if( name == null )
 				{
-					throw new ArgumentNullException( "name" );
+					throw new ArgumentNullException(nameof(name));
 				}
 
 				Contract.Ensures( _parameters.Count <= Contract.OldValue( _parameters.Count ) );

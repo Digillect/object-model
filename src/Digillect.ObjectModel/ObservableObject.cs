@@ -88,10 +88,7 @@ namespace Digillect
 		protected virtual void OnPropertyChanging( Digillect.ComponentModel.PropertyChangingEventArgs e )
 		{
 #if !(WINDOWS8 || SILVERLIGHT && !WINDOWS_PHONE)
-			if ( PropertyChanging != null )
-			{
-				PropertyChanging( this, e );
-			}
+			PropertyChanging?.Invoke(this, e);
 #endif
 		}
 
@@ -115,8 +112,7 @@ namespace Digillect
 		/// <param name="e">The <see cref="System.ComponentModel.PropertyChangedEventArgs"/> instance containing the event data.</param>
 		protected virtual void OnPropertyChanged( PropertyChangedEventArgs e )
 		{
-			if( PropertyChanged != null )
-				PropertyChanged( this, e );
+			PropertyChanged?.Invoke(this, e);
 		}
 		#endregion
 

@@ -106,7 +106,7 @@ namespace Digillect
 		/// путем применения метода <see cref="Match"/> можно получить результаты указанного запроса.
 		/// </summary>
 		/// <param name="query">Запрос для сравнения</param>
-		/// <returns><see langword="true"/> если результаты запроса можно преобразовать, иначе <see langword="false"/>.</returns>
+		/// <returns><c>true</c>, если результаты запроса можно преобразовать, иначе <c>false</c>.</returns>
 		/// <remarks>
 		/// Данная реализация использует метод <see cref="Equals"/> для определения возможности преобразования.
 		/// </remarks>
@@ -146,7 +146,7 @@ namespace Digillect
 		{
 			if( source == null )
 			{
-				throw new ArgumentNullException( "source" );
+				throw new ArgumentNullException(nameof(source));
 			}
 
 			Contract.EndContractBlock();
@@ -165,7 +165,7 @@ namespace Digillect
 				return false;
 			}
 
-			return object.Equals( _method, otherQuery._method ) && _parameters.Equals( otherQuery._parameters );
+			return string.Equals(_method, otherQuery._method) && _parameters.Equals(otherQuery._parameters);
 		}
 
 		public override bool Equals( object obj )

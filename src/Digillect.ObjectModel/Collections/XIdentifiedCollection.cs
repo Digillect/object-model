@@ -182,7 +182,7 @@ namespace Digillect.Collections
 		/// <param name="collection">Источник изменений.</param>
 		/// <param name="options">Операции, которые надо произвести с объектами, находящимися в данной коллекции.</param>
 		/// <returns>The <see cref="CollectionMergeResults">results</see> of the operation.</returns>
-		/// <seealso cref="IXUpdatable&lt;T&gt;"/>
+		/// <seealso cref="IXUpdatable{T}"/>
 		/// <seealso cref="XCollectionsUtil.Merge"/>
 		public override CollectionMergeResults Update(IEnumerable<TObject> collection, CollectionMergeOptions options)
 		{

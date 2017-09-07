@@ -32,7 +32,7 @@ namespace Digillect.Runtime.Serialization
 	{
 		private readonly BinaryReader _binaryReader;
 		private readonly bool _ownReader;
-#if SILVERLIGHT || NET40
+#if !NET45
 		private readonly bool _closeReader;
 #endif
 		private int _version;
@@ -48,12 +48,12 @@ namespace Digillect.Runtime.Serialization
 		{
 			if( stream == null )
 			{
-				throw new ArgumentNullException( "stream" );
+				throw new ArgumentNullException(nameof(stream));
 			}
 
 			Contract.EndContractBlock();
 
-#if SILVERLIGHT || NET40
+#if !NET45
 			_binaryReader = new BinaryReader( stream );
 			_closeReader = !leaveOpen;
 #else
@@ -66,7 +66,7 @@ namespace Digillect.Runtime.Serialization
 		{
 			if( reader == null )
 			{
-				throw new ArgumentNullException( "reader" );
+				throw new ArgumentNullException(nameof(reader));
 			}
 
 			Contract.EndContractBlock();
@@ -80,14 +80,12 @@ namespace Digillect.Runtime.Serialization
 			{
 				if( _ownReader )
 				{
-#if SILVERLIGHT || NET40
+#if !NET45
 					if( _closeReader )
+#endif
 					{
 						_binaryReader.Dispose();
 					}
-#else
-					_binaryReader.Dispose();
-#endif
 				}
 			}
 

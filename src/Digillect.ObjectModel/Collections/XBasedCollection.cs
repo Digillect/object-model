@@ -36,20 +36,20 @@ namespace Digillect.Collections
 #if !(SILVERLIGHT || WINDOWS8)
 	[Serializable]
 #endif
-	public abstract class XBasedCollection<T> : IXList<T>, IList, INotifyPropertyChanged, IDisposable
+	public abstract class XBasedCollection<T> : IXList<T>, IList, IDisposable
 #if !(SILVERLIGHT || WINDOWS8)
 		, ICloneable
 #endif
 		where T : XObject
 	{
 		/// <summary>
-		/// The name of the <see cref="ICollection&lt;T&gt;.Count"/> property for the <see cref="INotifyPropertyChanged.PropertyChanged"/> event.
+		/// The name of the <see cref="ICollection{T}.Count"/> property for the <see cref="INotifyPropertyChanged.PropertyChanged"/> event.
 		/// Contains the "Count" string.
 		/// </summary>
 		protected const string CountString = "Count";
 
 		/// <summary>
-		/// The name of the <see cref="IList&lt;T&gt;.this"/> property for the <see cref="INotifyPropertyChanged.PropertyChanged"/> event.
+		/// The name of the <see cref="IList{T}.this"/> property for the <see cref="INotifyPropertyChanged.PropertyChanged"/> event.
 		/// Contains the "Item[]" string.
 		/// </summary>
 		protected const string IndexerName = "Item[]";
@@ -117,7 +117,7 @@ namespace Digillect.Collections
 			return Clone(deep);
 		}
 
-		/// <inheritdoc cref="IXUpdatable&lt;T&gt;.Clone(bool)"/>
+		/// <inheritdoc cref="IXUpdatable{T}.Clone(bool)"/>
 		public abstract XBasedCollection<T> Clone(bool deep);
 
 		/// <inheritdoc/>
@@ -211,12 +211,12 @@ namespace Digillect.Collections
 		{
 			if ( array == null )
 			{
-				throw new ArgumentNullException("array");
+				throw new ArgumentNullException(nameof(array));
 			}
 
 			if ( arrayIndex < 0 )
 			{
-				throw new ArgumentOutOfRangeException("arrayIndex", Errors.ArgumentOutOfRange_NeedNonNegNum);
+				throw new ArgumentOutOfRangeException(nameof(arrayIndex), Errors.ArgumentOutOfRange_NeedNonNegNum);
 			}
 
 			if ( array.Length - arrayIndex < this.Count )
@@ -314,22 +314,22 @@ namespace Digillect.Collections
 		{
 			if ( array == null )
 			{
-				throw new ArgumentNullException("array");
+				throw new ArgumentNullException(nameof(array));
 			}
 
 			if ( array.Rank != 1 || array.GetLowerBound(0) != 0 )
 			{
-				throw new ArgumentException("Incompatible array.", "array");
+				throw new ArgumentException("Incompatible array.", nameof(array));
 			}
 
 			if ( index < 0 )
 			{
-				throw new ArgumentOutOfRangeException("index", Errors.ArgumentOutOfRange_NeedNonNegNum);
+				throw new ArgumentOutOfRangeException(nameof(index), Errors.ArgumentOutOfRange_NeedNonNegNum);
 			}
 
 			if ( array.Length - index < this.Count )
 			{
-				throw new ArgumentException("ArrayPlusOffTooSmall");
+				throw new ArgumentException(Errors.Arg_ArrayPlusOffTooSmall);
 			}
 
 			T[] localArray = array as T[];

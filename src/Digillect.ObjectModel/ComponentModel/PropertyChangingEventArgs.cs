@@ -51,18 +51,18 @@ namespace Digillect.ComponentModel
 		/// <value>
 		/// The name of the property whose value is changing.
 		/// </value>
-		public virtual string PropertyName { get; private set; }
+		public virtual string PropertyName { get; }
 #endif
 
 		/// <summary>
 		/// Current property value.
 		/// </summary>
-		public object CurrentValue { get; private set; }
+		public object CurrentValue { get; }
 
 		/// <summary>
 		/// Proposed property value.
 		/// </summary>
-		public object ProposedValue { get; private set; }
+		public object ProposedValue { get; }
 
 		#region Constructor
 		/// <summary>

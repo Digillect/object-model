@@ -34,7 +34,7 @@ namespace Digillect.Runtime.Serialization
 		{
 			if( string.IsNullOrEmpty( source ) )
 			{
-				throw new ArgumentNullException( "source" );
+				throw new ArgumentNullException(nameof(source));
 			}
 
 			Contract.Ensures( Contract.Result<XKey>() != null );
@@ -66,7 +66,7 @@ namespace Digillect.Runtime.Serialization
 		{
 			if( source == null )
 			{
-				throw new ArgumentNullException( "source" );
+				throw new ArgumentNullException(nameof(source));
 			}
 
 			Contract.Ensures( Contract.Result<XKey>() != null );
@@ -95,7 +95,7 @@ namespace Digillect.Runtime.Serialization
 		{
 			if( source == null )
 			{
-				throw new ArgumentNullException( "source" );
+				throw new ArgumentNullException(nameof(source));
 			}
 
 			Contract.Ensures( Contract.Result<XKey>() != null );
@@ -125,7 +125,7 @@ namespace Digillect.Runtime.Serialization
 		{
 			if( key == null )
 			{
-				throw new ArgumentNullException( "key" );
+				throw new ArgumentNullException(nameof(key));
 			}
 
 			Contract.Ensures( Contract.Result<string>() != null );
@@ -151,12 +151,12 @@ namespace Digillect.Runtime.Serialization
 		{
 			if( stream == null )
 			{
-				throw new ArgumentNullException( "stream" );
+				throw new ArgumentNullException(nameof(stream));
 			}
 
 			if( key == null )
 			{
-				throw new ArgumentNullException( "key" );
+				throw new ArgumentNullException(nameof(key));
 			}
 
 			Contract.EndContractBlock();
@@ -177,12 +177,12 @@ namespace Digillect.Runtime.Serialization
 		{
 			if( binaryWriter == null )
 			{
-				throw new ArgumentNullException( "binaryWriter" );
+				throw new ArgumentNullException(nameof(binaryWriter));
 			}
 
 			if( key == null )
 			{
-				throw new ArgumentNullException( "key" );
+				throw new ArgumentNullException(nameof(key));
 			}
 
 			Contract.EndContractBlock();

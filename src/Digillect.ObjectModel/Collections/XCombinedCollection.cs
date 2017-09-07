@@ -53,12 +53,12 @@ namespace Digillect.Collections
 		{
 			if ( collections == null )
 			{
-				throw new ArgumentNullException("collections");
+				throw new ArgumentNullException(nameof(collections));
 			}
 
 			if ( !Contract.ForAll(collections, item => item != null) )
 			{
-				throw new ArgumentException("Null element found.", "collections");
+				throw new ArgumentException("Null element found.", nameof(collections));
 			}
 
 			Contract.EndContractBlock();
@@ -118,7 +118,7 @@ namespace Digillect.Collections
 					}
 				}
 
-				throw new ArgumentOutOfRangeException("index", Errors.ArgumentOutOfRange_Index);
+				throw new ArgumentOutOfRangeException(nameof(index), Errors.ArgumentOutOfRange_Index);
 			}
 		}
 		#endregion
@@ -234,7 +234,7 @@ namespace Digillect.Collections
 		{
 			if ( item == null )
 			{
-				throw new ArgumentNullException("item");
+				throw new ArgumentNullException(nameof(item));
 			}
 
 			Contract.Requires(index >= 0);
@@ -259,7 +259,7 @@ namespace Digillect.Collections
 		{
 			if ( item == null )
 			{
-				throw new ArgumentNullException("item");
+				throw new ArgumentNullException(nameof(item));
 			}
 
 			Contract.EndContractBlock();
@@ -306,11 +306,16 @@ namespace Digillect.Collections
 				}
 			}
 
-			throw new ArgumentException("The collection is not a member of this collection.", "collection");
+			throw new ArgumentException("The collection is not a member of this collection.", nameof(collection));
 		}
 		#endregion
 
 		#region Event Handlers
+#if WINDOWS8
+		[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Globalization", "CA1305:SpecifyIFormatProvider", MessageId = "System.String.Format(System.String,System.Object[])")]
+#else
+		[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Globalization", "CA1305:SpecifyIFormatProvider", MessageId = "System.String.Format(System.String,System.Object)")]
+#endif
 		private void BaseCollection_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
 		{
 			_version++;
@@ -366,7 +371,7 @@ namespace Digillect.Collections
 					OnCollectionReset();
 					break;
 				default:
-					throw new ArgumentException(e.Action.ToString(), "e");
+					throw new ArgumentException($"Change action {e.Action} is invalid.", nameof(e));
 			}
 		}
 		#endregion

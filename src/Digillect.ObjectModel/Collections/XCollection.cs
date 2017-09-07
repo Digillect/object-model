@@ -44,13 +44,13 @@ namespace Digillect.Collections
 		where T : XObject
 	{
 		/// <summary>
-		/// The name of the <see cref="ICollection&lt;T&gt;.Count"/> property for the <see cref="INotifyPropertyChanged.PropertyChanged"/> event.
+		/// The name of the <see cref="ICollection{T}.Count"/> property for the <see cref="INotifyPropertyChanged.PropertyChanged"/> event.
 		/// Contains the "Count" string.
 		/// </summary>
 		protected const string CountString = "Count";
 
 		/// <summary>
-		/// The name of the <see cref="IList&lt;T&gt;.this"/> property for the <see cref="INotifyPropertyChanged.PropertyChanged"/> event.
+		/// The name of the <see cref="IList{T}.this"/> property for the <see cref="INotifyPropertyChanged.PropertyChanged"/> event.
 		/// Contains the "Item[]" string.
 		/// </summary>
 		protected const string IndexerName = "Item[]";
@@ -68,14 +68,14 @@ namespace Digillect.Collections
 
 		#region Constructor
 		/// <summary>
-		/// Initializes a new instance of the <see cref="XCollection&lt;T&gt;"/> class.
+		/// Initializes a new instance of the <see cref="XCollection{T}"/> class.
 		/// </summary>
 		public XCollection()
 		{
 		}
 
 		/// <summary>
-		/// Initializes a new instance of the <see cref="XCollection&lt;T&gt;"/> class that contains elements copied from the specified collection.
+		/// Initializes a new instance of the <see cref="XCollection{T}"/> class that contains elements copied from the specified collection.
 		/// </summary>
 		/// <param name="collection">The collection from which the elements are copied.</param>
 		/// <exception cref="ArgumentNullException">The <paramref name="collection"/> parameter cannot be null.</exception>
@@ -88,7 +88,7 @@ namespace Digillect.Collections
 
 #if !WINDOWS8
 		/// <summary>
-		/// Initializes a new instance of the <see cref="XCollection&lt;T&gt;"/> class that contains elements copied from the specified list.
+		/// Initializes a new instance of the <see cref="XCollection{T}"/> class that contains elements copied from the specified list.
 		/// </summary>
 		/// <param name="list">The list from which the elements are copied.</param>
 		/// <exception cref="ArgumentNullException">The <paramref name="list"/> parameter cannot be null.</exception>
@@ -127,7 +127,7 @@ namespace Digillect.Collections
 		}
 
 		/// <summary>
-		/// Raises the <see cref="ObservableCollection&lt;T&gt;.CollectionChanged"/> event with the <see cref="NotifyCollectionChangedAction.Reset"/> action.
+		/// Raises the <see cref="ObservableCollection{T}.CollectionChanged"/> event with the <see cref="NotifyCollectionChangedAction.Reset"/> action.
 		/// </summary>
 		protected void OnCollectionReset()
 		{
@@ -135,7 +135,7 @@ namespace Digillect.Collections
 		}
 
 		/// <summary>
-		/// Raises the <see cref="ObservableCollection&lt;T&gt;.PropertyChanged"/> event with the specified name of a property.
+		/// Raises the <see cref="ObservableCollection{T}.PropertyChanged"/> event with the specified name of a property.
 		/// </summary>
 		/// <param name="propertyName">The name of a property being changed.</param>
 		protected void OnPropertyChanged(string propertyName)
@@ -168,8 +168,8 @@ namespace Digillect.Collections
 		/// <summary>
 		/// Determines whether the <b>collection</b> contains an item with the specific key.
 		/// </summary>
-		/// <param name="key">The key of an item to locate in the <see cref="IXCollection&lt;T&gt;"/>.</param>
-		/// <returns><see langword="true"/> if item is found in the <see cref="IXCollection&lt;T&gt;"/>; otherwise, <see langword="false"/>.</returns>
+		/// <param name="key">The key of an item to locate in the <see cref="IXCollection{T}"/>.</param>
+		/// <returns><see langword="true"/> if item is found in the <see cref="IXCollection{T}"/>; otherwise, <see langword="false"/>.</returns>
 		public bool ContainsKey(XKey key)
 		{
 			return IndexOf(key) != -1;
@@ -180,7 +180,7 @@ namespace Digillect.Collections
 		{
 			if ( predicate == null )
 			{
-				throw new ArgumentNullException("predicate");
+				throw new ArgumentNullException(nameof(predicate));
 			}
 
 			Contract.Ensures(Contract.Result<XCollection<T>>() != null);
@@ -196,7 +196,7 @@ namespace Digillect.Collections
 		{
 			if ( action == null )
 			{
-				throw new ArgumentNullException("action");
+				throw new ArgumentNullException(nameof(action));
 			}
 
 			Contract.EndContractBlock();
@@ -222,7 +222,7 @@ namespace Digillect.Collections
 		{
 			if ( key == null )
 			{
-				throw new ArgumentNullException("key");
+				throw new ArgumentNullException(nameof(key));
 			}
 
 			for ( int i = 0; i < this.Items.Count; i++ )
@@ -242,7 +242,7 @@ namespace Digillect.Collections
 		{
 			if ( index < 0 || index > this.Count )
 			{
-				throw new ArgumentOutOfRangeException("index", Errors.ArgumentOutOfRange_Index);
+				throw new ArgumentOutOfRangeException(nameof(index), Errors.ArgumentOutOfRange_Index);
 			}
 
 			XCollectionsUtil.ValidateCollection(collection);
@@ -333,7 +333,7 @@ namespace Digillect.Collections
 		{
 			if ( clone == null )
 			{
-				throw new ArgumentNullException("clone");
+				throw new ArgumentNullException(nameof(clone));
 			}
 
 			Contract.EndContractBlock();
@@ -368,7 +368,7 @@ namespace Digillect.Collections
 		/// В процессе операции ни одно из событий не возбуждается.
 		/// Не забудьте вызвать метод <see cref="EndUpdate()"/> столько раз, сколько раз вызывался метод <b>BeginUpdate()</b>.
 		/// </remarks>
-		/// <seealso cref="IXUpdatable&lt;T&gt;"/>
+		/// <seealso cref="IXUpdatable{T}"/>
 		public void BeginUpdate()
 		{
 			++_updateCount;
@@ -379,9 +379,9 @@ namespace Digillect.Collections
 		/// </summary>
 		/// <remarks>
 		/// Как только будет вызван последний метод <b>EndUpdate()</b>, соответствующий первому вызванному методу <see cref="BeginUpdate()"/>,
-		/// будет возбуждено событие <see cref="ObservableCollection&lt;T&gt;.CollectionChanged"/> с типом операции <see cref="NotifyCollectionChangedAction.Reset"/>.
+		/// будет возбуждено событие <see cref="ObservableCollection{T}.CollectionChanged"/> с типом операции <see cref="NotifyCollectionChangedAction.Reset"/>.
 		/// </remarks>
-		/// <seealso cref="IXUpdatable&lt;T&gt;"/>
+		/// <seealso cref="IXUpdatable{T}"/>
 		public void EndUpdate()
 		{
 			if ( _updateCount == 0 )
@@ -408,12 +408,12 @@ namespace Digillect.Collections
 		/// <returns>
 		/// <see langword="false"/> if two collections are the same (equal by reference) or <paramref name="options"/> are <see cref="CollectionMergeOptions.None"/>, otherwise, <see langword="true"/>.
 		/// </returns>
-		/// <seealso cref="IXUpdatable&lt;T&gt;"/>
+		/// <seealso cref="IXUpdatable{T}"/>
 		public virtual bool IsUpdateRequired(IEnumerable<T> collection, CollectionMergeOptions options)
 		{
 			if ( collection == null )
 			{
-				throw new ArgumentNullException("collection");
+				throw new ArgumentNullException(nameof(collection));
 			}
 
 			Contract.EndContractBlock();
@@ -433,9 +433,9 @@ namespace Digillect.Collections
 		/// <param name="collection">Источник изменений.</param>
 		/// <returns>The <see cref="CollectionMergeResults">results</see> of the operation.</returns>
 		/// <remarks>
-		/// Вызов данного метода эквивалентен вызову метода <see cref="Update(IEnumerable&lt;T&gt;,CollectionMergeOptions)"/> со вторым параметром, равным <see cref="CollectionMergeOptions.Full"/>.
+		/// Вызов данного метода эквивалентен вызову метода <see cref="Update(IEnumerable{T},CollectionMergeOptions)"/> со вторым параметром, равным <see cref="CollectionMergeOptions.Full"/>.
 		/// </remarks>
-		/// <seealso cref="IXUpdatable&lt;T&gt;"/>
+		/// <seealso cref="IXUpdatable{T}"/>
 		public CollectionMergeResults Update(IEnumerable<T> collection)
 		{
 			Contract.Requires(collection != null);
@@ -451,7 +451,7 @@ namespace Digillect.Collections
 		/// <param name="collection">Источник изменений.</param>
 		/// <param name="options">Операции, которые надо произвести с объектами, находящимися в данной коллекции.</param>
 		/// <returns>The <see cref="CollectionMergeResults">results</see> of the operation.</returns>
-		/// <seealso cref="IXUpdatable&lt;T&gt;"/>
+		/// <seealso cref="IXUpdatable{T}"/>
 		/// <seealso cref="XCollectionsUtil.Merge"/>
 		public virtual CollectionMergeResults Update(IEnumerable<T> collection, CollectionMergeOptions options)
 		{
@@ -541,12 +541,12 @@ namespace Digillect.Collections
 		{
 			if ( item == null )
 			{
-				throw new ArgumentNullException("item");
+				throw new ArgumentNullException(nameof(item));
 			}
 
 			if ( this.Items.Contains(item, ReferenceComparer) )
 			{
-				throw new ArgumentException(Errors.XCollectionItemDuplicateException, "item");
+				throw new ArgumentException(Errors.XCollectionItemDuplicateException, nameof(item));
 			}
 
 			base.InsertItem(index, item);
@@ -564,12 +564,12 @@ namespace Digillect.Collections
 
 			if ( item == null )
 			{
-				throw new ArgumentNullException("item");
+				throw new ArgumentNullException(nameof(item));
 			}
 
 			if ( this.Items.Contains(item, ReferenceComparer) )
 			{
-				throw new ArgumentException(Errors.XCollectionItemDuplicateException, "item");
+				throw new ArgumentException(Errors.XCollectionItemDuplicateException, nameof(item));
 			}
 
 			base.SetItem(index, item);
@@ -633,10 +633,6 @@ namespace Digillect.Collections
 		#region class ReferenceEqualityComparer
 		private sealed class ReferenceEqualityComparer : IEqualityComparer<T>
 		{
-			public ReferenceEqualityComparer()
-			{
-			}
-
 			bool IEqualityComparer<T>.Equals(T x, T y)
 			{
 				return Object.ReferenceEquals(x, y);

@@ -36,7 +36,6 @@ namespace Digillect.Collections
 	public sealed class XSubRangeCollection<T> : XBasedCollection<T>
 		where T : XObject
 	{
-		private readonly IXList<T> _baseCollection;
 		private readonly int _startIndex;
 		private readonly int _maxCount;
 
@@ -50,26 +49,26 @@ namespace Digillect.Collections
 		{
 			if ( collection == null )
 			{
-				throw new ArgumentNullException("collection");
+				throw new ArgumentNullException(nameof(collection));
 			}
 
 			if ( startIndex < 0 )
 			{
-				throw new ArgumentOutOfRangeException("startIndex", Errors.ArgumentOutOfRange_NeedNonNegNum);
+				throw new ArgumentOutOfRangeException(nameof(startIndex), Errors.ArgumentOutOfRange_NeedNonNegNum);
 			}
 
 			if ( maxCount < 0 )
 			{
-				throw new ArgumentOutOfRangeException("maxCount", Errors.ArgumentOutOfRange_NeedNonNegNum);
+				throw new ArgumentOutOfRangeException(nameof(maxCount), Errors.ArgumentOutOfRange_NeedNonNegNum);
 			}
 
 			Contract.EndContractBlock();
 
-			_baseCollection = collection;
+			BaseCollection = collection;
 			_startIndex = startIndex;
 			_maxCount = maxCount;
 
-			_baseCollection.CollectionChanged += BaseCollection_CollectionChanged;
+			BaseCollection.CollectionChanged += BaseCollection_CollectionChanged;
 
 			_size = CalculateCollectionSize();
 		}
@@ -79,7 +78,7 @@ namespace Digillect.Collections
 		{
 			if ( disposing )
 			{
-				_baseCollection.CollectionChanged -= BaseCollection_CollectionChanged;
+				BaseCollection.CollectionChanged -= BaseCollection_CollectionChanged;
 			}
 
 			base.Dispose(disposing);
@@ -100,16 +99,16 @@ namespace Digillect.Collections
 			{
 				if ( index < 0 || index >= _size )
 				{
-					throw new ArgumentOutOfRangeException("index", Errors.ArgumentOutOfRange_Index);
+					throw new ArgumentOutOfRangeException(nameof(index), Errors.ArgumentOutOfRange_Index);
 				}
 
-				return _baseCollection[_startIndex + index];
+				return BaseCollection[_startIndex + index];
 			}
 		}
 
 		public IXList<T> BaseCollection
 		{
-			get { return _baseCollection; }
+			get;
 		}
 		#endregion
 
@@ -117,21 +116,21 @@ namespace Digillect.Collections
 		/// <inheritdoc/>
 		public override XBasedCollection<T> Clone(bool deep)
 		{
-			return new XSubRangeCollection<T>(deep ? (IXList<T>) _baseCollection.Clone(true) : _baseCollection, _startIndex, _maxCount);
+			return new XSubRangeCollection<T>(deep ? (IXList<T>) BaseCollection.Clone(true) : BaseCollection, _startIndex, _maxCount);
 		}
 
 		/// <inheritdoc/>
 		[ContractVerification(false)]
 		public override bool Contains(T item)
 		{
-			return _baseCollection.Skip(_startIndex).Take(_size).Any(x => x.Equals(item));
+			return BaseCollection.Skip(_startIndex).Take(_size).Any(x => x.Equals(item));
 		}
 
 		/// <inheritdoc/>
 		[ContractVerification(false)]
 		public override bool ContainsKey(XKey key)
 		{
-			return _baseCollection.Skip(_startIndex).Take(_size).Any(x => x.GetKey() == key);
+			return BaseCollection.Skip(_startIndex).Take(_size).Any(x => x.GetKey() == key);
 		}
 
 		/// <inheritdoc/>
@@ -139,7 +138,7 @@ namespace Digillect.Collections
 		{
 #if CUSTOM_ENUMERATOR
 			int version = _version;
-			int endIndex = Math.Min(_startIndex + _size, _baseCollection.Count);
+			int endIndex = Math.Min(_startIndex + _size, BaseCollection.Count);
 
 			for ( int i = _startIndex; i < endIndex; i++ )
 			{
@@ -148,10 +147,10 @@ namespace Digillect.Collections
 					throw new InvalidOperationException(Errors.XCollectionEnumFailedVersionException);
 				}
 
-				yield return _baseCollection[i];
+				yield return BaseCollection[i];
 			}
 #else
-			return _baseCollection.Skip(_startIndex).Take(_size).GetEnumerator();
+			return BaseCollection.Skip(_startIndex).Take(_size).GetEnumerator();
 #endif
 		}
 
@@ -160,7 +159,7 @@ namespace Digillect.Collections
 		{
 			int index = 0;
 
-			foreach ( T element in _baseCollection.Skip(_startIndex).Take(_size) )
+			foreach (T element in BaseCollection.Skip(_startIndex).Take(_size))
 			{
 				if ( element.GetKey() == key )
 				{
@@ -178,7 +177,7 @@ namespace Digillect.Collections
 		{
 			int index = 0;
 
-			foreach ( T element in _baseCollection.Skip(_startIndex).Take(_size) )
+			foreach (T element in BaseCollection.Skip(_startIndex).Take(_size))
 			{
 				if ( element.Equals(item) )
 				{
@@ -194,15 +193,20 @@ namespace Digillect.Collections
 		[Pure]
 		private int CalculateCollectionSize()
 		{
-			return Math.Min(_maxCount, Math.Max(_baseCollection.Count - _startIndex, 0));
+			return Math.Min(_maxCount, Math.Max(BaseCollection.Count - _startIndex, 0));
 		}
 		#endregion
 
 		#region Event Handlers
+#if WINDOWS8
+		[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Globalization", "CA1305:SpecifyIFormatProvider", MessageId = "System.String.Format(System.String,System.Object[])")]
+#else
+		[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Globalization", "CA1305:SpecifyIFormatProvider", MessageId = "System.String.Format(System.String,System.Object)")]
+#endif
 		[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Maintainability", "CA1502:AvoidExcessiveComplexity")]
 		private void BaseCollection_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
 		{
-			Contract.Assume(_baseCollection != null);
+			Contract.Assume(BaseCollection != null);
 
 #if CUSTOM_ENUMERATOR
 			_version++;
@@ -246,7 +250,7 @@ namespace Digillect.Collections
 						// After the range - no visible changes
 						return;
 					}
-					else if ( e.OldStartingIndex < _startIndex || (_size == _maxCount && _baseCollection.Count > _startIndex + _size) )
+					else if ( e.OldStartingIndex < _startIndex || (_size == _maxCount && BaseCollection.Count > _startIndex + _size) )
 					{
 						// Before the range or inside the fully filled collection with items remaining to the right in the source collection - reset
 						goto case NotifyCollectionChangedAction.Reset;
@@ -309,7 +313,7 @@ namespace Digillect.Collections
 						// After the range - no visible changes
 						return;
 					}
-					else if ( e.OldStartingIndex < _startIndex || (_size == _maxCount && _baseCollection.Count > _startIndex + _size) )
+					else if ( e.OldStartingIndex < _startIndex || (_size == _maxCount && BaseCollection.Count > _startIndex + _size) )
 					{
 						// Before the range or inside the fully filled collection with items remaining to the right in the source collection - reset
 						goto case NotifyCollectionChangedAction.Reset;
@@ -404,7 +408,7 @@ namespace Digillect.Collections
 					break;
 
 				default:
-					throw new ArgumentException(e.Action.ToString(), "e");
+					throw new ArgumentException($"Change action {e.Action} is invalid.", nameof(e));
 			}
 		}
 		#endregion

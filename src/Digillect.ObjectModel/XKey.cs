@@ -210,7 +210,7 @@ namespace Digillect
 		}
 
 		/// <summary>
-		///     Returns the <see cref="Builder" /> object which allows mutation in a multistep fashion.
+		///     Returns the <see cref="Builder" /> object which allows mutation in a multi-step fashion.
 		/// </summary>
 		/// <returns>
 		///     An instance of the <see cref="Builder" /> class.
@@ -236,12 +236,12 @@ namespace Digillect
 		{
 			if( keyName == null )
 			{
-				throw new ArgumentNullException( "keyName" );
+				throw new ArgumentNullException(nameof(keyName));
 			}
 
 			if( keyValue == null )
 			{
-				throw new ArgumentNullException( "keyValue" );
+				throw new ArgumentNullException(nameof(keyValue));
 			}
 
 			Contract.Ensures( Contract.Result<XKey>() != null );
@@ -249,24 +249,6 @@ namespace Digillect
 			return new XKey( _keys, keyName, keyValue );
 		}
 		#endregion
-
-		/// <summary>
-		///     Creates a key from the specified value.
-		/// </summary>
-		/// <typeparam name="T">Type of key value.</typeparam>
-		/// <param name="keyName">The name of the value.</param>
-		/// <param name="key">The value.</param>
-		/// <returns>Created key.</returns>
-		[EditorBrowsable(EditorBrowsableState.Never)]
-		[Obsolete("Use From<T>(string, T)")]
-		public static XKey Create<T>( string keyName, T key )
-		{
-			Contract.Requires( keyName != null );
-			Contract.Requires( key != null );
-			Contract.Ensures( Contract.Result<XKey>() != null );
-
-			return From(keyName, key);
-		}
 
 		#region Equality Operators
 		/// <summary>
@@ -355,7 +337,7 @@ namespace Digillect
 
 		#region class Builder
 		/// <summary>
-		///     <see cref="XKey" /> builder which allows mutation in a multistep fashion.
+		///     <see cref="XKey" /> builder which allows mutation in a multi-step fashion.
 		/// </summary>
 		[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1034:NestedTypesShouldNotBeVisible")]
 		public sealed class Builder
@@ -379,12 +361,12 @@ namespace Digillect
 			{
 				if( name == null )
 				{
-					throw new ArgumentNullException( "name" );
+					throw new ArgumentNullException(nameof(name));
 				}
 
 				if( value == null )
 				{
-					throw new ArgumentNullException( "value" );
+					throw new ArgumentNullException(nameof(value));
 				}
 
 				Contract.Ensures( _keys.Count >= Contract.OldValue( _keys.Count ) );
@@ -412,7 +394,7 @@ namespace Digillect
 			{
 				if( name == null )
 				{
-					throw new ArgumentNullException( "name" );
+					throw new ArgumentNullException(nameof(name));
 				}
 
 				Contract.Ensures( _keys.Count <= Contract.OldValue( _keys.Count ) );

@@ -151,7 +151,7 @@ namespace Digillect.Collections
 		{
 			if ( source == null )
 			{
-				throw new ArgumentNullException("source");
+				throw new ArgumentNullException(nameof(source));
 			}
 
 			Contract.Ensures(!Contract.Result<bool>() || source.Count < Contract.OldValue(source.Count));
@@ -185,7 +185,7 @@ namespace Digillect.Collections
 		{
 			if ( source == null )
 			{
-				throw new ArgumentNullException("source");
+				throw new ArgumentNullException(nameof(source));
 			}
 
 			Contract.Ensures(!Contract.Result<bool>() || source.Count < Contract.OldValue(source.Count));
@@ -213,7 +213,7 @@ namespace Digillect.Collections
 		{
 			if ( source == null )
 			{
-				throw new ArgumentNullException("source");
+				throw new ArgumentNullException(nameof(source));
 			}
 
 			Contract.EndContractBlock();
@@ -247,13 +247,13 @@ namespace Digillect.Collections
 		/// Merges the specified collection into the current one.
 		/// </summary>
 		/// <typeparam name="T">Type of the collections' members.</typeparam>
-		/// <param name="source">The <see cref="IList&lt;T&gt;"/> to merge into.</param>
-		/// <param name="collection">The <see cref="IEnumerable&lt;T&gt;"/> containing the source of changes.</param>
+		/// <param name="source">The <see cref="IList{T}"/> to merge into.</param>
+		/// <param name="collection">The <see cref="IEnumerable{T}"/> containing the source of changes.</param>
 		/// <param name="options">The operations to perform on objects within the collections.</param>
 		/// <returns>The <see cref="CollectionMergeResults">results</see> of the operation.</returns>
 		/// <remarks>
 		/// Be careful to not use this method on objects implementing the <see cref="INotifyCollectionChanged"/> interface unless you don't care about events being raised.
-		/// Specifically, in cases of <see cref="IXCollection&lt;T&gt;"/> or <see cref="XCollection&lt;T&gt;"/> use theirs <b>Update</b> methods.
+		/// Specifically, in cases of <see cref="IXCollection{T}"/> or <see cref="XCollection{T}"/> use theirs <b>Update</b> methods.
 		/// </remarks>
 		[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Maintainability", "CA1502:AvoidExcessiveComplexity", Justification = "God knows how to make it simplier.")]
 		public static CollectionMergeResults Merge<T>(this IList<T> source, IEnumerable<T> collection, CollectionMergeOptions options)
@@ -261,12 +261,12 @@ namespace Digillect.Collections
 		{
 			if ( source == null )
 			{
-				throw new ArgumentNullException("source");
+				throw new ArgumentNullException(nameof(source));
 			}
 
 			if ( collection == null )
 			{
-				throw new ArgumentNullException("collection");
+				throw new ArgumentNullException(nameof(collection));
 			}
 
 			Contract.Ensures(Contract.Result<CollectionMergeResults>() != null);
@@ -440,7 +440,7 @@ namespace Digillect.Collections
 					// Reorder the updated item in the source collection to match the current position in the other collection
 					// HACK: instead of remove-then-insert we will change indexes of all affected items
 
-					// Move range [index..existing0.Index) one element up
+					// Move range [index..exisitingItem.Index) one element up
 					for ( int i = exisitingItem.Index; i > index; i-- )
 					{
 						collection[i] = collection[i - 1];
@@ -497,12 +497,12 @@ namespace Digillect.Collections
 		{
 			if ( source == null )
 			{
-				throw new ArgumentNullException("source");
+				throw new ArgumentNullException(nameof(source));
 			}
 
 			if ( target == null )
 			{
-				throw new ArgumentNullException("target");
+				throw new ArgumentNullException(nameof(target));
 			}
 
 			Contract.EndContractBlock();
@@ -555,7 +555,7 @@ namespace Digillect.Collections
 		/// <typeparam name="T"><see cref="Type"/> of the collection members.</typeparam>
 		/// <param name="collection">The collection to wrap.</param>
 		/// <returns>
-		/// Unmodifiable (<see cref="ICollection&lt;T&gt;.IsReadOnly"/> == <c>true</c>) wrapper around the original collection.
+		/// Unmodifiable (<see cref="ICollection{T}.IsReadOnly"/> == <c>true</c>) wrapper around the original collection.
 		/// </returns>
 		[Pure]
 		public static IXCollection<T> UnmodifiableCollection<T>(IXCollection<T> collection)
@@ -571,7 +571,7 @@ namespace Digillect.Collections
 		/// <typeparam name="T"><see cref="Type"/> of the collection members.</typeparam>
 		/// <param name="collection">The collection to wrap.</param>
 		/// <returns>
-		/// Unmodifiable (<see cref="ICollection&lt;T&gt;.IsReadOnly"/> == <c>true</c>) wrapper around the original collection.
+		/// Unmodifiable (<see cref="ICollection{T}.IsReadOnly"/> == <c>true</c>) wrapper around the original collection.
 		/// </returns>
 		[Pure]
 		public static IXList<T> UnmodifiableList<T>(IXList<T> collection)
@@ -596,7 +596,7 @@ namespace Digillect.Collections
 
 		#region FilteredList
 		/// <summary>
-		/// Creates a <see cref="XFilteredCollection&lt;T&gt;"/> instance using the <paramref name="filter"/> as a filter.
+		/// Creates a <see cref="XFilteredCollection{T}"/> instance using the <paramref name="filter"/> as a filter.
 		/// </summary>
 		/// <typeparam name="T">Type of the collection's members.</typeparam>
 		/// <param name="collection">Source collection.</param>
@@ -619,12 +619,12 @@ namespace Digillect.Collections
 		{
 			if ( collection == null )
 			{
-				throw new ArgumentNullException("collection");
+				throw new ArgumentNullException(nameof(collection));
 			}
 
 			if ( !Contract.ForAll(collection, item => item != null) )
 			{
-				throw new ArgumentException("Null element found.", "collection");
+				throw new ArgumentException("Null element found.", nameof(collection));
 			}
 
 			Contract.EndContractBlock();
@@ -636,12 +636,12 @@ namespace Digillect.Collections
 		{
 			if ( collection == null )
 			{
-				throw new ArgumentNullException("collection");
+				throw new ArgumentNullException(nameof(collection));
 			}
 
 			if ( match == null )
 			{
-				throw new ArgumentNullException("match");
+				throw new ArgumentNullException(nameof(match));
 			}
 
 			Contract.EndContractBlock();
@@ -663,12 +663,12 @@ namespace Digillect.Collections
 		{
 			if ( collection == null )
 			{
-				throw new ArgumentNullException("collection");
+				throw new ArgumentNullException(nameof(collection));
 			}
 
 			if ( action == null )
 			{
-				throw new ArgumentNullException("action");
+				throw new ArgumentNullException(nameof(action));
 			}
 
 			Contract.EndContractBlock();
@@ -690,26 +690,26 @@ namespace Digillect.Collections
 			, ICloneable
 #endif
 		{
-			private readonly IXCollection<T> collection;
+			private readonly IXCollection<T> _collection;
 
 			#region Constructor
 			public ReadOnlyXCollection(IXCollection<T> collection)
 			{
 				if ( collection == null )
 				{
-					throw new ArgumentNullException("collection");
+					throw new ArgumentNullException(nameof(collection));
 				}
 
 				Contract.EndContractBlock();
 
-				this.collection = collection;
+				_collection = collection;
 			}
 			#endregion
 
 			#region IXCollection`1 Members
 			bool IXCollection<T>.ContainsKey(XKey key)
 			{
-				return this.collection.ContainsKey(key);
+				return _collection.ContainsKey(key);
 			}
 
 			bool IXCollection<T>.Remove(XKey key)
@@ -719,24 +719,24 @@ namespace Digillect.Collections
 
 			IEnumerable<XKey> IXCollection<T>.GetKeys()
 			{
-				return this.collection.GetKeys();
+				return _collection.GetKeys();
 			}
 
 			public IXCollection<T> Clone(bool deep)
 			{
-				return new ReadOnlyXCollection<T>(deep ? this.collection.Clone(deep) : this.collection);
+				return new ReadOnlyXCollection<T>(deep ? _collection.Clone(deep) : _collection);
 			}
 			#endregion
 
 			#region IXUpdatable`1 Members
 			void IXUpdatable<IXCollection<T>>.BeginUpdate()
 			{
-				collection.BeginUpdate();
+				_collection.BeginUpdate();
 			}
 
 			void IXUpdatable<IXCollection<T>>.EndUpdate()
 			{
-				collection.EndUpdate();
+				_collection.EndUpdate();
 			}
 
 			bool IXUpdatable<IXCollection<T>>.IsUpdateRequired(IXCollection<T> source)
@@ -763,17 +763,17 @@ namespace Digillect.Collections
 
 			bool ICollection<T>.Contains(T item)
 			{
-				return this.collection.Contains( item );
+				return _collection.Contains(item);
 			}
 
 			void ICollection<T>.CopyTo(T[] array, int arrayIndex)
 			{
-				this.collection.CopyTo( array, arrayIndex );
+				_collection.CopyTo(array, arrayIndex);
 			}
 
 			public int Count
 			{
-				get { return this.collection.Count; }
+				get { return _collection.Count; }
 			}
 
 			bool ICollection<T>.IsReadOnly
@@ -790,37 +790,37 @@ namespace Digillect.Collections
 			#region IEnumerable`1 Members
 			IEnumerator<T> IEnumerable<T>.GetEnumerator()
 			{
-				return this.collection.GetEnumerator();
+				return _collection.GetEnumerator();
 			}
 			#endregion
 
 			#region IEnumerable Members
-			System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
+			IEnumerator IEnumerable.GetEnumerator()
 			{
-				return this.collection.GetEnumerator();
+				return _collection.GetEnumerator();
 			}
 			#endregion
 
 			#region IEquatable`1 Members
 			bool IEquatable<IXCollection<T>>.Equals(IXCollection<T> other)
 			{
-				return this.collection.Equals( other );
+				return _collection.Equals(other);
 			}
 			#endregion
 
 			#region INotifyCollectionChanged Members
 			event NotifyCollectionChangedEventHandler INotifyCollectionChanged.CollectionChanged
 			{
-				add { this.collection.CollectionChanged += value; }
-				remove { this.collection.CollectionChanged -= value; }
+				add { _collection.CollectionChanged += value; }
+				remove { _collection.CollectionChanged -= value; }
 			}
 			#endregion
 
 			#region INotifyPropertyChanged Members
 			event PropertyChangedEventHandler INotifyPropertyChanged.PropertyChanged
 			{
-				add { collection.PropertyChanged += value; }
-				remove { collection.PropertyChanged -= value; }
+				add { _collection.PropertyChanged += value; }
+				remove { _collection.PropertyChanged -= value; }
 			}
 			#endregion
 
@@ -836,17 +836,17 @@ namespace Digillect.Collections
 			#region Object Overrides
 			public override bool Equals(object obj)
 			{
-				return this.collection.Equals( obj );
+				return _collection.Equals(obj);
 			}
 
 			public override int GetHashCode()
 			{
-				return this.collection.GetHashCode();
+				return _collection.GetHashCode();
 			}
 
 			public override string ToString()
 			{
-				return this.collection.ToString();
+				return _collection.ToString();
 			}
 			#endregion
 
@@ -855,7 +855,7 @@ namespace Digillect.Collections
 			[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1822:MarkMembersAsStatic", Justification = "Required for code contracts.")]
 			private void ObjectInvariant()
 			{
-				Contract.Invariant(this.Count == this.collection.Count);
+				Contract.Invariant(Count == _collection.Count);
 			}
 			#endregion
 		}
@@ -867,29 +867,29 @@ namespace Digillect.Collections
 #endif
 		private class ReadOnlyXList<T> : ReadOnlyXCollection<T>, IXList<T>
 		{
-			private readonly IXList<T> collection;
+			private readonly IXList<T> _collection;
 
 			#region Constructor
 			public ReadOnlyXList(IXList<T> collection)
 				: base(collection)
 			{
-				Contract.Requires(collection != null, "collection");
+				Contract.Requires(collection != null, nameof(collection));
 
-				this.collection = collection;
+				_collection = collection;
 			}
 			#endregion
 
 			#region IXList`1 Members
 			int IXList<T>.IndexOf(XKey key)
 			{
-				return this.collection.IndexOf(key);
+				return _collection.IndexOf(key);
 			}
 			#endregion
 
 			#region IList`1 Members
 			int IList<T>.IndexOf(T item)
 			{
-				return this.collection.IndexOf(item);
+				return _collection.IndexOf(item);
 			}
 
 			void IList<T>.Insert(int index, T item)
@@ -904,7 +904,7 @@ namespace Digillect.Collections
 
 			T IList<T>.this[int index]
 			{
-				get { return this.collection[index]; }
+				get { return _collection[index]; }
 				set { throw new NotSupportedException(Errors.XCollectionReadOnlyException); }
 			}
 			#endregion
@@ -912,7 +912,7 @@ namespace Digillect.Collections
 			#region IEquatable`1 Members
 			bool IEquatable<IXList<T>>.Equals(IXList<T> other)
 			{
-				return this.collection.Equals(other);
+				return _collection.Equals(other);
 			}
 			#endregion
 
@@ -921,7 +921,7 @@ namespace Digillect.Collections
 			[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1822:MarkMembersAsStatic", Justification = "Required for code contracts.")]
 			private void ObjectInvariant()
 			{
-				Contract.Invariant(this.Count == this.collection.Count);
+				Contract.Invariant(Count == _collection.Count);
 			}
 			#endregion
 		}
@@ -938,7 +938,7 @@ namespace Digillect.Collections
 			{
 				if ( filter == null )
 				{
-					throw new ArgumentNullException("filter");
+					throw new ArgumentNullException(nameof(filter));
 				}
 
 				Contract.Requires(collection != null);
@@ -961,7 +961,7 @@ namespace Digillect.Collections
 			{
 				return _filter(obj);
 			}
-		} 
+		}
 		#endregion
 
 		#region class MergeItem`1
@@ -980,19 +980,13 @@ namespace Digillect.Collections
 	/// <typeparam name="T">Type of the collections' members.</typeparam>
 	public sealed class XCollectionDifference<T>
 	{
-		private readonly IXCollection<T> _added;
-		private readonly IXCollection<T> _changed;
-		private readonly IXCollection<T> _deleted;
-		private readonly IXCollection<T> _modified;
-		private readonly IXCollection<T> _nonModified;
-
 		internal XCollectionDifference(IXCollection<T> added, IXCollection<T> changed, IXCollection<T> deleted, IXCollection<T> modified, IXCollection<T> nonModified)
 		{
-			this._added = added;
-			this._changed = changed;
-			this._deleted = deleted;
-			this._modified = modified;
-			this._nonModified = nonModified;
+			Added = added;
+			Changed = changed;
+			Deleted = deleted;
+			Modified = modified;
+			NonModified = nonModified;
 		}
 
 		/// <summary>
@@ -1000,7 +994,7 @@ namespace Digillect.Collections
 		/// </summary>
 		public IXCollection<T> Added
 		{
-			get { return this._added; }
+			get;
 		}
 
 		/// <summary>
@@ -1008,7 +1002,7 @@ namespace Digillect.Collections
 		/// </summary>
 		public IXCollection<T> Changed
 		{
-			get { return this._changed; }
+			get;
 		}
 
 		/// <summary>
@@ -1016,7 +1010,7 @@ namespace Digillect.Collections
 		/// </summary>
 		public IXCollection<T> Deleted
 		{
-			get { return this._deleted; }
+			get;
 		}
 
 		/// <summary>
@@ -1024,7 +1018,7 @@ namespace Digillect.Collections
 		/// </summary>
 		public IXCollection<T> Modified
 		{
-			get { return this._modified; }
+			get;
 		}
 
 		/// <summary>
@@ -1032,7 +1026,7 @@ namespace Digillect.Collections
 		/// </summary>
 		public IXCollection<T> NonModified
 		{
-			get { return this._nonModified; }
+			get;
 		}
 	}
 	#endregion

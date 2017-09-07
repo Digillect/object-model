@@ -32,7 +32,7 @@ namespace Digillect.Runtime.Serialization
 	{
 		private readonly BinaryWriter _binaryWriter;
 		private readonly bool _ownWriter;
-#if SILVERLIGHT || NET40
+#if !NET45
 		private readonly bool _closeWriter;
 #endif
 		private bool _epilogueWritten;
@@ -48,12 +48,12 @@ namespace Digillect.Runtime.Serialization
 		{
 			if( stream == null )
 			{
-				throw new ArgumentNullException( "stream" );
+				throw new ArgumentNullException(nameof(stream));
 			}
 
 			Contract.EndContractBlock();
 
-#if SILVERLIGHT || NET40
+#if !NET45
 			_binaryWriter = new BinaryWriter( stream );
 			_closeWriter = !leaveOpen;
 #else
@@ -68,7 +68,7 @@ namespace Digillect.Runtime.Serialization
 		{
 			if( writer == null )
 			{
-				throw new ArgumentNullException( "writer" );
+				throw new ArgumentNullException(nameof(writer));
 			}
 
 			Contract.EndContractBlock();
@@ -86,14 +86,12 @@ namespace Digillect.Runtime.Serialization
 
 				if( _ownWriter )
 				{
-#if SILVERLIGHT || NET40
+#if !NET45
 					if( _closeWriter )
+#endif
 					{
 						_binaryWriter.Dispose();
 					}
-#else
-					_binaryWriter.Dispose();
-#endif
 				}
 			}
 
