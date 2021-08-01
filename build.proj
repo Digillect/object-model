@@ -13,7 +13,7 @@
 		<ProjectReference Include="$(MSBuildProjectDirectory)\src\Digillect.ObjectModel\Digillect.ObjectModel (net40).csproj"/>
 		<ProjectReference Include="$(MSBuildProjectDirectory)\src\Digillect.ObjectModel\Digillect.ObjectModel (sl4).csproj"/>
 		<ProjectReference Include="$(MSBuildProjectDirectory)\src\Digillect.ObjectModel\Digillect.ObjectModel (wp71).csproj"/>
-		<ProjectReference Include="$(MSBuildProjectDirectory)\src\Digillect.ObjectModel\Digillect.ObjectModel.csproj"/>
+		<ProjectReference Include="$(MSBuildProjectDirectory)\src\Digillect.ObjectModel.Portable\Digillect.ObjectModel.Portable.csproj"/>
 		<ProjectReference Include="$(MSBuildProjectDirectory)\src\Digillect.ObjectModel.Tests\Digillect.ObjectModel.Tests.csproj">
 			<TestFramework>xUnit</TestFramework>
 		</ProjectReference>

@@ -59,7 +59,7 @@ namespace Digillect
 		{
 		}
 
-#if !(SILVERLIGHT || WINDOWS8)
+#if !(NETSTANDARD || SILVERLIGHT || WINDOWS8)
 		private XKeyNotAvailableException(SerializationInfo info, StreamingContext context)
 			: base(info, context)
 		{

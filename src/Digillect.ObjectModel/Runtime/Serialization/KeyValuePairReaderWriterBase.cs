@@ -121,7 +121,7 @@ namespace Digillect.Runtime.Serialization
 			{
 				return TypeCode.String;
 			}
-#if WINDOWS8
+#if NETSTANDARD || WINDOWS8
 			else if( type.GetTypeInfo().IsEnum )
 #else
 			else if( type.IsEnum )

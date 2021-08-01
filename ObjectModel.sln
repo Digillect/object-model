@@ -1,15 +1,17 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 14
-VisualStudioVersion = 14.0.25420.1
+# Visual Studio 15
+VisualStudioVersion = 15.0.27428.2037
 MinimumVisualStudioVersion = 10.0.40219.1
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "Digillect.ObjectModel", "src\Digillect.ObjectModel\Digillect.ObjectModel.shproj", "{69CD224F-29F4-4C3E-A775-11EF7EEC4E5B}"
+EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Digillect.ObjectModel (wp71)", "src\Digillect.ObjectModel\Digillect.ObjectModel (wp71).csproj", "{173D9764-D139-4319-9532-4332C58F96C7}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Digillect.ObjectModel (net40)", "src\Digillect.ObjectModel\Digillect.ObjectModel (net40).csproj", "{F3F1B6B4-8771-4B81-93DC-C0F1DD68D9E0}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Digillect.ObjectModel (sl4)", "src\Digillect.ObjectModel\Digillect.ObjectModel (sl4).csproj", "{8CE98474-DFA3-42FA-AE2F-991F52A75977}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Digillect.ObjectModel", "src\Digillect.ObjectModel\Digillect.ObjectModel.csproj", "{69480627-02F5-45E9-9107-90F2AB917374}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Digillect.ObjectModel.Portable", "src\Digillect.ObjectModel.Portable\Digillect.ObjectModel.Portable.csproj", "{69480627-02F5-45E9-9107-90F2AB917374}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Digillect.ObjectModel.Tests", "src\Digillect.ObjectModel.Tests\Digillect.ObjectModel.Tests.csproj", "{ABDC1825-8F24-4A80-87F3-F30A59F76BAF}"
 EndProject
@@ -27,7 +29,14 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		ObjectModel.sln.vsspell = ObjectModel.sln.vsspell
 	EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Digillect.ObjectModel.Core", "src\Digillect.ObjectModel.Core\Digillect.ObjectModel.Core.csproj", "{8DD7D13F-B2BA-4F51-B83B-125CF81424D6}"
+EndProject
 Global
+	GlobalSection(SharedMSBuildProjectFiles) = preSolution
+		src\Digillect.ObjectModel\Digillect.ObjectModel.projitems*{69480627-02f5-45e9-9107-90f2ab917374}*SharedItemsImports = 4
+		src\Digillect.ObjectModel\Digillect.ObjectModel.projitems*{69cd224f-29f4-4c3e-a775-11ef7eec4e5b}*SharedItemsImports = 13
+		src\Digillect.ObjectModel\Digillect.ObjectModel.projitems*{f3f1b6b4-8771-4b81-93dc-c0f1dd68d9e0}*SharedItemsImports = 4
+	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		CodeAnalysis|Any CPU = CodeAnalysis|Any CPU
 		Debug|Any CPU = Debug|Any CPU
@@ -63,8 +72,17 @@ Global
 		{ABDC1825-8F24-4A80-87F3-F30A59F76BAF}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{ABDC1825-8F24-4A80-87F3-F30A59F76BAF}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{ABDC1825-8F24-4A80-87F3-F30A59F76BAF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8DD7D13F-B2BA-4F51-B83B-125CF81424D6}.CodeAnalysis|Any CPU.ActiveCfg = Debug|Any CPU
+		{8DD7D13F-B2BA-4F51-B83B-125CF81424D6}.CodeAnalysis|Any CPU.Build.0 = Debug|Any CPU
+		{8DD7D13F-B2BA-4F51-B83B-125CF81424D6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8DD7D13F-B2BA-4F51-B83B-125CF81424D6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8DD7D13F-B2BA-4F51-B83B-125CF81424D6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8DD7D13F-B2BA-4F51-B83B-125CF81424D6}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {314FC49B-1137-43EF-AEBD-3234F59BA923}
 	EndGlobalSection
 EndGlobal

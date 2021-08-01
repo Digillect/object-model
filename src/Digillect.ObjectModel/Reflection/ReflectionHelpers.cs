@@ -76,7 +76,7 @@ namespace Digillect.Reflection
 
 							for( int i = 0; i < targetTypeArguments.Length; ++i )
 							{
-								if( sourceTypeArguments[i] != null && !sourceTypeArguments[i].IsGenericParameter && !targetTypeArguments[i].IsGenericParameter )
+								if (sourceTypeArguments[i]?.IsGenericParameter == false && !targetTypeArguments[i].IsGenericParameter)
 								{
 									if( !IsAssignableFrom( targetTypeArguments[i], sourceTypeArguments[i] ) )
 									{

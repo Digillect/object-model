@@ -1,0 +1,50 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
+    <HasSharedItems>true</HasSharedItems>
+    <SharedGUID>69cd224f-29f4-4c3e-a775-11ef7eec4e5b</SharedGUID>
+  </PropertyGroup>
+  <PropertyGroup Label="Configuration">
+    <Import_RootNamespace>Digillect</Import_RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)Collections\CollectionMergeOptions.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Collections\CollectionMergeResults.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Collections\IXCollection.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Collections\IXCollectionContract.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Collections\IXList.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Collections\IXListContract.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Collections\XBasedCollection.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Collections\XCollection.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Collections\XCollectionsUtil.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Collections\XCombinedCollection.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Collections\XFilteredCollection.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Collections\XIdentifiedCollection.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Collections\XSortedCollection.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Collections\XSubRangeCollection.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Collections\XUniqueCollection.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ComponentModel\PropertyChangingEventArgs.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Errors.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)GlobalSuppressions.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ICloneable.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)IXIdentified.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)IXUpdatable.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)IXUpdatableContract.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ObservableObject.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Properties\AssemblyInfo.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Runtime\Serialization\KeyValuePairReader.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Runtime\Serialization\KeyValuePairReaderWriterBase.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Runtime\Serialization\KeyValuePairWriter.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Runtime\Serialization\XKeySerializer.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Runtime\Serialization\XParametersSerializer.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)XCache.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)XImmutableIdentifiedObject.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)XKey.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)XKeyNotAvailableException.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)XObject.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)XObject`1.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)XParameters.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)XQuery.cs" />
+  </ItemGroup>
+</Project>

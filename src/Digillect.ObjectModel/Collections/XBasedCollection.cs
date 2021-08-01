@@ -26,7 +26,7 @@ using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Diagnostics.Contracts;
 using System.Linq;
-#if WINDOWS8
+#if NETSTANDARD || WINDOWS8
 using System.Reflection;
 #endif
 
@@ -340,7 +340,7 @@ namespace Digillect.Collections
 			}
 			else
 			{
-#if WINDOWS8
+#if NETSTANDARD || WINDOWS8
 				TypeInfo elementType = array.GetType().GetElementType().GetTypeInfo();
 				TypeInfo c = typeof(T).GetTypeInfo();
 #else

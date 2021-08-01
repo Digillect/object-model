@@ -948,7 +948,7 @@ namespace Digillect.Collections
 
 			protected override XFilteredCollection<T> CreateInstanceOfSameType(IXList<T> collection)
 			{
-#if !(SILVERLIGHT || WINDOWS8)
+#if !(NETSTANDARD || SILVERLIGHT || WINDOWS8)
 				Func<T, bool> filter = (Func<T, bool>) _filter.Clone();
 #else
 				Func<T, bool> filter = _filter;

@@ -121,9 +121,9 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Digillect.ObjectModel\Digillect.ObjectModel.csproj">
-      <Project>{69480627-02f5-45e9-9107-90f2ab917374}</Project>
-      <Name>Digillect.ObjectModel</Name>
+    <ProjectReference Include="..\Digillect.ObjectModel.Core\Digillect.ObjectModel.Core.csproj">
+      <Project>{8dd7d13f-b2ba-4f51-b83b-125cf81424d6}</Project>
+      <Name>Digillect.ObjectModel.Core</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
